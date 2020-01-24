@@ -8,8 +8,8 @@ PRG    := $(BIN:$(OBJDIR)/%.bin=$(OBJDIR)/%.prg)
 D64    := $(OBJDIR)/gpascal.d64
 
 # Commands
-ASM = ca65 -o $@ $<
-LNK = ld65 -o $@ -t none -S 32768 $<
+ASM = ca65 -g -o $@ $<
+LNK = ld65 -Ln $(OBJDIR)/gpascal.labels -o $@ -t none -S 32768 $<
 PAK = dd if=$< bs=1 skip=88 of=0. &&\
 printf "\000\200" >$@ &&\
 cat 0. >>$@ && rm -f 0.
