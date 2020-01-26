@@ -4005,7 +4005,6 @@ BELL1X:          ; no bell yet
 CHK_RUN:
 	JSR  CHK_VAL
         JSR  TXT2REU
-        JMP  INTERP
 
 ;
 ; START
@@ -9077,6 +9076,13 @@ GET_3:	STA  INBUF,Y    ; proper c/r
 	TKNJMP	= V2+60
 
 ;***********************************************
+; PART 3 VECTORS
+;***********************************************
+
+        V3     = P3
+        INTERP = V3+1711
+
+;***********************************************
 
 CHKGET:
          JSR  CHKTKN
@@ -9560,6 +9566,7 @@ REU_LOOP:
         STA $DF01,X
         DEX
         BPL REU_LOOP
+        JMP INTERP              ; start interpreter
         RTS
 
 XFER_LEN:
