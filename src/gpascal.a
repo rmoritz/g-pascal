@@ -4003,8 +4003,8 @@ BELL1X:          ; no bell yet
         RTS
 ;
 CHK_RUN:
-	JSR  CHK_VAL
         JSR  TXT2REU
+      	JMP  INTERP
 
 ;
 ; START
@@ -9079,8 +9079,7 @@ GET_3:	STA  INBUF,Y    ; proper c/r
 ; PART 3 VECTORS
 ;***********************************************
 
-        V3     = P3
-        INTERP = V3+1711
+        CHK_VAL = P3+403
 
 ;***********************************************
 
@@ -9536,7 +9535,7 @@ BLKB6:	JMP  GENNOP
         BRK
 
 TXT2REU:
-        ;JSR FND_END
+        JSR FND_END
         ;; P contains text end address
         ;; Subtract TS from P to determine xfer length
         SEC
@@ -9566,7 +9565,7 @@ REU_LOOP:
         STA $DF01,X
         DEX
         BPL REU_LOOP
-        JMP INTERP              ; start interpreter
+        JSR CHK_VAL
         RTS
 
 XFER_LEN:
