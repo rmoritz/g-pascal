@@ -1,2 +1,6 @@
 build/
+*.o
+*.bin
+*.prg
+*.d64
 *.labels
