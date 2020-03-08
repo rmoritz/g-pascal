@@ -88,6 +88,7 @@
 ; Copyright (C) 1986 - Gambit Games.
 ;***********************************************
 
+        P0      = $33C
 	P1	= $8013
 	P2	= $8DD4
 	P3	= $992E
@@ -3760,6 +3761,12 @@ FOR6:	LDA  #$FF
 	.scope
 
 ;***********************************************
+; PART 0 VECTORS
+;***********************************************
+
+	TXT2REU	= P0
+
+;***********************************************
 ; PART 1 VECTORS
 ;***********************************************
 
@@ -3842,7 +3849,6 @@ FOR6:	LDA  #$FF
 ;***********************************************
 
 	BLOCK	= P6
-        TXT2REU = P6+839
 
 ;***********************************************
 ; PART 3 STARTS HERE
@@ -9534,48 +9540,4 @@ BLKB6:	JMP  GENNOP
 ;
         BRK
 
-TXT2REU:
-        JSR FND_END
-        ;; P contains text end address
-        ;; Subtract TS from P to determine xfer length
-        SEC
-        LDA P
-        SBC TS
-        STA XFER_LEN
-        LDA P+1
-        SBC TS+1
-        STA XFER_LEN+1
-        LDA #$90
-        JMP INIT_REU
-REU2TXT:
-        LDA #$91
-INIT_REU:
-        STA REU_ARGS            ; set command
-        LDX #<TS                ; set C64 base address
-        LDY #>TS
-        STX REU_ARGS+1
-        STY REU_ARGS+2
-        LDX #<XFER_LEN          ; set xfer length
-        LDY #>XFER_LEN
-        STX REU_ARGS+6
-        STY REU_ARGS+7
-        LDX #9
-REU_LOOP:
-        LDA REU_ARGS,X
-        STA $DF01,X
-        DEX
-        BPL REU_LOOP
-        JSR CHK_VAL
-        RTS
-
-XFER_LEN:
-        .word 0
-REU_ARGS:
-        .byte 0                 ; REC command
-        .word 0                 ; C64 base address
-        .word 0
-        .byte 0
-        .word 0                 ; xfer length
-        .byte 0,0
-
-	.endscope
+        .endscope
