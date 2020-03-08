@@ -2,7 +2,7 @@
 SRCDIR   := src
 OBJDIR   := build
 GP       := gpascal
-REU      := gpreu
+REU      := reu
 BOOT     := boot
 GP_SRC   := $(SRCDIR)/$(GP).s
 GP_OBJ   := $(OBJDIR)/$(GP).o
@@ -20,7 +20,7 @@ D64      := $(OBJDIR)/gpascal_reu.d64
 # Commands
 ASM_GP = ca65 -g -o $(GP_OBJ) $(GP_SRC)
 LNK_GP = ld65 -Ln $(GP_LBL) -o $(GP_BIN) -t none -S 32768 $(GP_OBJ)
-LNK_REU = cl65 -g -o $(REU_PRG) --start-addr '$$33C' -t c64 -C c64-asm.cfg -Ln $(REU_LBL) $(REU_SRC)
+LNK_REU = cl65 -g -o $(REU_PRG) --start-addr '$$A00' -t c64 -C c64-asm.cfg -Ln $(REU_LBL) $(REU_SRC)
 PAK_GP = dd if=$(GP_BIN) bs=1 skip=88 of=0. &&\
 printf "\000\200" >$(GP_PRG) &&\
 cat 0. >>$(GP_PRG) && rm -f 0.

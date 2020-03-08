@@ -6,7 +6,7 @@
 ; Authors: Ralph Moeritz
 ;***********************************************
 
-        .org $33C               ; tape buffer
+        .org $A00
 
 ;***********************************************
 ; G-PASCAL POINTERS & ADDRESSES
@@ -44,6 +44,7 @@ TXT2REU:
         STA XFER_LEN+1
         LDA #$90
         JMP INIT_REU
+
 ;***********************************************
 ; REU2TXT - Restore Pascal sources from REU
 ;***********************************************
