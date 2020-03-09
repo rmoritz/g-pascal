@@ -42,6 +42,7 @@ TXT2REU:
         LDA P+1
         SBC TS+1
         STA XFER_LEN+1
+        CLC
         LDA #$90
         JMP INIT_REU
 
@@ -52,12 +53,12 @@ REU2TXT:
         LDA #$91
 INIT_REU:
         STA REU_ARGS            ; set command
-        LDX #<TS                ; set C64 base address
-        LDY #>TS
+        LDX TS                  ; set C64 base address
+        LDY TS+1
         STX REU_ARGS+1
         STY REU_ARGS+2
-        LDX #<XFER_LEN          ; set xfer length
-        LDY #>XFER_LEN
+        LDX XFER_LEN            ; set xfer length
+        LDY XFER_LEN+1
         STX REU_ARGS+6
         STY REU_ARGS+7
         LDX #9
