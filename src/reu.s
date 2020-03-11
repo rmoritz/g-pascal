@@ -6,7 +6,7 @@
 ; Authors: Ralph Moeritz
 ;***********************************************
 
-        .org $A00
+        .org $7F00
 
 ;***********************************************
 ; G-PASCAL POINTERS & ADDRESSES
@@ -15,11 +15,7 @@
         P       = $26
         TS      = $8009
 	P1	= $8013
-	P2	= $8DD4
 	P3	= $992E
-	P4	= $A380
-	P5	= $B384
-	P6	= $BCB8
 
 ;***********************************************
 ; G-PASCAL VECTORS
@@ -27,55 +23,79 @@
 
         FND_END	= P1+102
         CHK_VAL = P3+403
+        INITIO  = P3+649
+
+;***********************************************
+; REU CONSTANTS & ADDRESSES
+;***********************************************
+
+        WRITE_CMD    = $90
+        READ_CMD     = $91
+        REU_ARGS_LEN = 9
+        REU_ADDR     = $DF01
 
 ;***********************************************
 ; TXT2REU - Backup Pascal sources to REU
 ;***********************************************
+
 TXT2REU:
+        ;; TS is the address of the Pascal source.
+        ;; Set it as the source/destination
+        ;; address for the copy operation.
+        LDX TS
+        LDY TS+1
+        STX REU_ARGS+1
+        STY REU_ARGS+2
+
+        ;; Determine the end address of the sources.
         JSR FND_END
-        ;; P contains text end address
-        ;; Subtract TS from P to determine xfer length
+        ;; P contains the text end address. Subtract
+        ;; TS from P to determine the transfer length.
         SEC
         LDA P
         SBC TS
-        STA XFER_LEN
+        STA REU_ARGS+6
         LDA P+1
         SBC TS+1
-        STA XFER_LEN+1
+        STA REU_ARGS+7
         CLC
-        LDA #$90
+
+        LDA #WRITE_CMD
         JMP INIT_REU
 
 ;***********************************************
 ; REU2TXT - Restore Pascal sources from REU
 ;***********************************************
+
 REU2TXT:
-        LDA #$91
+        LDA #READ_CMD
+
 INIT_REU:
         STA REU_ARGS            ; set command
-        LDX TS                  ; set C64 base address
-        LDY TS+1
-        STX REU_ARGS+1
-        STY REU_ARGS+2
-        LDX XFER_LEN            ; set xfer length
-        LDY XFER_LEN+1
-        STX REU_ARGS+6
-        STY REU_ARGS+7
-        LDX #9
+        LDX #REU_ARGS_LEN
+
 REU_LOOP:
+        ;; Store copy operation arguments at
+        ;; REU pickup location to initiate copy.
         LDA REU_ARGS,X
-        STA $DF01,X
+        STA REU_ADDR,X
         DEX
         BPL REU_LOOP
+
+        ;; Jump back to G-Pascal
+        LDA REU_ARGS
+        SBC WRITE_CMD
+        BPL RT_FROM_READ
+RT_FROM_WRITE:
         JSR CHK_VAL
+RT_FROM_READ:
+        JSR INITIO
         RTS
 
-XFER_LEN:
-        .word 0
 REU_ARGS:
         .byte 0                 ; REC command
         .word 0                 ; C64 base address
         .word 0
         .byte 0
-        .word 0                 ; xfer length
+        .word 0                 ; transfer length
         .byte 0,0
