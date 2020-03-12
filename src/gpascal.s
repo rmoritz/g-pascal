@@ -88,13 +88,13 @@
 ; Copyright (C) 1986 - Gambit Games.
 ;***********************************************
 
+        P0      = $7F00
 	P1	= $8013
 	P2	= $8DD4
 	P3	= $992E
 	P4	= $A380
 	P5	= $B384
 	P6	= $BCB8
-        P7      = $7F00
 	;
 	STACK	= $100
 	INBUF	= $33C
@@ -819,23 +819,23 @@ TOKEN4_C:
         STA ACT_PCDA+1
         CMP #$08       ; TOO LOW?
         BCC TOKEN4_I   ; YES - ERROR
-        CMP #$40       ; TOO HIGH
+        CMP #$70       ; TOO HIGH?
         BCC TOKEN3J    ; NOPE
         BNE TOKEN4_I   ; YES
 ;
-; here if address is $40XX - CHECK THAT XX IS ZERO
+; here if address is $70XX - CHECK THAT XX IS ZERO
 ;
         LDA P
         BEQ TOKEN3J    ; YES - THANK GOODNES
-TOKEN3J:
-        JMP TOKEN3     ; BACK AGAIN
 
-; here if address is outside range $0800 to $4000
+; here if address is outside range $0800 to $7000
 ;
 TOKEN4_I:
 	LDX  #30
         JSR  ERROR      ; crash it
 
+TOKEN3J:
+        JMP TOKEN3     ; BACK AGAIN
 TOKEN4_D:
          CMP  #'L'       ; COMMENCE LISTING?
          BNE  TOKEN4_E   ; NOPE
@@ -3761,6 +3761,13 @@ FOR6:	LDA  #$FF
 	.scope
 
 ;***********************************************
+; PART 0 VECTORS
+;***********************************************
+
+	TXT2REU	= P0
+        REU2TXT = P0+38
+
+;***********************************************
 ; PART 1 VECTORS
 ;***********************************************
 
@@ -3843,13 +3850,6 @@ FOR6:	LDA  #$FF
 ;***********************************************
 
 	BLOCK	= P6
-
-;***********************************************
-; PART 7 VECTORS
-;***********************************************
-
-	TXT2REU	= P7
-        REU2TXT = P7+38
 
 ;***********************************************
 ; PART 3 STARTS HERE

@@ -75,27 +75,30 @@ INIT_REU:
         LDX #REU_ARGS_LEN
 
 REU_LOOP:
-        ;; Store copy operation arguments at
-        ;; REU pickup location to initiate copy.
+        ;; Store copy operation arguments in REU
+        ;; command register to initiate copy.
         LDA REU_ARGS,X
         STA REU_ADDR,X
         DEX
         BPL REU_LOOP
 
-        ;; Jump back to G-Pascal
+        ;; Return to G-Pascal
         LDA REU_ARGS
-        SBC WRITE_CMD
-        BPL RT_FROM_READ
-RT_FROM_WRITE:
-        JSR CHK_VAL
-RT_FROM_READ:
+        CMP #READ_CMD
+        BCC WRITING
+READING:
         JSR INITIO
+        JMP EXIT
+WRITING:
+        JSR CHK_VAL
+EXIT:
         RTS
 
 REU_ARGS:
         .byte 0                 ; REC command
         .word 0                 ; C64 base address
-        .word 0
-        .byte 0
+        .word 0                 ; REU base address
+        .byte 0                 ; REU bank
         .word 0                 ; transfer length
-        .byte 0,0
+        .byte 0                 ; IRQ mask
+        .byte 0                 ; address control register
