@@ -81,603 +81,603 @@
 ;*******************************************************************
 
 ;************************************************
-; G-PASCAL COMPILER
-; for Commodore 64
-; PART 1
-; Authors_ Nick Gammon & Sue Gobbett
-; Copyright (C) 1986 - Gambit Games.
+; g-pascal compiler
+; for commodore 64
+; part 1
+; authors_ nick gammon & sue gobbett
+; copyright (c) 1986 - gambit games.
 ;***********************************************
 
-        P0      = $7F00
-	P1	= $8013
-	P2	= $8DD4
-	P3	= $992E
-	P4	= $A380
-	P5	= $B384
-	P6	= $BCB8
+        p0      = $7f00
+	p1	= $8013
+	p2	= $8dd4
+	p3	= $992e
+	p4	= $a380
+	p5	= $b384
+	p6	= $bcb8
 	;
-	STACK	= $100
-	INBUF	= $33C
-	KBD_BUF	= $277
-	HIMEM	= $283
-	COLOR	= $286
-	HIBASE	= $288
-	AUTODN	= $292
-	BITNUM	= $298
-	BAUDOF	= $299
-	RODBS	= $29D
-	RODBE	= $29E
-	ENABRS	= $2A1		; RS232 enables
-	WARM_STR= $302		; basic warm start vector
-	CINV	= $314		; hardware interrupt vector
+	stack	= $100
+	inbuf	= $33c
+	kbd_buf	= $277
+	himem	= $283
+	color	= $286
+	hibase	= $288
+	autodn	= $292
+	bitnum	= $298
+	baudof	= $299
+	rodbs	= $29d
+	rodbe	= $29e
+	enabrs	= $2a1		; rs232 enables
+	warm_str= $302		; basic warm start vector
+	cinv	= $314		; hardware interrupt vector
 	;
-	SPACE	= $20
-	CR	= $D
-	FF	= $C
-	LF	= $A
-	MAX_STK	= 32
-	NEW_STK	= $FF
+	space	= $20
+	cr	= $d
+	ff	= $c
+	lf	= $a
+	max_stk	= 32
+	new_stk	= $ff
 	;
-	VIC	= $D000
-	SID	= $D400
-	CIA1	= $DC00
-	CIA2	= $DD00
-	DATAREG	= $DD01
-	DDRB	= $DD03
-	FLAG	= $DD0D
-	BORDER	= $D020
-	BKGND	= $D021
+	vic	= $d000
+	sid	= $d400
+	cia1	= $dc00
+	cia2	= $dd00
+	datareg	= $dd01
+	ddrb	= $dd03
+	flag	= $dd0d
+	border	= $d020
+	bkgnd	= $d021
 	;
-	COUT	= $FFD2
-	STOP	= $FFE1
-	GETIN	= $FFE4
-	CHKOUT	= $FFC9
-	CLRCHN	= $FFCC
-	UNLSN	= $FFAE
-	UNTKL	= $FFAB
-	CHRIN	= $FFCF
-	CHKIN	= $FFC6
-	PLOT	= $FFF0
-	CHROUT	= $FFD2
-	CINT	= $FF81
-	IOINIT	= $FF84
-	CLALL	= $FFE7
-	SETMSG	= $FF90
-	SETLFS	= $FFBA
-	SETNAM	= $FFBD
-	OPEN	= $FFC0
-	LOAD	= $FFD5
-	READST	= $FFB7
-	SAVE	= $FFD8
-	RAMTAS	= $FF87
-	RESTOR	= $FF8A
-	MEMTOP	= $FF99
-	UNTLK	= $FFAB
-	CLOSE	= $FFC3
+	cout	= $ffd2
+	stop	= $ffe1
+	getin	= $ffe4
+	chkout	= $ffc9
+	clrchn	= $ffcc
+	unlsn	= $ffae
+	untkl	= $ffab
+	chrin	= $ffcf
+	chkin	= $ffc6
+	plot	= $fff0
+	chrout	= $ffd2
+	cint	= $ff81
+	ioinit	= $ff84
+	clall	= $ffe7
+	setmsg	= $ff90
+	setlfs	= $ffba
+	setnam	= $ffbd
+	open	= $ffc0
+	load	= $ffd5
+	readst	= $ffb7
+	save	= $ffd8
+	ramtas	= $ff87
+	restor	= $ff8a
+	memtop	= $ff99
+	untlk	= $ffab
+	close	= $ffc3
 
 	;***********************************************
-	; PASCAL WORK AREAS
+	; pascal work areas
 	;***********************************************
 
-	LINE_CNT= $2		; 2 BYTES
-	LINE_NO	= LINE_CNT
-	REG	= $4		; 2 BYTES
-	ROWL	= REG
-	ROWH	= REG+1
-	SRCE	= REG
-	REG2	= $6		; 2 BYTES
-	DEST	= REG2
-	WX	= $8		; 2 BYTES
-	ERR_RTN	= $B		; 2 BYTES
-	SYMTBL	= $D
-	TOKEN	= $16
-	TKNADR	= $17		; 2 BYTES
-	TKNLEN	= $19
-	EOF	= $1A
-	LIST	= $1B
-	NXTCHR	= $1C		; 2 BYTES
-	VALUE	= $1E		; 3 BYTES
-	DIGIT	= $21
-	NOTRSV	= $22
-	FRAME	= $23		; 2 BYTES
-	LEVEL	= $25
-	PCODE	= $26
-	P 	= PCODE
-	PNTR	= PCODE
-	ACT_PCDA= $28		; 2 BYTES
-	DISPL	= $2A		; 2 BYTES
-	OFFSET	= $2C		; 2 BYTES
-	OPND	= $2E		; 3 BYTES
-	DCODE	= $31
-	ENDSYM	= $32		; 2 BYTES
-	ARG	= $34
-	PROMPT	= $35
-	WORKD	= $36		; 2 BYTES
-	ERRNO	= $38
-	RTNADR	= $39		; 2 BYTES
-	BSAVE	= $3B
-	WORK	= $3C		; 2 BYTES
-	PRCITM	= $3E		; 2 BYTES
-	DSPWRK	= $40		; 2 BYTES
-	PFLAG	= $42
-	T 	= ENDSYM	; STACK POINTER 2 BYTES
-	TMP_PNTR= T
-	BASE	= $45		; 2 BYTES
-	TO	= BASE
-	DATA	= $47		; 2 BYTES
-	RUNNING	= $49
-	UPR_CASE= $4A
-	SCE_LIM	= $4B		; 2 BYTES
-	FUNCTION= SCE_LIM
-	SPRITENO= SCE_LIM+1
-	STK_USE	= $4D
-	VOICENO	= STK_USE
-	SYMITM	= $4E		; 2 BYTES
-	FROM	= SYMITM
-	SYNTAX	= $50
-	CHK_ARY	= $51
-	SECRET	= $52
-	VAL_CMP	= $53
-	CTRLC_RT= $54		; 2 BYTES
-	END_PCD	= $56		; 2 BYTES
-	REGB	= $58
-	REG2B	= $59
-	LEFTCOL	= $5A
-	SIGN	= $5B
-	TEMP	= $5C		; 2 BYTES
-	CALL	= $5E		; 2 BYTES
-	COUNT	= $60
-	LNCNT	= $61
-	LS	= $62
-	PCSVD	= $63		; 2 BYTES
-	FIRST	= $65
-	DBGTYP	= $66
-	DBGFLG	= $67
-	DEFP	= $68		; 2 BYTES
-	DEFS	= $6A		; 2 BYTES
-	DATTYP	= $6C
-	DOS_FLG	= DATTYP
-	A5	= $6D		; 2 BYTES
-	MASK	= A5
-	COLL_REG= A5+1
-	ST	= $90
-	DFLTN	= $99		; input device
-	QUEUE	= $C6
-	INDX	= $C8
-	LXSP	= $C9
-	BLNSW	= $CC
-	BLNON	= $CF
-	CRSW	= $D0
-	BASL	= $D1
-	CH	= $D3
+	line_cnt= $2		; 2 bytes
+	line_no	= line_cnt
+	reg	= $4		; 2 bytes
+	rowl	= reg
+	rowh	= reg+1
+	srce	= reg
+	reg2	= $6		; 2 bytes
+	dest	= reg2
+	wx	= $8		; 2 bytes
+	err_rtn	= $b		; 2 bytes
+	symtbl	= $d
+	token	= $16
+	tknadr	= $17		; 2 bytes
+	tknlen	= $19
+	eof	= $1a
+	list	= $1b
+	nxtchr	= $1c		; 2 bytes
+	value	= $1e		; 3 bytes
+	digit	= $21
+	notrsv	= $22
+	frame	= $23		; 2 bytes
+	level	= $25
+	pcode	= $26
+	p 	= pcode
+	pntr	= pcode
+	act_pcda= $28		; 2 bytes
+	displ	= $2a		; 2 bytes
+	offset	= $2c		; 2 bytes
+	opnd	= $2e		; 3 bytes
+	dcode	= $31
+	endsym	= $32		; 2 bytes
+	arg	= $34
+	prompt	= $35
+	workd	= $36		; 2 bytes
+	errno	= $38
+	rtnadr	= $39		; 2 bytes
+	bsave	= $3b
+	work	= $3c		; 2 bytes
+	prcitm	= $3e		; 2 bytes
+	dspwrk	= $40		; 2 bytes
+	pflag	= $42
+	t 	= endsym	; stack pointer 2 bytes
+	tmp_pntr= t
+	base	= $45		; 2 bytes
+	to	= base
+	data	= $47		; 2 bytes
+	running	= $49
+	upr_case= $4a
+	sce_lim	= $4b		; 2 bytes
+	function= sce_lim
+	spriteno= sce_lim+1
+	stk_use	= $4d
+	voiceno	= stk_use
+	symitm	= $4e		; 2 bytes
+	from	= symitm
+	syntax	= $50
+	chk_ary	= $51
+	secret	= $52
+	val_cmp	= $53
+	ctrlc_rt= $54		; 2 bytes
+	end_pcd	= $56		; 2 bytes
+	regb	= $58
+	reg2b	= $59
+	leftcol	= $5a
+	sign	= $5b
+	temp	= $5c		; 2 bytes
+	call	= $5e		; 2 bytes
+	count	= $60
+	lncnt	= $61
+	ls	= $62
+	pcsvd	= $63		; 2 bytes
+	first	= $65
+	dbgtyp	= $66
+	dbgflg	= $67
+	defp	= $68		; 2 bytes
+	defs	= $6a		; 2 bytes
+	dattyp	= $6c
+	dos_flg	= dattyp
+	a5	= $6d		; 2 bytes
+	mask	= a5
+	coll_reg= a5+1
+	st	= $90
+	dfltn	= $99		; input device
+	queue	= $c6
+	indx	= $c8
+	lxsp	= $c9
+	blnsw	= $cc
+	blnon	= $cf
+	crsw	= $d0
+	basl	= $d1
+	ch	= $d3
 ;
-	P_STACK	= $CED0		; P-CODE STACK
-	S_ANIMCT= $CED8		; count of frames
-	S_ANIMPS= $CEE0		; current position
-	S_ANIMCC= $CEE8		; current frame count
-	S_ANIMFM= $CEF0		; no. of frames
-	S_POINTR= $CEF8		; pointers - 16 per sprite
-	SID_IMG	= $CF7C
-	S_ACTIVE= $CF98
-	S_XPOS	= $CFA0		; 3 bytes each
-	S_YPOS	= $CFB8		; 2 bytes each
-	S_XINC	= $CFC8		; 3 bytes each
-	S_YINC	= $CFE0		; 2 bytes each
-	S_COUNT	= $CFF0		; 2 bytes each
+	p_stack	= $ced0		; p-code stack
+	s_animct= $ced8		; count of frames
+	s_animps= $cee0		; current position
+	s_animcc= $cee8		; current frame count
+	s_animfm= $cef0		; no. of frames
+	s_pointr= $cef8		; pointers - 16 per sprite
+	sid_img	= $cf7c
+	s_active= $cf98
+	s_xpos	= $cfa0		; 3 bytes each
+	s_ypos	= $cfb8		; 2 bytes each
+	s_xinc	= $cfc8		; 3 bytes each
+	s_yinc	= $cfe0		; 2 bytes each
+	s_count	= $cff0		; 2 bytes each
 ;
-	.org $02A7
+	.org $02a7
 
-COUNT1:  .res 1
-COUNT2:  .res 1
-SYM_USE: .res 2			; 2 BYTES
-SAVCUR:  .res 6			; 6 BYTES
-BPOINT:	 .res 20
+count1:  .res 1
+count2:  .res 1
+sym_use: .res 2			; 2 bytes
+savcur:  .res 6			; 6 bytes
+bpoint:	 .res 20
 
-	CALL_P	= BPOINT
-	CALL_A	= BPOINT+1
-	CALL_X	= BPOINT+2
-	CALL_Y	= BPOINT+3
-	FNC_VAL	= BPOINT+15
-	REMAIN	= BPOINT+4
-	XPOSL	= BPOINT+15
-	XPOSH	= BPOINT+16
-	YPOS	= BPOINT+17
-	CNTR	= BPOINT+10
-	ECNTR	= BPOINT
-	EPNTR	= $43
-	REP_FROM= BPOINT+2
-	REP_TO	= BPOINT+3
-	REP_LEN	= BPOINT+4
-	PNTR_HI	= BPOINT+5
-	IN_LGTH	= BPOINT+6
-	LENGTH	= BPOINT+7
-	FROM_ST	= BPOINT+9
-	NUM_LINS= BPOINT+11
-	ED_COM	= BPOINT+13
-	TO_LINE	= BPOINT+15
-	FND_FROM= BPOINT+17
-	FND_TO	= BPOINT+18
-	FND_POS	= BPOINT+19
+	call_p	= bpoint
+	call_a	= bpoint+1
+	call_x	= bpoint+2
+	call_y	= bpoint+3
+	fnc_val	= bpoint+15
+	remain	= bpoint+4
+	xposl	= bpoint+15
+	xposh	= bpoint+16
+	ypos	= bpoint+17
+	cntr	= bpoint+10
+	ecntr	= bpoint
+	epntr	= $43
+	rep_from= bpoint+2
+	rep_to	= bpoint+3
+	rep_len	= bpoint+4
+	pntr_hi	= bpoint+5
+	in_lgth	= bpoint+6
+	length	= bpoint+7
+	from_st	= bpoint+9
+	num_lins= bpoint+11
+	ed_com	= bpoint+13
+	to_line	= bpoint+15
+	fnd_from= bpoint+17
+	fnd_to	= bpoint+18
+	fnd_pos	= bpoint+19
 
-LASTP:    .res 2
-INCHAR:   .res 1
-IO_A:     .res 1
-IO_Y:     .res 1
-IO_X:     .res 1
-CURR_CHR: .res 1
-HEX_WK:   .res 1
+lastp:    .res 2
+inchar:   .res 1
+io_a:     .res 1
+io_y:     .res 1
+io_x:     .res 1
+curr_chr: .res 1
+hex_wk:   .res 1
           .res 2
-STK_AVL:  .res 1
-STK_PAGE: .res 1
-STK_WRK:  .res 1
-STK_RT:   .res 2
-BEG_STK:  .res 1
-XSAVE:    .res 1
-RES:      .res 3		; 3 BYTES
-MCAND:    .res 3		; 3 BYTES
-	DIVISOR	= MCAND
-DVDN:     .res 3		; 3 BYTES
-RMNDR:    .res 1
-TEMP1:    .res 2
-BIN_WRK:  .res 3
-ASC_WRK:  .res 10
-DEF_PCD:  .res 1
-REP_SIZE: .res 1
-NLN_FLAG: .res 1
-Q_FLAG:   .res 1
-FND_FLG:  .res 1
-FND_LEN:  .res 1
-UC_FLAG:  .res 1
-TRN_FLAG: .res 1
-GLB_FLAG: .res 1
-INT_RTN:  .res 2	; address to return to after a timer interrupt
-INT_TEMP: .res 1	; for interrupt service routine
-INT_TMP1: .res 1
-INT_TMP2: .res 1
-QT_TGL:   .res 1	      ; quote toggle
-QT_SIZE:  .res 1	      ; number of characters in reserved words
+stk_avl:  .res 1
+stk_page: .res 1
+stk_wrk:  .res 1
+stk_rt:   .res 2
+beg_stk:  .res 1
+xsave:    .res 1
+res:      .res 3		; 3 bytes
+mcand:    .res 3		; 3 bytes
+	divisor	= mcand
+dvdn:     .res 3		; 3 bytes
+rmndr:    .res 1
+temp1:    .res 2
+bin_wrk:  .res 3
+asc_wrk:  .res 10
+def_pcd:  .res 1
+rep_size: .res 1
+nln_flag: .res 1
+q_flag:   .res 1
+fnd_flg:  .res 1
+fnd_len:  .res 1
+uc_flag:  .res 1
+trn_flag: .res 1
+glb_flag: .res 1
+int_rtn:  .res 2	; address to return to after a timer interrupt
+int_temp: .res 1	; for interrupt service routine
+int_tmp1: .res 1
+int_tmp2: .res 1
+qt_tgl:   .res 1	      ; quote toggle
+qt_size:  .res 1	      ; number of characters in reserved words
 
 ;***********************************************
-; ADDRESS CONSTANTS ETC.
+; address constants etc.
 ;***********************************************
 
         .org $8000
-        JMP START
-        JMP RESTART
+        jmp start
+        jmp restart
 
           .res 3
-TS:	  .word $4000
-SYM_SIZE: .byte 16
-LHB:	  .byte "["
-RHB:	  .byte "]"
-QUOT_SYM: .byte 34         ; QUOTE SYMBOL
-DELIMIT:  .byte "."        ; FIND/REPLACE DELIMITER
-PR_CHAN:  .byte 4          ; PRINTER CHANNEL
-DISK_CHN: .byte 8          ; DISK CHANNEL
-          .byte  0         ; SPARE FOR NOW
+ts:	  .word $4000
+sym_size: .byte 16
+lhb:	  .byte "["
+rhb:	  .byte "]"
+quot_sym: .byte 34         ; quote symbol
+delimit:  .byte "."        ; find/replace delimiter
+pr_chan:  .byte 4          ; printer channel
+disk_chn: .byte 8          ; disk channel
+          .byte  0         ; spare for now
 
 ;***********************************************
-; SYMBOL TABLE STUFF
+; symbol table stuff
 ;***********************************************
 
-	SYMPRV	= 0
-	SYMLVL	= 2
-	SYMTYP	= 3
-	SYMDSP	= 4
-	SYMARG	= 6
-	SYMSUB	= 6          ; MAX SUBSCRIPT+1
-	SYMDAT	= 8          ; VARIABLE TYPE
-	SYMLEN	= 9
-	SYMNAM	= 10         ; NAME
+	symprv	= 0
+	symlvl	= 2
+	symtyp	= 3
+	symdsp	= 4
+	symarg	= 6
+	symsub	= 6          ; max subscript+1
+	symdat	= 8          ; variable type
+	symlen	= 9
+	symnam	= 10         ; name
 
 ;***********************************************
-; PART 3 START
+; part 3 start
 ;***********************************************
 
-	START	= P3
-	RESTART	= START+3
+	start	= p3
+	restart	= start+3
 	.scope
-	EXIT_CMP= RESTART
-	DSP_BIN	= P3+6
-	ST_CMP	= P3+9
-	ST_SYN	= P3+12
-	DEBUG	= P3+15
-	BELL1X	= P3+24
+	exit_cmp= restart
+	dsp_bin	= p3+6
+	st_cmp	= p3+9
+	st_syn	= p3+12
+	debug	= p3+15
+	bell1x	= p3+24
 
 ;***********************************************
-; VECTORS
+; vectors
 ;***********************************************
 
-        JMP INIT
-        JMP GETNEXT
-        JMP COMSTL
-        JMP ISITHX
-        JMP ISITAL
-        JMP ISITNM
-        JMP CHAR
-        JMP GEN2_B
-        JMP DISHX
-        JMP ERROR
-        JMP GETCHK
-        JMP CHKTKN
-        JMP GENNOP
-        JMP GENADR
-        JMP GENNJP
-        JMP GENNJM
-        JMP TKNWRK
-        JMP PRBYTE
-        JMP GTOKEN
-        JMP WRKTKN
-        JMP FIXAD
-        JMP PSHWRK
-        JMP PULWRK
-        JMP PC
-        JMP PT
-        JMP PL
-        JMP TOKEN1
-        JMP GETANS
-        JMP PUTSP
-        JMP DISPAD
-        JMP CROUT
-        JMP SHLVAL
-        JMP GET_NUM
-        JMP GET_HEX
-        JMP FND_END
-        JMP PAUSE
-        JMP HOME
-        JMP RDKEY
-        JMP GENJMP
-        JMP GENRJMP
+        jmp init
+        jmp getnext
+        jmp comstl
+        jmp isithx
+        jmp isital
+        jmp isitnm
+        jmp char
+        jmp gen2_b
+        jmp dishx
+        jmp error
+        jmp getchk
+        jmp chktkn
+        jmp gennop
+        jmp genadr
+        jmp gennjp
+        jmp gennjm
+        jmp tknwrk
+        jmp prbyte
+        jmp gtoken
+        jmp wrktkn
+        jmp fixad
+        jmp pshwrk
+        jmp pulwrk
+        jmp pc
+        jmp pt
+        jmp pl
+        jmp token1
+        jmp getans
+        jmp putsp
+        jmp dispad
+        jmp crout
+        jmp shlval
+        jmp get_num
+        jmp get_hex
+        jmp fnd_end
+        jmp pause
+        jmp home
+        jmp rdkey
+        jmp genjmp
+        jmp genrjmp
 
-	; These are DICT token values to produce the
+	; these are dict token values to produce the
 	; following..
 	; 5,14,"g-pASCAL",
 	; "COMPILER", ""vERSION 3.1 sER# 5001",13,
 	; "wRITTEN BY nICK gAMMON ","AND sUE gOBBETT",13
 	; "cOPYRIGHT 1983","gAMBIT",gAMES",
 	; "p.o. bOX 124 iVANHOE 3079 vIC aUSTRALIA",13
-US:	.byte $D1,$BA,$D2,$D6,$D3,$CE,$CF,$D0
+us:	.byte $d1,$ba,$d2,$d6,$d3,$ce,$cf,$d0
 
 
 ;***********************************************
-; PART 5 VECTORS
+; part 5 vectors
 ;***********************************************
 
-	EDITOR	= P5
-	PUT_LINE= P5+12
+	editor	= p5
+	put_line= p5+12
 
 ;***********************************************
-; PART 6 VECTORS
+; part 6 vectors
 ;***********************************************
 
-	BLOCK	= P6
-
-;***********************************************
-;
-; INITIALIZE
-;
-;***********************************************
-
-NOSCE:	.byte "NO",$BF,$0D	; "NO SOURCE\n"
-
-INIT: 	LDA #0
-        STA EOF
-        STA LIST
-        STA LEVEL
-        STA DCODE
-        STA RUNNING
-        STA PRCITM
-        STA PRCITM+1
-        STA LINE_CNT
-        STA LINE_CNT+1
-        STA REGB
-        LDA #<US
-        LDX #>US
-        LDY #8
-        JSR PT
-        LDA SYMTBL+1
-        STA SYM_USE+1
-        STA ENDSYM+1
-        LDA TS
-        SEC
-        SBC #1
-        STA NXTCHR
-        LDA TS+1
-        SBC #0
-        STA NXTCHR+1
-        JSR FND_END
-        LDA P
-        STA ACT_PCDA
-        LDA P+1
-        STA ACT_PCDA+1
-        JSR LINE
-        LDA EOF
-        BEQ GOT_END2
-        LDA #<NOSCE
-        LDX #>NOSCE
-        JSR PL
-        JMP ERRRTN
-
-;***********************************************
-; FIND TEXT END
-;***********************************************
-
-FND_END:
-        LDA TS
-        STA PCODE
-        LDA TS+1
-        STA PCODE+1
-        LDY #0
-FND_TXTE:
-        LDA (P),Y
-        BEQ GOT_ENDS
-        INC P
-        BNE FND_TXTE
-        INC P+1
-        BNE FND_TXTE
-GOT_ENDS:
-        INC P
-        BNE GOT_END2
-        INC P+1
-GOT_END2:
-        RTS
-
-;***********************************************
-; GET NEXT CHAR FROM INPUT
-;***********************************************
-
-GETNEXT:
-        LDY #1
-        LDA (NXTCHR),Y
-LINE4: 	RTS
-
-;***********************************************
-; INPUT A LINE
-;***********************************************
-
-LINE:	JSR GETNEXT
-        BNE LINE1		; NULL= EOF
-        INC EOF
-        RTS
-LINE1:
-        LDA NXTCHR
-        CLC
-        ADC #1
-        STA A5
-        LDA NXTCHR+1
-        ADC #0
-        STA A5+1
-        INC LINE_CNT
-        BNE LINE3
-        INC LINE_CNT+1
-LINE3:
-        LDA LIST
-        BEQ LINE2
-        JSR DISP
-        RTS
-LINE2:
-        LDA LINE_CNT
-        AND #15
-        BNE LINE4
-        LDA #'*'
-        JMP PC
-
-;***********************************************
-; GET A CHARACTER
-;***********************************************
-
-CHAR:
-        INC NXTCHR
-        BNE CHAR2
-        INC NXTCHR+1
-CHAR2:
-        LDY #0
-        LDA (NXTCHR),Y
-        CMP #CR
-        BNE CHAR1
-        JSR LINE		; END OF LINE
-        LDA EOF
-        BEQ CHAR
-        LDA #0			; END OF FILE MARKER
-CHAR1:
-        STA  CURR_CHR
-        RTS
-
-CROUT:  LDA  #CR
-        JMP  PC
-
-;***********************************************
-; COMPARE STRING
-;***********************************************
-
-COMSTL: DEY
-        BMI COMS8
-        LDA (SRCE),Y
-        CMP #$C1
-        BCC COMS1		; BLT = "BCC"
-        CMP #$DB
-        BCS COMS1		; BGE = "BCS"
-        AND #$7F		; CONVERT TO U/C
-COMS1:
-        CMP (DEST),Y
-        BEQ COMSTL
-COMS9:	RTS			; NOT EQUAL
-COMS8:	LDA #0
-        RTS			; EQUAL
-
-;***********************************************
-; IS IT HEX?
-;***********************************************
-
-ISITHX: CMP #'0'
-        BCC NOTHX
-        CMP #'9'+1
-        BCC ISHX
-        CMP #'A'
-        BCC NOTHX
-        CMP #'F'+1
-        BCC ISHX_A
-        CMP #$C1
-        BCC NOTHX
-        CMP #$C7
-        BCS NOTHX
-        AND #$7F		; convert to upper case
-ISHX_A:
-        SEC
-        SBC #7
-ISHX:
-        SEC
-        SBC #'0'
-        CLC
-        RTS
-NOTHX:
-        SEC
-        RTS
-
-;***********************************************
-; IS IT ALPHA
-;***********************************************
-
-ISITAL: CMP #'A'
-        BCC NOTAL
-        CMP #'Z'+1
-        BCC ISAL
-        CMP #$C1
-        BCC NOTAL
-        CMP #$DB
-        BCC ISAL
-NOTAL:
-        SEC
-        RTS
-ISAL:
-        CLC
-        RTS
-
-;***********************************************
-; IS IT NUMERIC?
-;***********************************************
-
-ISITNM: CMP #'0'
-        BCC NOTNUM
-        CMP #'9'+1
-        BCC ISNUM
-NOTNUM:
-        SEC
-        RTS
-ISNUM:
-        CLC
-        RTS
+	block	= p6
 
 ;***********************************************
 ;
-; GET TOKEN !!!
+; initialize
+;
+;***********************************************
+
+nosce:	.byte "NO",$bf,$0d	; "NO SOURCE\n"
+
+init: 	lda #0
+        sta eof
+        sta list
+        sta level
+        sta dcode
+        sta running
+        sta prcitm
+        sta prcitm+1
+        sta line_cnt
+        sta line_cnt+1
+        sta regb
+        lda #<us
+        ldx #>us
+        ldy #8
+        jsr pt
+        lda symtbl+1
+        sta sym_use+1
+        sta endsym+1
+        lda ts
+        sec
+        sbc #1
+        sta nxtchr
+        lda ts+1
+        sbc #0
+        sta nxtchr+1
+        jsr fnd_end
+        lda p
+        sta act_pcda
+        lda p+1
+        sta act_pcda+1
+        jsr line
+        lda eof
+        beq got_end2
+        lda #<nosce
+        ldx #>nosce
+        jsr pl
+        jmp errrtn
+
+;***********************************************
+; find text end
+;***********************************************
+
+fnd_end:
+        lda ts
+        sta pcode
+        lda ts+1
+        sta pcode+1
+        ldy #0
+fnd_txte:
+        lda (p),y
+        beq got_ends
+        inc p
+        bne fnd_txte
+        inc p+1
+        bne fnd_txte
+got_ends:
+        inc p
+        bne got_end2
+        inc p+1
+got_end2:
+        rts
+
+;***********************************************
+; get next char from input
+;***********************************************
+
+getnext:
+        ldy #1
+        lda (nxtchr),y
+line4: 	rts
+
+;***********************************************
+; input a line
+;***********************************************
+
+line:	jsr getnext
+        bne line1		; null= eof
+        inc eof
+        rts
+line1:
+        lda nxtchr
+        clc
+        adc #1
+        sta a5
+        lda nxtchr+1
+        adc #0
+        sta a5+1
+        inc line_cnt
+        bne line3
+        inc line_cnt+1
+line3:
+        lda list
+        beq line2
+        jsr disp
+        rts
+line2:
+        lda line_cnt
+        and #15
+        bne line4
+        lda #'*'
+        jmp pc
+
+;***********************************************
+; get a character
+;***********************************************
+
+char:
+        inc nxtchr
+        bne char2
+        inc nxtchr+1
+char2:
+        ldy #0
+        lda (nxtchr),y
+        cmp #cr
+        bne char1
+        jsr line		; end of line
+        lda eof
+        beq char
+        lda #0			; end of file marker
+char1:
+        sta  curr_chr
+        rts
+
+crout:  lda  #cr
+        jmp  pc
+
+;***********************************************
+; compare string
+;***********************************************
+
+comstl: dey
+        bmi coms8
+        lda (srce),y
+        cmp #$c1
+        bcc coms1		; blt = "bcc"
+        cmp #$db
+        bcs coms1		; bge = "bcs"
+        and #$7f		; convert to u/c
+coms1:
+        cmp (dest),y
+        beq comstl
+coms9:	rts			; not equal
+coms8:	lda #0
+        rts			; equal
+
+;***********************************************
+; is it hex?
+;***********************************************
+
+isithx: cmp #'0'
+        bcc nothx
+        cmp #'9'+1
+        bcc ishx
+        cmp #'A'
+        bcc nothx
+        cmp #'F'+1
+        bcc ishx_a
+        cmp #$c1
+        bcc nothx
+        cmp #$c7
+        bcs nothx
+        and #$7f		; convert to upper case
+ishx_a:
+        sec
+        sbc #7
+ishx:
+        sec
+        sbc #'0'
+        clc
+        rts
+nothx:
+        sec
+        rts
+
+;***********************************************
+; is it alpha
+;***********************************************
+
+isital: cmp #'A'
+        bcc notal
+        cmp #'Z'+1
+        bcc isal
+        cmp #$c1
+        bcc notal
+        cmp #$db
+        bcc isal
+notal:
+        sec
+        rts
+isal:
+        clc
+        rts
+
+;***********************************************
+; is it numeric?
+;***********************************************
+
+isitnm: cmp #'0'
+        bcc notnum
+        cmp #'9'+1
+        bcc isnum
+notnum:
+        sec
+        rts
+isnum:
+        clc
+        rts
+
+;***********************************************
+;
+; get token !!!
 ; *********
 ;
-; RESERVED WORD TABLE
+; reserved word table
 ;
 ;***********************************************
 
-RSVWRD:	.byte 3, $81, "GET"
+rsvwrd:	.byte 3, $81, "GET"
         .byte 5, $82, "CONST"
         .byte 3, $83, "VAR"
         .byte 5, $84, "ARRAY"
@@ -686,12 +686,12 @@ RSVWRD:	.byte 3, $81, "GET"
         .byte 8, $87, "FUNCTION"
         .byte 5, $88, "BEGIN"
         .byte 3, $89, "END"
-        .byte 2, $8A, "OR"
-        .byte 3, $8B, "DIV"
-        .byte 3, $8C, "MOD"
-        .byte 3, $8D, "AND"
-        .byte 3, $8E, "SHL"
-        .byte 3, $8F, "SHR"
+        .byte 2, $8a, "OR"
+        .byte 3, $8b, "DIV"
+        .byte 3, $8c, "MOD"
+        .byte 3, $8d, "AND"
+        .byte 3, $8e, "SHL"
+        .byte 3, $8f, "SHR"
         .byte 3, $90, "NOT"
         .byte 3, $91, "MEM"
         .byte 2, $92, "IF"
@@ -702,3848 +702,3848 @@ RSVWRD:	.byte 3, $81, "GET"
         .byte 2, $97, "DO"
         .byte 6, $98, "REPEAT"
         .byte 5, $99, "UNTIL"
-        .byte 3, $9A, "FOR"
-        .byte 2, $9B, "TO"
-        .byte 6, $9C, "DOWNTO"
-        .byte 5, $9D, "WRITE"
-        .byte 4, $9E, "READ"
-        .byte 4, $9F, "CALL"
-	; $A0 not used because of clash with shift/space
-        .byte 4, $A1, "CHAR"
-        .byte 4, $A2, "MEMC"
-        .byte 6, $A3, "CURSOR"
-        .byte 3, $A4, "XOR"
-        .byte 12,$A5, "DEFINESPRITE"
-        .byte 4, $A6, "PLOT"
-        .byte 6, $A7, "GETKEY"
-        .byte 5, $A8, "CLEAR"
-        .byte 7, $A9, "ADDRESS"
-        .byte 4, $AA, "WAIT"
-        .byte 3, $AB, "CHR"
-        .byte 3, $AC, "HEX"
-        .byte 12,$AD, "SPRITEFREEZE"
-        .byte 5, $AE, "CLOSE"
-        .byte 3, $AF, "PUT"
-        .byte 6, $DF, "SPRITE"
-        .byte 14,$E0, "POSITIONSPRITE"
-        .byte 5, $E1, "VOICE"
-        .byte 8, $E2, "GRAPHICS"
-        .byte 5, $E3, "SOUND"
-        .byte 8, $E4, "SETCLOCK"
-        .byte 6, $E5, "SCROLL"
-        .byte 13,$E6, "SPRITECOLLIDE"
-        .byte 13,$E7, "GROUNDCOLLIDE"
-        .byte 7, $E8, "CURSORX"
-        .byte 7, $E9, "CURSORY"
-        .byte 5, $EA, "CLOCK"
-        .byte 6, $EB, "PADDLE"
-        .byte 7, $EC, "SPRITEX"
-        .byte 8, $ED, "JOYSTICK"
-        .byte 7, $EE, "SPRITEY"
-        .byte 6, $EF, "RANDOM"
-        .byte 8, $F0, "ENVELOPE"
-        .byte 7, $F1, "SCROLLX"
-        .byte 7, $F2, "SCROLLY"
-        .byte 12,$F3, "SPRITESTATUS"
-        .byte 10,$F4, "MOVESPRITE"
-        .byte 10,$F5, "STOPSPRITE"
-        .byte 11,$F6, "STARTSPRITE"
-        .byte 13,$F7, "ANIMATESPRITE"
-        .byte 3, $F8, "ABS"
-        .byte 7, $F9, "INVALID"
-        .byte 4, $FA, "LOAD"
-        .byte 4, $FB, "SAVE"
-        .byte 4, $FC, "OPEN"
-        .byte 12,$FD, "FREEZESTATUS"
-        .byte 7, $FE, "INTEGER"
-        .byte 7, $FF, "WRITELN"
-RSVEND:	.byte 0,0		; END OF TABLE
+        .byte 3, $9a, "FOR"
+        .byte 2, $9b, "TO"
+        .byte 6, $9c, "DOWNTO"
+        .byte 5, $9d, "WRITE"
+        .byte 4, $9e, "READ"
+        .byte 4, $9f, "CALL"
+	; $a0 not used because of clash with shift/space
+        .byte 4, $a1, "CHAR"
+        .byte 4, $a2, "MEMC"
+        .byte 6, $a3, "CURSOR"
+        .byte 3, $a4, "XOR"
+        .byte 12,$a5, "DEFINESPRITE"
+        .byte 4, $a6, "PLOT"
+        .byte 6, $a7, "GETKEY"
+        .byte 5, $a8, "CLEAR"
+        .byte 7, $a9, "ADDRESS"
+        .byte 4, $aa, "WAIT"
+        .byte 3, $ab, "CHR"
+        .byte 3, $ac, "HEX"
+        .byte 12,$ad, "SPRITEFREEZE"
+        .byte 5, $ae, "CLOSE"
+        .byte 3, $af, "PUT"
+        .byte 6, $df, "SPRITE"
+        .byte 14,$e0, "POSITIONSPRITE"
+        .byte 5, $e1, "VOICE"
+        .byte 8, $e2, "GRAPHICS"
+        .byte 5, $e3, "SOUND"
+        .byte 8, $e4, "SETCLOCK"
+        .byte 6, $e5, "SCROLL"
+        .byte 13,$e6, "SPRITECOLLIDE"
+        .byte 13,$e7, "GROUNDCOLLIDE"
+        .byte 7, $e8, "CURSORX"
+        .byte 7, $e9, "CURSORY"
+        .byte 5, $ea, "CLOCK"
+        .byte 6, $eb, "PADDLE"
+        .byte 7, $ec, "SPRITEX"
+        .byte 8, $ed, "JOYSTICK"
+        .byte 7, $ee, "SPRITEY"
+        .byte 6, $ef, "RANDOM"
+        .byte 8, $f0, "ENVELOPE"
+        .byte 7, $f1, "SCROLLX"
+        .byte 7, $f2, "SCROLLY"
+        .byte 12,$f3, "SPRITESTATUS"
+        .byte 10,$f4, "MOVESPRITE"
+        .byte 10,$f5, "STOPSPRITE"
+        .byte 11,$f6, "STARTSPRITE"
+        .byte 13,$f7, "ANIMATESPRITE"
+        .byte 3, $f8, "ABS"
+        .byte 7, $f9, "INVALID"
+        .byte 4, $fa, "LOAD"
+        .byte 4, $fb, "SAVE"
+        .byte 4, $fc, "OPEN"
+        .byte 12,$fd, "FREEZESTATUS"
+        .byte 7, $fe, "INTEGER"
+        .byte 7, $ff, "WRITELN"
+rsvend:	.byte 0,0		; end of table
 
 
-GETTKN:
-GTOKEN: JSR CHAR
-        BNE TOKEN1		; ZERO= EOF
-        STA TOKEN
-        RTS
-TOKEN1:
-        CMP #32
-        BEQ GTOKEN		; BYPASS SPACE
-        CMP #160		; ALSO BYPASS SHIFT/SPACE
-        BEQ GTOKEN
-        CMP #$10		; DLE?
-        BNE TOKEN1_A
-        INC NXTCHR
-        BNE DLE_OK
-        INC NXTCHR+1
-DLE_OK:
-        JMP GTOKEN
-TOKEN1_A:
-        CMP #'('
-        BEQ TOKEN1_B
-        JMP TOKEN2
-TOKEN1_B:
-        JSR GETNEXT
-        CMP #'*'
-        BEQ TOKEN3     ; COMMENT
-        JMP TKN26_A    ; BACK TO PROCESS '('
-TOKEN3:		       ; BYPASS COMMENTS
-        JSR CHAR
-        BNE TOKEN4
-        LDX #7         ; NO } FOUND
-        JSR ERROR
-TOKEN4:
-        CMP #$10       ; dle
-        BNE TOKEN4_A   ; n
-        INC NXTCHR     ; bypass count
-        BNE TOKEN3
-        INC NXTCHR+1
-        BNE TOKEN3
-TOKEN4_A:
-        CMP #'%'       ; COMPILER DIRECTIVE?
-        BNE TOKEN4_B   ; NO SUCH LUCK
-        JSR CHAR       ; AND WHAT MIGHT THE DIRECTIVE BE?
-        AND #$7F       ; convert case
-        CMP #'A'       ; ADDRESS OF P-CODES?
-        BNE TOKEN4_D   ; NOPE
-        JSR GTOKEN     ; RE-CALL GTOKEN TO FIND THE ADDRESS
-        CMP #'N'       ; NUMBER?
-        BEQ TOKEN4_C   ; YES
-        LDX #2
-        JSR ERROR      ; 'Constant expected'
-TOKEN4_C:
-        LDA VALUE
-        STA P
-        STA ACT_PCDA   ; also save for run
-        LDA VALUE+1
-        STA P+1        ; STORE NEW P-CODE ADDRESS
-        STA ACT_PCDA+1
-        CMP #$08       ; TOO LOW?
-        BCC TOKEN4_I   ; YES - ERROR
-        CMP #$70       ; TOO HIGH?
-        BCC TOKEN3J    ; NOPE
-        BNE TOKEN4_I   ; YES
+gettkn:
+gtoken: jsr char
+        bne token1		; zero= eof
+        sta token
+        rts
+token1:
+        cmp #32
+        beq gtoken		; bypass space
+        cmp #160		; also bypass shift/space
+        beq gtoken
+        cmp #$10		; dle?
+        bne token1_a
+        inc nxtchr
+        bne dle_ok
+        inc nxtchr+1
+dle_ok:
+        jmp gtoken
+token1_a:
+        cmp #'('
+        beq token1_b
+        jmp token2
+token1_b:
+        jsr getnext
+        cmp #'*'
+        beq token3     ; comment
+        jmp tkn26_a    ; back to process '('
+token3:		       ; bypass comments
+        jsr char
+        bne token4
+        ldx #7         ; no } found
+        jsr error
+token4:
+        cmp #$10       ; dle
+        bne token4_a   ; n
+        inc nxtchr     ; bypass count
+        bne token3
+        inc nxtchr+1
+        bne token3
+token4_a:
+        cmp #'%'       ; compiler directive?
+        bne token4_b   ; no such luck
+        jsr char       ; and what might the directive be?
+        and #$7f       ; convert case
+        cmp #'A'       ; address of p-codes?
+        bne token4_d   ; nope
+        jsr gtoken     ; re-call gtoken to find the address
+        cmp #'N'       ; number?
+        beq token4_c   ; yes
+        ldx #2
+        jsr error      ; 'constant expected'
+token4_c:
+        lda value
+        sta p
+        sta act_pcda   ; also save for run
+        lda value+1
+        sta p+1        ; store new p-code address
+        sta act_pcda+1
+        cmp #$08       ; too low?
+        bcc token4_i   ; yes - error
+        cmp #$70       ; too high?
+        bcc token3j    ; nope
+        bne token4_i   ; yes
 ;
-; here if address is $70XX - CHECK THAT XX IS ZERO
+; here if address is $70xx - check that xx is zero
 ;
-        LDA P
-        BEQ TOKEN3J    ; YES - THANK GOODNES
+        lda p
+        beq token3j    ; yes - thank goodnes
 
 ; here if address is outside range $0800 to $7000
 ;
-TOKEN4_I:
-	LDX  #30
-        JSR  ERROR      ; crash it
+token4_i:
+	ldx  #30
+        jsr  error      ; crash it
 
-TOKEN3J:
-        JMP TOKEN3     ; BACK AGAIN
-TOKEN4_D:
-         CMP  #'L'       ; COMMENCE LISTING?
-         BNE  TOKEN4_E   ; NOPE
-TOKEN4_H:
-         PHA
-         LDA  LIST       ; ALREADY LISTING THE FILE?
-         BNE  TOKEN4_F   ; YEP
-         JSR  DISP       ; NO - SO DISPLAY THIS LINE THEN
-TOKEN4_F:
-         PLA
-         STA  LIST       ; SET LISTING FLAG
-         JMP  TOKEN3     ; BACK FOR NEXT COMMENT
+token3j:
+        jmp token3     ; back again
+token4_d:
+         cmp  #'L'       ; commence listing?
+         bne  token4_e   ; nope
+token4_h:
+         pha
+         lda  list       ; already listing the file?
+         bne  token4_f   ; yep
+         jsr  disp       ; no - so display this line then
+token4_f:
+         pla
+         sta  list       ; set listing flag
+         jmp  token3     ; back for next comment
 ;
-TOKEN4_E:
-         CMP  #'P'       ; P-CODES LIST?
-         BNE  TOKEN4_G   ; NOPE
-         STA  DCODE      ; SET DISPLAY P-CODE FLAG
-         BEQ  TOKEN4_H   ; GO BACK AS IF FOR LIST
+token4_e:
+         cmp  #'P'       ; p-codes list?
+         bne  token4_g   ; nope
+         sta  dcode      ; set display p-code flag
+         beq  token4_h   ; go back as if for list
 ;
-TOKEN4_G:
-         EOR  #'N'       ; NO-LIST?
-         BNE  TOKEN4_B   ; NOPE - FORGET IT THEN
-         STA  DCODE
-         STA  LIST       ; (A) MUST BE ZERO - CLEAR BOTH FLAGS
-         BEQ  TOKEN3J    ; BACK FOR NEXT COMMENT
+token4_g:
+         eor  #'N'       ; no-list?
+         bne  token4_b   ; nope - forget it then
+         sta  dcode
+         sta  list       ; (a) must be zero - clear both flags
+         beq  token3j    ; back for next comment
 ;
 ;
-TOKEN4_B:
-         CMP  #'*'
-         BNE  TOKEN3J
-         JSR  GETNEXT
-         CMP  #')'
-         BNE  TOKEN3J
-         JSR  CHAR       ; BYPASS *
-         JMP  GTOKEN
+token4_b:
+         cmp  #'*'
+         bne  token3j
+         jsr  getnext
+         cmp  #')'
+         bne  token3j
+         jsr  char       ; bypass *
+         jmp  gtoken
 ;
-; HERE IF NOT COMMENT OR SPACE
+; here if not comment or space
 ;
-TOKEN2:
-        LDX NXTCHR
-        STX TKNADR
-        LDX NXTCHR+1
-        STX TKNADR+1
-        LDX #1
-        STX TKNLEN     ; DEFAULT LENGTH=1
-        DEX
-        STX SIGN
-        STX VALUE+1    ; FOR STRINGS
-        STX VALUE+2
-        STX NOTRSV
-        JSR ISITAL
-        BCS TOKEN5     ; NOT ALPHA
-        LDA #'I'
-        STA TOKEN      ; IDENTIFIER
-TOKEN7:
-        JSR GETNEXT
-        JSR ISITAL
-        BCC TKN18      ; ALPHA
-        CMP #'_'       ; UNDERSCORE?
-        BEQ TKN18_A    ; YEP
-        JSR ISITNM
-        BCS TOKEN6     ; END OF IDENT
-TKN18_A:
-	INC NOTRSV
-TKN18:
-        JSR CHAR
-        INC TKNLEN
-        BNE TOKEN7
-TOKEN6:
-        LDA NOTRSV
-        BNE TKN19
-        LDA #<RSVWRD
-        STA WX
-        LDA #>RSVWRD
-        STA WX+1
-TOKEN8:
-        LDY #0
-        LDA (WX),Y
-        BNE TOKEN9     ; MORE TO GO
-TKN19:
-        LDA TOKEN
-        RTS
+token2:
+        ldx nxtchr
+        stx tknadr
+        ldx nxtchr+1
+        stx tknadr+1
+        ldx #1
+        stx tknlen     ; default length=1
+        dex
+        stx sign
+        stx value+1    ; for strings
+        stx value+2
+        stx notrsv
+        jsr isital
+        bcs token5     ; not alpha
+        lda #'I'
+        sta token      ; identifier
+token7:
+        jsr getnext
+        jsr isital
+        bcc tkn18      ; alpha
+        cmp #'_'       ; underscore?
+        beq tkn18_a    ; yep
+        jsr isitnm
+        bcs token6     ; end of ident
+tkn18_a:
+	inc notrsv
+tkn18:
+        jsr char
+        inc tknlen
+        bne token7
+token6:
+        lda notrsv
+        bne tkn19
+        lda #<rsvwrd
+        sta wx
+        lda #>rsvwrd
+        sta wx+1
+token8:
+        ldy #0
+        lda (wx),y
+        bne token9     ; more to go
+tkn19:
+        lda token
+        rts
 
-; SEARCH FOR RESERVED WORD
+; search for reserved word
 ;
-TOKEN9:
-         LDA  (WX),Y     ; LENGTH OF WORD
-         CMP  TKNLEN     ; SAME?
-         BNE  TKN10      ; CAN'T BE IT THEN
-         TAY             ; LENGTH
-         LDA  TKNADR
-         STA  SRCE
-         LDA  TKNADR+1
-         STA  SRCE+1
-         LDA  WX
-         CLC
-         ADC  #2
-         STA  DEST
-         LDA  WX+1
-         ADC  #0
-         STA  DEST+1
-         JSR  COMSTL
-         BNE  TKN10      ; NOT FOUND
-         LDY  #1
-         LDA  (WX),Y
-         STA  TOKEN
-         RTS
-TKN10:
-         LDY  #0
-         LDA  (WX),Y     ; LENGTH
-         CLC
-         ADC  #2
-         ADC  WX
-         STA  WX
-         BCC  TOKEN8
-         INC  WX+1
-         BNE  TOKEN8
-
-;***********************************************
-; NOT IDENTIFIER
-;***********************************************
-
-TOKEN5:
-         JSR  ISITNM
-         BCC  GET_NUM
-         JMP  TKN12
-GET_NUM:
-         SEC
-         SBC  #'0'
-         STA  VALUE
-         LDA  #0
-         STA  VALUE+1
-         STA  VALUE+2
-TKN13:          ; NEXT DIGIT
-         JSR  GETNEXT
-         JSR  ISITNM
-         BCC  TKN14      ; MORE DIGITS
-TKN13A:
-         LDA  SIGN
-         BEQ  TKN13B
-         SEC
-         LDA  #0
-         TAX
-         SBC  VALUE
-         STA  VALUE
-         TXA
-         SBC  VALUE+1
-         STA  VALUE+1
-         TXA
-         SBC  VALUE+2
-         STA  VALUE+2
-TKN13B:
-         LDA  #'N'
-         STA  TOKEN
-         CLC
-         RTS
-TKN14:
-         JSR  CHAR
-         SEC
-         SBC  #'0'
-         STA  DIGIT
-         INC  TKNLEN
-         JSR  SHLVAL
-         LDA  VALUE
-         LDX  VALUE+1
-         LDY  VALUE+2
-         JSR  SHLVAL
-         JSR  SHLVAL
-         ADC  VALUE
-         STA  VALUE
-         TXA
-         ADC  VALUE+1
-         STA  VALUE+1
-         TYA
-         ADC  VALUE+2
-         STA  VALUE+2
-         BCS  TKN16
-         LDA  VALUE
-         ADC  DIGIT
-         STA  VALUE
-         BCC  TKN13
-         INC  VALUE+1
-         BNE  TKN13
-         INC  VALUE+2
-         BEQ  TKN16
-         BMI  TKN16
-         JMP  TKN13
-;
-TKN16_B:
-	PLA
-        PLA             ; CUT STACK
-TKN16:
-        LDA RUNNING
-        BPL TKN16_A
-        SEC
-        RTS
-TKN16_A:
-        LDX #30
-        JSR ERROR
-;
-SHLVAL:
-        ASL VALUE
-        ROL VALUE+1
-        ROL VALUE+2
-        BCS TKN16_B
-        RTS
-;
-;***********************************************
-; NOT A NUMBER
-;***********************************************
-TKN12:
-         CMP  QUOT_SYM
-         BNE  TKN17
-         INC  TKNADR
-         BNE  TKN12_A
-         INC  TKNADR+1
-TKN12_A:
-         DEC  TKNLEN
-TKN30_A:
-         JSR  GETNEXT
-         CMP  #CR
-         BNE  TKN31
-         LDX  #8         ; MISSIG QUOTE
-         JSR  ERROR
-TKN31:
-         CMP  QUOT_SYM
-         BNE  TKN20
-         JSR  CHAR
-         JSR  GETNEXT    ; ANOTHER?
-         CMP  QUOT_SYM
-         BEQ  TKN20      ; IMBEDDED QUOTE
-         LDY  #3
-         CPY  TKNLEN
-         BCC  TKN31_A
-         LDY  TKNLEN
-TKN31_A:
-	DEY
-        BMI TKN31_B
-        LDA (TKNADR),Y
-        STA VALUE,Y
-        BNE TKN31_A
-TKN31_B:
-         LDA  TKNLEN
-         BNE  TKN21
-         LDX  #14        ; BAD STRING
-         JSR  ERROR
-TKN21:
-         LDA  QUOT_SYM
-         STA  TOKEN
-         RTS
-TKN20:
-         JSR  CHAR
-         INC  TKNLEN
-         BNE  TKN30_A
-;***********************************************
-; NOT A STRING
-;***********************************************
-TKN17:
-         CMP  #'$'
-         BNE  TKN29
-         JSR  GETNEXT
-         JSR  ISITHX
-         BCC  TKN22
-         LDA  #'$'
-         STA  TOKEN
-         RTS
-TKN22:
-GET_HEX:
-         STA  VALUE
-         LDA  #0
-         STA  VALUE+1
-         STA  VALUE+2
-TKN24:
-         JSR  CHAR
-         JSR  GETNEXT
-         JSR  ISITHX
-         BCC  TKN23
-         JMP  TKN13A
-TKN23:
-         INC  TKNLEN
-         LDX  #4
-TKN15:
-        JSR SHLVAL
-        DEX
-        BNE TKN15
-        CLC
-        ADC VALUE
-        STA VALUE
-        BCC TKN24
-        INC VALUE+1
-        BNE TKN24
-        INC VALUE+2
-        BNE TKN24
-TKN16J:	JMP TKN16
-;
-;***********************************************
-; NOT $ OR HEX LITERAL
-;***********************************************
-TKN29:
-         CMP  #':'
-         BNE  TKN25
-         JSR  GETNEXT
-         CMP  #'='
-         BNE  TKN26_A
-         JSR  CHAR
-         INC  TKNLEN
-         LDA  #'A'
-TKN26:
-         STA  TOKEN
-         RTS
-TKN26_A:
-         LDY  #0
-         LDA  (NXTCHR),Y
-         BNE  TKN26
-TKN25:
-         CMP  #'<'
-         BNE  TKN27
-         JSR  GETNEXT
-         CMP  #'='
-         BNE  TKN28
-         JSR  CHAR
-         INC  TKNLEN
-         LDA  #$80
-         BNE  TKN26
-TKN27:
-         CMP  #'>'
-         BNE  TKN30
-         JSR  GETNEXT
-         CMP  #'='
-         BNE  TKN26_A
-         JSR  CHAR
-         INC  TKNLEN
-         LDA  #$81
-         BNE  TKN26
-TKN28:
-         CMP  #'>'
-         BNE  TKN26_A
-         JSR  CHAR
-         INC  TKNLEN
-         LDA  #'U'
-         BNE  TKN26
-TKN30:	CMP  #'-'
-         BNE  TKN31_C
-         STA  SIGN
-TKN32:	JSR  GETNEXT
-         JSR  ISITNM
-         BCS  TKN26_A
-         JSR  CHAR
-         JMP  TOKEN5
-TKN31_C: CMP  #'+'
-         BNE  TKN26_A
-         BEQ  TKN32
+token9:
+         lda  (wx),y     ; length of word
+         cmp  tknlen     ; same?
+         bne  tkn10      ; can't be it then
+         tay             ; length
+         lda  tknadr
+         sta  srce
+         lda  tknadr+1
+         sta  srce+1
+         lda  wx
+         clc
+         adc  #2
+         sta  dest
+         lda  wx+1
+         adc  #0
+         sta  dest+1
+         jsr  comstl
+         bne  tkn10      ; not found
+         ldy  #1
+         lda  (wx),y
+         sta  token
+         rts
+tkn10:
+         ldy  #0
+         lda  (wx),y     ; length
+         clc
+         adc  #2
+         adc  wx
+         sta  wx
+         bcc  token8
+         inc  wx+1
+         bne  token8
 
 ;***********************************************
-; DISPLAY A LINE
-
-DISP: 	JSR DISPAD1
-        JSR PUT_LINE   ; display right-justified line no.
-        LDA CH
-        STA LEFTCOL
-        LDA #$40
-        STA RUNNING
-        LDA A5
-        LDX A5+1
-        JSR PL
-        LDA #0
-        STA RUNNING
-        RTS
-;
-; DISPLAY IN HEX
-;
-DISHX:	JSR  PRBYTE
-        JMP  PUTSP
-
-;***********************************************
-; DISPLAY ERROR
+; not identifier
 ;***********************************************
 
-ERRLIT:	.byte 14         ; SWITCH TO LOWER CASE
-        .byte "***",$BD	 ; '*** ERROR'
+token5:
+         jsr  isitnm
+         bcc  get_num
+         jmp  tkn12
+get_num:
+         sec
+         sbc  #'0'
+         sta  value
+         lda  #0
+         sta  value+1
+         sta  value+2
+tkn13:          ; next digit
+         jsr  getnext
+         jsr  isitnm
+         bcc  tkn14      ; more digits
+tkn13a:
+         lda  sign
+         beq  tkn13b
+         sec
+         lda  #0
+         tax
+         sbc  value
+         sta  value
+         txa
+         sbc  value+1
+         sta  value+1
+         txa
+         sbc  value+2
+         sta  value+2
+tkn13b:
+         lda  #'N'
+         sta  token
+         clc
+         rts
+tkn14:
+         jsr  char
+         sec
+         sbc  #'0'
+         sta  digit
+         inc  tknlen
+         jsr  shlval
+         lda  value
+         ldx  value+1
+         ldy  value+2
+         jsr  shlval
+         jsr  shlval
+         adc  value
+         sta  value
+         txa
+         adc  value+1
+         sta  value+1
+         tya
+         adc  value+2
+         sta  value+2
+         bcs  tkn16
+         lda  value
+         adc  digit
+         sta  value
+         bcc  tkn13
+         inc  value+1
+         bne  tkn13
+         inc  value+2
+         beq  tkn16
+         bmi  tkn16
+         jmp  tkn13
+;
+tkn16_b:
+	pla
+        pla             ; cut stack
+tkn16:
+        lda running
+        bpl tkn16_a
+        sec
+        rts
+tkn16_a:
+        ldx #30
+        jsr error
+;
+shlval:
+        asl value
+        rol value+1
+        rol value+2
+        bcs tkn16_b
+        rts
+;
+;***********************************************
+; not a number
+;***********************************************
+tkn12:
+         cmp  quot_sym
+         bne  tkn17
+         inc  tknadr
+         bne  tkn12_a
+         inc  tknadr+1
+tkn12_a:
+         dec  tknlen
+tkn30_a:
+         jsr  getnext
+         cmp  #cr
+         bne  tkn31
+         ldx  #8         ; missig quote
+         jsr  error
+tkn31:
+         cmp  quot_sym
+         bne  tkn20
+         jsr  char
+         jsr  getnext    ; another?
+         cmp  quot_sym
+         beq  tkn20      ; imbedded quote
+         ldy  #3
+         cpy  tknlen
+         bcc  tkn31_a
+         ldy  tknlen
+tkn31_a:
+	dey
+        bmi tkn31_b
+        lda (tknadr),y
+        sta value,y
+        bne tkn31_a
+tkn31_b:
+         lda  tknlen
+         bne  tkn21
+         ldx  #14        ; bad string
+         jsr  error
+tkn21:
+         lda  quot_sym
+         sta  token
+         rts
+tkn20:
+         jsr  char
+         inc  tknlen
+         bne  tkn30_a
+;***********************************************
+; not a string
+;***********************************************
+tkn17:
+         cmp  #'$'
+         bne  tkn29
+         jsr  getnext
+         jsr  isithx
+         bcc  tkn22
+         lda  #'$'
+         sta  token
+         rts
+tkn22:
+get_hex:
+         sta  value
+         lda  #0
+         sta  value+1
+         sta  value+2
+tkn24:
+         jsr  char
+         jsr  getnext
+         jsr  isithx
+         bcc  tkn23
+         jmp  tkn13a
+tkn23:
+         inc  tknlen
+         ldx  #4
+tkn15:
+        jsr shlval
+        dex
+        bne tkn15
+        clc
+        adc value
+        sta value
+        bcc tkn24
+        inc value+1
+        bne tkn24
+        inc value+2
+        bne tkn24
+tkn16j:	jmp tkn16
+;
+;***********************************************
+; not $ or hex literal
+;***********************************************
+tkn29:
+         cmp  #':'
+         bne  tkn25
+         jsr  getnext
+         cmp  #'='
+         bne  tkn26_a
+         jsr  char
+         inc  tknlen
+         lda  #'A'
+tkn26:
+         sta  token
+         rts
+tkn26_a:
+         ldy  #0
+         lda  (nxtchr),y
+         bne  tkn26
+tkn25:
+         cmp  #'<'
+         bne  tkn27
+         jsr  getnext
+         cmp  #'='
+         bne  tkn28
+         jsr  char
+         inc  tknlen
+         lda  #$80
+         bne  tkn26
+tkn27:
+         cmp  #'>'
+         bne  tkn30
+         jsr  getnext
+         cmp  #'='
+         bne  tkn26_a
+         jsr  char
+         inc  tknlen
+         lda  #$81
+         bne  tkn26
+tkn28:
+         cmp  #'>'
+         bne  tkn26_a
+         jsr  char
+         inc  tknlen
+         lda  #'U'
+         bne  tkn26
+tkn30:	cmp  #'-'
+         bne  tkn31_c
+         sta  sign
+tkn32:	jsr  getnext
+         jsr  isitnm
+         bcs  tkn26_a
+         jsr  char
+         jmp  token5
+tkn31_c: cmp  #'+'
+         bne  tkn26_a
+         beq  tkn32
 
-ERROR:	STX ERRNO
-        LDA RUNNING
-        BEQ ERR7
-        JMP ERR6
-ERR7:
-         LDA  LIST
-         BNE  ERR1
-         JSR  CROUT
-         JSR  DISP
-ERR1:
-         LDA  TKNADR
-         SEC
-         SBC  A5
-         PHA             ; CHARS UP TO ERROR POINT
-         LDY  #5
-         LDA  #<ERRLIT
-         LDX  #>ERRLIT
-         JSR  PT
-         PLA
-         STA  TEMP       ; BYTES TO ERROR POINT
-         CLC
-         ADC  LEFTCOL
-         SBC  #8
-         TAX
+;***********************************************
+; display a line
+
+disp: 	jsr dispad1
+        jsr put_line   ; display right-justified line no.
+        lda ch
+        sta leftcol
+        lda #$40
+        sta running
+        lda a5
+        ldx a5+1
+        jsr pl
+        lda #0
+        sta running
+        rts
 ;
-; ALLOW FOR SPACE COUNTS
+; display in hex
 ;
-         LDY  #0
-         STY  QT_TGL
-         STY  QT_SIZE
-ERR1_A:
-         CPY  TEMP
-         BCS  ERR2       ; DONE
-         LDA  (A5),Y
-         BMI  ERR1_D     ; could be reserved word
-         CMP  #$10       ; DLE?
-         BEQ  ERR1_B     ; YES
-         CMP  QUOT_SYM   ; quote?
-         BNE  ERR1_C     ; no
-         LDA  QT_TGL
-         EOR  #1
-         STA  QT_TGL     ; flip flag
-ERR1_C:	INY             ; ONTO NEXT
-         BNE  ERR1_A
+dishx:	jsr  prbyte
+        jmp  putsp
+
+;***********************************************
+; display error
+;***********************************************
+
+errlit:	.byte 14         ; switch to lower case
+        .byte "***",$bd	 ; '*** error'
+
+error:	stx errno
+        lda running
+        beq err7
+        jmp err6
+err7:
+         lda  list
+         bne  err1
+         jsr  crout
+         jsr  disp
+err1:
+         lda  tknadr
+         sec
+         sbc  a5
+         pha             ; chars up to error point
+         ldy  #5
+         lda  #<errlit
+         ldx  #>errlit
+         jsr  pt
+         pla
+         sta  temp       ; bytes to error point
+         clc
+         adc  leftcol
+         sbc  #8
+         tax
+;
+; allow for space counts
+;
+         ldy  #0
+         sty  qt_tgl
+         sty  qt_size
+err1_a:
+         cpy  temp
+         bcs  err2       ; done
+         lda  (a5),y
+         bmi  err1_d     ; could be reserved word
+         cmp  #$10       ; dle?
+         beq  err1_b     ; yes
+         cmp  quot_sym   ; quote?
+         bne  err1_c     ; no
+         lda  qt_tgl
+         eor  #1
+         sta  qt_tgl     ; flip flag
+err1_c:	iny             ; onto next
+         bne  err1_a
 ;
 ; here to allow for spaces in expanded reserved word
 ;
-ERR1_D:	STY  IO_Y
-         LDY  QT_TGL
-         BNE  ERR1_F     ; ignore if in quotes
-         CMP  #$B0
-         BCC  ERR1_E
-         CMP  #$DF
-         BCC  ERR1_F     ; not in range
+err1_d:	sty  io_y
+         ldy  qt_tgl
+         bne  err1_f     ; ignore if in quotes
+         cmp  #$b0
+         bcc  err1_e
+         cmp  #$df
+         bcc  err1_f     ; not in range
 ;
-ERR1_E:	STA  IO_A       ; token
-         JSR  PC_LOOK
-         CLC
-         ADC  QT_SIZE
-         STA  QT_SIZE
-ERR1_F:	LDY  IO_Y
-         INY
-         BNE  ERR1_A     ; done
+err1_e:	sta  io_a       ; token
+         jsr  pc_look
+         clc
+         adc  qt_size
+         sta  qt_size
+err1_f:	ldy  io_y
+         iny
+         bne  err1_a     ; done
 ;
 ;
-ERR1_B:
-         INY
-         LDA  (A5),Y     ; SPACE COUNT
-         AND  #$7F       ; CLEAR 8-BIT
-         STA  TEMP+1
-         TXA
-         CLC
-         ADC  TEMP+1
-         TAX
-         DEX
-         DEX             ; ALLOW FOR DLE/COUNT
-         BNE  ERR1_C
+err1_b:
+         iny
+         lda  (a5),y     ; space count
+         and  #$7f       ; clear 8-bit
+         sta  temp+1
+         txa
+         clc
+         adc  temp+1
+         tax
+         dex
+         dex             ; allow for dle/count
+         bne  err1_c
 ;
-ERR2:
-         TXA
-         CLC
-         ADC  QT_SIZE
-         TAX
-ERR3:
-         JSR  PUTSP
-         DEX
-         BNE  ERR3
-         LDA  #'^'
-         JSR  PC
-         JSR  CROUT
-         LDX  #9
-ERR5:
-         JSR  PUTSP
-         DEX
-         BNE  ERR5
-ERR6:
-         DEC  ERRNO
-         LDA  ERRNO
-         ASL
-         CLC
-         ADC  #<ERRTBL
-         STA  REG
-         LDA  #>ERRTBL
-         ADC  #0
-         STA  REG+1
-         LDY  #1
-         LDA  (REG),Y
-         TAX
-         DEY
-         LDA  (REG),Y
-         JSR  PL         ; DISPLAY ERROR
-ERRRTN:
-         LDA  #0
-         STA  QUEUE
-         JMP  (ERR_RTN)
+err2:
+         txa
+         clc
+         adc  qt_size
+         tax
+err3:
+         jsr  putsp
+         dex
+         bne  err3
+         lda  #'^'
+         jsr  pc
+         jsr  crout
+         ldx  #9
+err5:
+         jsr  putsp
+         dex
+         bne  err5
+err6:
+         dec  errno
+         lda  errno
+         asl
+         clc
+         adc  #<errtbl
+         sta  reg
+         lda  #>errtbl
+         adc  #0
+         sta  reg+1
+         ldy  #1
+         lda  (reg),y
+         tax
+         dey
+         lda  (reg),y
+         jsr  pl         ; display error
+errrtn:
+         lda  #0
+         sta  queue
+         jmp  (err_rtn)
 
 ;***********************************************
-; ERROR TABLE
+; error table
 ;***********************************************
 
-ERRTBL:
-	.word ERR01,ERR02,ERR03,ERR04
-        .word ERR05,ERR06,ERR07,ERR08
-        .word ERR09,ERR10,ERR11,ERR12,ERR13,ERR14,ERR15,ERR16
-        .word ERR17,ERR18,ERR19,ERR06,ERR21,ERR22,ERR23,ERR24
-        .word ERR25,ERR26,ERR27,ERR28,ERR29,ERR30,ERR31
-        .word ERR32,ERR33,ERR34,ERR35,ERR36,ERR37,ERR38
+errtbl:
+	.word err01,err02,err03,err04
+        .word err05,err06,err07,err08
+        .word err09,err10,err11,err12,err13,err14,err15,err16
+        .word err17,err18,err19,err06,err21,err22,err23,err24
+        .word err25,err26,err27,err28,err29,err30,err31
+        .word err32,err33,err34,err35,err36,err37,err38
 
-ERR01:	.byte "mEMORY",$B1,$0D
-ERR02:	.byte $B2,$B4,$0D
-ERR03:	.byte "=",$B4,$0D
-ERR04:	.byte $B3,$B4,$0D
-ERR05:	.byte ",",$C1," :",$B4,$0D
-ERR06:	.byte "BUG",$0D
-ERR07:	.byte "*)",$B4,$0D
-ERR08:	.byte $B7,$B8,$0D
-ERR09:	.byte ".",$B4,$0D
-ERR10:	.byte ";",$B4,$0D
-ERR11:	.byte "uNDECLARED",$B3,$0D
-ERR12:	.byte $B6,$B3,$0D
-ERR13:	.byte ":=",$B4,$0D
-ERR14:	.byte $BB,$B8,$C0,$BE," LENGTH",$0D
-ERR15:	.byte $BA," LIMITS EXCEEDED",$0D
-ERR16:	.byte "then",$B4,$0D
-ERR17:	.byte ";",$C1," end",$B4,$0D
-ERR18:	.byte "do",$B4,$0D
-ERR19:	.byte $B7,$C4,$0D
-ERR21:	.byte "uSE",$C0," PROCEDURE",$B3," IN EXPRESSION",$0D
-ERR22:	.byte ")",$B4,$0D
-ERR23:	.byte $B6," FACTOR",$0D
-ERR24:	.byte $C9,$BC,$0D
-ERR25:	.byte "begin",$B4,$0D
-ERR26:	.byte $22,$C0,$22,$B4,$0D
-ERR27: 	.byte $C6,$B1,$0D
-ERR28:	.byte $22,$C2,$22,$C1," downto",$B4,$0D
-ERR29:	.byte $B8,$BB,$C2,"O BIG",$0D
-ERR30:	.byte $CC," OUT",$C0,$D8,$0D
-ERR31:	.byte "(",$B4,$0D
-ERR32:	.byte ",",$B4,$0D
-ERR33:	.byte "[",$B4,$0D
-ERR34:	.byte "]",$B4,$0D
-ERR35:	.byte $D9,"S",$BC,"ED",$0D
-ERR36:	.byte "dATA",$C9," NOT RECOGNISED",$0D
-ERR37:	.byte $C4,$C8,$B1,$0D
-ERR38:	.byte "dUPLICATE",$B3,$0D
-
-;***********************************************
-; GET A TOKEN - CHECK THAT IT
-; IS THE SAME AS IN "A", IF NOT
-; CALL ERROR "X"
-;***********************************************
-
-GETCHK: STA BSAVE
-        TXA
-        PHA
-        JSR GTOKEN
-        CMP BSAVE
-        BEQ CHKOK
-        PLA
-        TAX
-CHKNOK: JSR ERROR
-CHKOK: 	PLA
-        RTS
+err01:	.byte "mEMORY",$b1,$0d
+err02:	.byte $b2,$b4,$0d
+err03:	.byte "=",$b4,$0d
+err04:	.byte $b3,$b4,$0d
+err05:	.byte ",",$c1," :",$b4,$0d
+err06:	.byte "BUG",$0d
+err07:	.byte "*)",$b4,$0d
+err08:	.byte $b7,$b8,$0d
+err09:	.byte ".",$b4,$0d
+err10:	.byte ";",$b4,$0d
+err11:	.byte "uNDECLARED",$b3,$0d
+err12:	.byte $b6,$b3,$0d
+err13:	.byte ":=",$b4,$0d
+err14:	.byte $bb,$b8,$c0,$be," LENGTH",$0d
+err15:	.byte $ba," LIMITS EXCEEDED",$0d
+err16:	.byte "then",$b4,$0d
+err17:	.byte ";",$c1," end",$b4,$0d
+err18:	.byte "do",$b4,$0d
+err19:	.byte $b7,$c4,$0d
+err21:	.byte "uSE",$c0," PROCEDURE",$b3," IN EXPRESSION",$0d
+err22:	.byte ")",$b4,$0d
+err23:	.byte $b6," FACTOR",$0d
+err24:	.byte $c9,$bc,$0d
+err25:	.byte "begin",$b4,$0d
+err26:	.byte $22,$c0,$22,$b4,$0d
+err27: 	.byte $c6,$b1,$0d
+err28:	.byte $22,$c2,$22,$c1," downto",$b4,$0d
+err29:	.byte $b8,$bb,$c2,"O BIG",$0d
+err30:	.byte $cc," OUT",$c0,$d8,$0d
+err31:	.byte "(",$b4,$0d
+err32:	.byte ",",$b4,$0d
+err33:	.byte "[",$b4,$0d
+err34:	.byte "]",$b4,$0d
+err35:	.byte $d9,"S",$bc,"ED",$0d
+err36:	.byte "dATA",$c9," NOT RECOGNISED",$0d
+err37:	.byte $c4,$c8,$b1,$0d
+err38:	.byte "dUPLICATE",$b3,$0d
 
 ;***********************************************
-; CHECK TOKEN AGREES WITH "A",
-; IF NOT, GIVE ERROR "X"
+; get a token - check that it
+; is the same as in "a", if not
+; call error "x"
 ;***********************************************
-CHKTKN:
-         CMP  TOKEN
-         BNE  CHKNOK
-         RTS
+
+getchk: sta bsave
+        txa
+        pha
+        jsr gtoken
+        cmp bsave
+        beq chkok
+        pla
+        tax
+chknok: jsr error
+chkok: 	pla
+        rts
+
+;***********************************************
+; check token agrees with "a",
+; if not, give error "x"
+;***********************************************
+chktkn:
+         cmp  token
+         bne  chknok
+         rts
 ;
 ;***********************************************
-; GENERATE P-CODES - NO OPERANDS
+; generate p-codes - no operands
 ;***********************************************
-GENNOP:
-         LDY  SYNTAX
-         BNE  GEN1
-         STA  (PCODE),Y
-         PHA
-         JSR  DISPAD
-         PLA
-         LDX  DCODE
-         BEQ  GEN1
-         JSR  DISHX
-         JSR  CROUT
-GEN1:
-         LDA  #1
-         BNE  GEN2_B
+gennop:
+         ldy  syntax
+         bne  gen1
+         sta  (pcode),y
+         pha
+         jsr  dispad
+         pla
+         ldx  dcode
+         beq  gen1
+         jsr  dishx
+         jsr  crout
+gen1:
+         lda  #1
+         bne  gen2_b
 ;***********************************************
-; GENERATE P-CODES - WITH ADDRESS
+; generate p-codes - with address
 ;***********************************************
-GENADR:
-         LDY  SYNTAX
-         BNE  GEN2
-         STA  (PCODE),Y
-         PHA
-         LDA  DISPL
-         INY
-         STA  (PCODE),Y
-         LDA  OFFSET
-         INY
-         STA  (PCODE),Y
-         LDA  OFFSET+1
-         INY
-         STA  (PCODE),Y
-         JSR  DISPAD
-         PLA
-         LDX  DCODE
-         BEQ  GEN2
-         JSR  DISHX
-         LDA  DISPL
-         JSR  DISHX
-         LDA  OFFSET
-         JSR  DISHX
-         LDA  OFFSET+1
-         JSR  DISHX
-         JSR  CROUT
-GEN2:
-         LDA  #4
-GEN2_B:
-         CLC
-         ADC  PCODE
-         STA  PCODE
-         BCC  GEN2_A
-         INC  PCODE+1
-GEN2_A:
-         LDA  SYNTAX
-         BNE  GEN2_C
-         LDA  PCODE+1
-         CMP  #>(P1-$18)
-         BCC  GEN2_C
-         BNE  GEN_FULL
-         LDA  PCODE
-         CMP  #<(P1-$18)
-         BCC  GEN2_C
-GEN_FULL:
-	LDX #1         ; MEM FULL
-        JSR ERROR
-GEN2_C:
-DISP9:	RTS
+genadr:
+         ldy  syntax
+         bne  gen2
+         sta  (pcode),y
+         pha
+         lda  displ
+         iny
+         sta  (pcode),y
+         lda  offset
+         iny
+         sta  (pcode),y
+         lda  offset+1
+         iny
+         sta  (pcode),y
+         jsr  dispad
+         pla
+         ldx  dcode
+         beq  gen2
+         jsr  dishx
+         lda  displ
+         jsr  dishx
+         lda  offset
+         jsr  dishx
+         lda  offset+1
+         jsr  dishx
+         jsr  crout
+gen2:
+         lda  #4
+gen2_b:
+         clc
+         adc  pcode
+         sta  pcode
+         bcc  gen2_a
+         inc  pcode+1
+gen2_a:
+         lda  syntax
+         bne  gen2_c
+         lda  pcode+1
+         cmp  #>(p1-$18)
+         bcc  gen2_c
+         bne  gen_full
+         lda  pcode
+         cmp  #<(p1-$18)
+         bcc  gen2_c
+gen_full:
+	ldx #1         ; mem full
+        jsr error
+gen2_c:
+disp9:	rts
 
 ;***********************************************
-; GENERATE P-CODES - JUMP ADDRESS
+; generate p-codes - jump address
 ;***********************************************
 
-GENRJMP:
-         PHA
-         LDA  OPND
-         SEC
-         SBC  PCODE
-         STA  OPND
-         LDA  OPND+1
-         SBC  PCODE+1
-         STA  OPND+1
-         PLA
-         JMP  GENJMP
+genrjmp:
+         pha
+         lda  opnd
+         sec
+         sbc  pcode
+         sta  opnd
+         lda  opnd+1
+         sbc  pcode+1
+         sta  opnd+1
+         pla
+         jmp  genjmp
 ;
-GENNJP:
-        LDA  #60        ; JMP
-GENNJM:	LDX  #0
-        STX  OPND
-        STX  OPND+1
+gennjp:
+        lda  #60        ; jmp
+gennjm:	ldx  #0
+        stx  opnd
+        stx  opnd+1
 ;
-GENJMP:
-         LDY  SYNTAX
-         BNE  GEN3
-         STA  (PCODE),Y
-         PHA
-         LDA  OPND
-         INY
-         STA  (PCODE),Y
-         LDA  OPND+1
-         INY
-         STA  (PCODE),Y
-         JSR  DISPAD
-         PLA
-         LDX  DCODE
-         BEQ  GEN3
-         JSR  DISHX
-         LDA  OPND
-         JSR  DISHX
-         LDA  OPND+1
-         JSR  DISHX
-         JSR  CROUT
-GEN3:
-         LDA  #3
-         JMP  GEN2_B
+genjmp:
+         ldy  syntax
+         bne  gen3
+         sta  (pcode),y
+         pha
+         lda  opnd
+         iny
+         sta  (pcode),y
+         lda  opnd+1
+         iny
+         sta  (pcode),y
+         jsr  dispad
+         pla
+         ldx  dcode
+         beq  gen3
+         jsr  dishx
+         lda  opnd
+         jsr  dishx
+         lda  opnd+1
+         jsr  dishx
+         jsr  crout
+gen3:
+         lda  #3
+         jmp  gen2_b
 
 ;***********************************************
-; DISPLAY PCODE ADDRESS
+; display pcode address
 ;***********************************************
-DISPAD:
-         LDA  DCODE
-         BEQ  DISP9
-DISPAD1:
-         LDA  #'('
-         JSR  PC
-         LDA  PCODE+1
-         JSR  PRBYTE
-         LDA  PCODE
-         JSR  PRBYTE
-         LDA  #')'
-         JSR  PC
-         JMP  PUTSP
+dispad:
+         lda  dcode
+         beq  disp9
+dispad1:
+         lda  #'('
+         jsr  pc
+         lda  pcode+1
+         jsr  prbyte
+         lda  pcode
+         jsr  prbyte
+         lda  #')'
+         jsr  pc
+         jmp  putsp
 
 ;***********************************************
-; FIXUP ADDRESSES
+; fixup addresses
 ;***********************************************
 
-FIXAD:
-         LDY  SYNTAX
-         BNE  DISP9
-         LDY  #1
-         LDA  PCODE
-         SEC
-         SBC  WORK
-         STA  (WORK),Y
-         INY
-         LDA  PCODE+1
-         SBC  WORK+1
-         STA  (WORK),Y
-         LDA  DCODE
-         BEQ  PSH9
-         LDA  #<FIXM1
-         LDX  #>FIXM1
-         LDY  #8
-         JSR  PT
-         LDA  WORK+1
-         JSR  PRBYTE
-         LDA  WORK
-         JSR  DISHX
-         LDA  #<FIXM2
-         LDX  #>FIXM2
-         LDY  #9
-         JSR  PT
-         LDA  PCODE+1
-         JSR  PRBYTE
-         LDA  PCODE
-         JSR  DISHX
-         JMP  CROUT
+fixad:
+         ldy  syntax
+         bne  disp9
+         ldy  #1
+         lda  pcode
+         sec
+         sbc  work
+         sta  (work),y
+         iny
+         lda  pcode+1
+         sbc  work+1
+         sta  (work),y
+         lda  dcode
+         beq  psh9
+         lda  #<fixm1
+         ldx  #>fixm1
+         ldy  #8
+         jsr  pt
+         lda  work+1
+         jsr  prbyte
+         lda  work
+         jsr  dishx
+         lda  #<fixm2
+         ldx  #>fixm2
+         ldy  #9
+         jsr  pt
+         lda  pcode+1
+         jsr  prbyte
+         lda  pcode
+         jsr  dishx
+         jmp  crout
 
-FIXM1:	.byte "jUMP AT "
-FIXM2:	.byte "CHANGED",$C2
+fixm1:	.byte "jUMP AT "
+fixm2:	.byte "CHANGED",$c2
         .byte " "
 
 ;***********************************************
-; PUSH 'WORK' ONTO STACK
+; push 'work' onto stack
 ;***********************************************
 
-PSHWRK:
-        STA  BSAVE
-        PLA
-        TAX
-        PLA
-        TAY
-        LDA  WORK+1
-        PHA
-        LDA  WORK
-        PHA
-        TYA
-        PHA
-        TXA
-        PHA
-        LDA  BSAVE
-PSH9:	RTS
+pshwrk:
+        sta  bsave
+        pla
+        tax
+        pla
+        tay
+        lda  work+1
+        pha
+        lda  work
+        pha
+        tya
+        pha
+        txa
+        pha
+        lda  bsave
+psh9:	rts
 
 ;***********************************************
-; PULL 'WORK' FROM STACK
+; pull 'work' from stack
 ;***********************************************
 
-PULWRK:
-        STA  BSAVE
-        PLA
-        TAX
-        PLA
-        TAY
-        PLA
-        STA  WORK
-        PLA
-        STA  WORK+1
-        TYA
-        PHA
-        TXA
-        PHA
-        LDA  BSAVE
-        RTS
+pulwrk:
+        sta  bsave
+        pla
+        tax
+        pla
+        tay
+        pla
+        sta  work
+        pla
+        sta  work+1
+        tya
+        pha
+        txa
+        pha
+        lda  bsave
+        rts
 
 ;***********************************************
-; PRINTING SUBROUTINES
+; printing subroutines
 ;***********************************************
 
-PRCHAR:
-        STX  XSAVE
-        PHA
-        CMP  QUOT_SYM
-        BNE  PR_NTQT
-        PHA
-        LDA  QT_TGL
-        EOR  #1
-        STA  QT_TGL
-        PLA
-PR_NTQT:
-        PHA
-        JSR  COUT
-        PLA
-        LDX  PFLAG      ; printing?
-        BEQ  PR_NPTR
-        PHA
-        LDX  #4
-        JSR  CHKOUT     ; direct to printer
-        PLA
+prchar:
+        stx  xsave
+        pha
+        cmp  quot_sym
+        bne  pr_ntqt
+        pha
+        lda  qt_tgl
+        eor  #1
+        sta  qt_tgl
+        pla
+pr_ntqt:
+        pha
+        jsr  cout
+        pla
+        ldx  pflag      ; printing?
+        beq  pr_nptr
+        pha
+        ldx  #4
+        jsr  chkout     ; direct to printer
+        pla
 
-; The fiddling around below is because
+; the fiddling around below is because
 ; the capital letters in our messages (which are really
-; lowercase here) do not print properly. So if we are not
+; lowercase here) do not print properly. so if we are not
 ; running a program or in quote mode, then we will convert
 ; what we think is 'lower case' to the equivalent in
 ; 'shifted' upper case (8 bit on).
 
-         LDX  RUNNING    ; running?
-         CPX  #12
-         BEQ  PR_POK     ; yes - ignore
-         LDX  QT_TGL     ; in quotes?
-         BNE  PR_POK     ; yes - ignore
-         CMP  #'a'       ; upper case (on C64)?
-         BCC  PR_POK     ; nope
-         CMP  #'z'+1
-         BCS  PR_POK     ; nope
-         CLC
-         ADC  #$60       ; 'a' (hex 61) now becomes hex C1
+         ldx  running    ; running?
+         cpx  #12
+         beq  pr_pok     ; yes - ignore
+         ldx  qt_tgl     ; in quotes?
+         bne  pr_pok     ; yes - ignore
+         cmp  #'a'       ; upper case (on c64)?
+         bcc  pr_pok     ; nope
+         cmp  #'z'+1
+         bcs  pr_pok     ; nope
+         clc
+         adc  #$60       ; 'a' (hex 61) now becomes hex c1
 ;
-PR_POK:
-         JSR  COUT
-         JSR  CLRCHN     ; back to screen
-PR_NPTR:
-         JSR  STOP
-         BEQ  ABORT      ; abort list
-         LDA  QUEUE      ; keys in kbd queue?
-         BEQ  PR_NOT     ; nope
-         LDA  KBD_BUF    ; get item in queue
-         CMP  #$20       ; SPACE
-         BNE  PR_NOT
-         PLA
-PAUSE:	PHA
-        TYA
-        PHA
-        JSR  GETIN      ; clear that entry
-PR_WAIT:
-         JSR  GETIN      ; wait for another
-         BEQ  PR_WAIT
-         JSR  STOP       ; stop key?
-         BNE  PR_ONWD
-ABORT:
-         JSR  GETIN      ; clear keyboard buffer
-         JMP  (CTRLC_RT)
-PR_ONWD: PLA
-         TAY
-PR_NOT:
-         PLA
-PRCHR_X:
-         LDX  XSAVE
-         RTS
+pr_pok:
+         jsr  cout
+         jsr  clrchn     ; back to screen
+pr_nptr:
+         jsr  stop
+         beq  abort      ; abort list
+         lda  queue      ; keys in kbd queue?
+         beq  pr_not     ; nope
+         lda  kbd_buf    ; get item in queue
+         cmp  #$20       ; space
+         bne  pr_not
+         pla
+pause:	pha
+        tya
+        pha
+        jsr  getin      ; clear that entry
+pr_wait:
+         jsr  getin      ; wait for another
+         beq  pr_wait
+         jsr  stop       ; stop key?
+         bne  pr_onwd
+abort:
+         jsr  getin      ; clear keyboard buffer
+         jmp  (ctrlc_rt)
+pr_onwd: pla
+         tay
+pr_not:
+         pla
+prchr_x:
+         ldx  xsave
+         rts
 ;
 ;
 ;
-PRBYTE:	PHA
-        LSR
-        LSR
-        LSR
-        LSR
-        JSR  PRHEXZ
-        PLA
-PRHEX:
-        AND  #$0F
-PRHEXZ:	ORA  #$30
-        CMP  #$3A
-        BCC  PRHEX1
-        ADC  #$26
-PRHEX1:	JMP  PRCHAR
+prbyte:	pha
+        lsr
+        lsr
+        lsr
+        lsr
+        jsr  prhexz
+        pla
+prhex:
+        and  #$0f
+prhexz:	ora  #$30
+        cmp  #$3a
+        bcc  prhex1
+        adc  #$26
+prhex1:	jmp  prchar
 
-PUTSP:
-        LDA  #32
-        BNE  PRHEX1
+putsp:
+        lda  #32
+        bne  prhex1
 
-PC:
-        PHA
-        JSR  IOSAVE
-        PLA
-        BPL  PC3
-        LDX  RUNNING
-        CPX  #12
-        BNE  PC1        ; interpreting
-PC9:	LDA  IO_A
-        BMI  PC3
-PC1:
-        LDA  QT_TGL
-        BNE  PC9
-        LDY  #0
-        LDA  IO_A
-        CMP  #$B0
-        BCC  PC_RSVD
-        CMP  #$DF
-        BCS  PC_RSVD
-        CPX  #$40       ; in Editor?
-        BEQ  PC9
-        JSR  PUTSP
-        LDX  #<DICT
-        STX  REG
-        LDX  #>DICT
-        STX  REG+1
-PC6:
-        LDA  (REG),Y
-        CMP  #$FF
-        BEQ  PC7
-        LDA  IO_A
-        CMP  (REG),Y
-        BEQ  PC5
-        INY
-        BNE  PC6
-        INC  REG+1
-        BNE  PC6
-PC5:
-        INY
-        BNE  PC5_A
-        INC  REG+1
-PC5_A:
-        LDA  (REG),Y
-        BMI  PC2
-        JSR  PRCHAR
-         JMP  PC5
-PC7:
-PC3:
-         JSR  PRCHAR
-PC2:
-         JMP  IOREST
+pc:
+        pha
+        jsr  iosave
+        pla
+        bpl  pc3
+        ldx  running
+        cpx  #12
+        bne  pc1        ; interpreting
+pc9:	lda  io_a
+        bmi  pc3
+pc1:
+        lda  qt_tgl
+        bne  pc9
+        ldy  #0
+        lda  io_a
+        cmp  #$b0
+        bcc  pc_rsvd
+        cmp  #$df
+        bcs  pc_rsvd
+        cpx  #$40       ; in editor?
+        beq  pc9
+        jsr  putsp
+        ldx  #<dict
+        stx  reg
+        ldx  #>dict
+        stx  reg+1
+pc6:
+        lda  (reg),y
+        cmp  #$ff
+        beq  pc7
+        lda  io_a
+        cmp  (reg),y
+        beq  pc5
+        iny
+        bne  pc6
+        inc  reg+1
+        bne  pc6
+pc5:
+        iny
+        bne  pc5_a
+        inc  reg+1
+pc5_a:
+        lda  (reg),y
+        bmi  pc2
+        jsr  prchar
+         jmp  pc5
+pc7:
+pc3:
+         jsr  prchar
+pc2:
+         jmp  iorest
 ;
-PC_LOOK:          ; lookup reserved word for PC and ERROR
-         LDA  #<RSVWRD
-         STA  REG
-         LDA  #>RSVWRD
-         STA  REG+1
-PC_RSVD1:
-	INY
-        LDA  (REG),Y    ; token
-        BEQ  PC_LOOK9   ; end
-        CMP  IO_A
-        BEQ  PC_RSVD2   ; found
-        DEY
-        LDA  (REG),Y    ; length
-        CLC
-        ADC  #2
-        ADC  REG
-        STA  REG
-        BCC  PC_RSVD1
-        INC  REG+1
-        BNE  PC_RSVD1
-PC_RSVD2:
-	DEY
-        LDA  (REG),Y
-PC_LOOK9:
-	RTS
+pc_look:          ; lookup reserved word for pc and error
+         lda  #<rsvwrd
+         sta  reg
+         lda  #>rsvwrd
+         sta  reg+1
+pc_rsvd1:
+	iny
+        lda  (reg),y    ; token
+        beq  pc_look9   ; end
+        cmp  io_a
+        beq  pc_rsvd2   ; found
+        dey
+        lda  (reg),y    ; length
+        clc
+        adc  #2
+        adc  reg
+        sta  reg
+        bcc  pc_rsvd1
+        inc  reg+1
+        bne  pc_rsvd1
+pc_rsvd2:
+	dey
+        lda  (reg),y
+pc_look9:
+	rts
 ;
-PC_RSVD:
-	JSR  PC_LOOK
-        BEQ  PC7        ; not found
-        TAX
-        INY
-        INY
-PC_RSVD3:
-	LDA  (REG),Y
-        JSR  PRCHAR
-        INY
-        DEX
-        BNE  PC_RSVD3
-        JSR  PUTSP
-        BEQ  PC2        ; done!
+pc_rsvd:
+	jsr  pc_look
+        beq  pc7        ; not found
+        tax
+        iny
+        iny
+pc_rsvd3:
+	lda  (reg),y
+        jsr  prchar
+        iny
+        dex
+        bne  pc_rsvd3
+        jsr  putsp
+        beq  pc2        ; done!
 ;
 ;
-PT:
-         STA  REG2
-         STX  REG2+1
-         TYA
-         TAX
-         LDY  #0
-         STY  QT_TGL
-PT6:
-         LDA  (REG2),Y
-         JSR  PC
-         INY
-         DEX
-         BNE  PT6
-         RTS
+pt:
+         sta  reg2
+         stx  reg2+1
+         tya
+         tax
+         ldy  #0
+         sty  qt_tgl
+pt6:
+         lda  (reg2),y
+         jsr  pc
+         iny
+         dex
+         bne  pt6
+         rts
 ;
-PL:
-         STA  REG2
-         STX  REG2+1
-         LDY  #0
-         STY  QT_TGL
-PL5:
-         LDA  (REG2),Y
-         CMP  #$10       ; DLE
-         BEQ  PL5A
-         JSR  PC
-         INY
-         CMP  #CR
-         BNE  PL5
-         RTS
-PL5A:
-         INY
-         LDA  (REG2),Y
-         AND  #$7F       ; STRIP 8-BIT
-         TAX
-PL5B:
-         JSR  PUTSP
-         DEX
-         BNE  PL5B
-         INY
-         JMP  PL5
+pl:
+         sta  reg2
+         stx  reg2+1
+         ldy  #0
+         sty  qt_tgl
+pl5:
+         lda  (reg2),y
+         cmp  #$10       ; dle
+         beq  pl5a
+         jsr  pc
+         iny
+         cmp  #cr
+         bne  pl5
+         rts
+pl5a:
+         iny
+         lda  (reg2),y
+         and  #$7f       ; strip 8-bit
+         tax
+pl5b:
+         jsr  putsp
+         dex
+         bne  pl5b
+         iny
+         jmp  pl5
 ;
 ;
 
-DICT: 	.byte $B0, "p-CODES"
-        .byte $B1, "FULL"
-        .byte $B2, "cONSTANT"
-        .byte $D0, "p.o. bOX 124 iVANHOE 3079 vIC aUSTRALIA",$0D
-        .byte $B3, "iDENTIFIER"
-        .byte $B4, "EXPECTED"
-        .byte $B5, "MISSING"
-        .byte $CF, "gAMES",$0D
-        .byte $B6, "iLLEGAL"
-        .byte $B7, "iNCORRECT"
-        .byte $D2, "vERSION 3.1 sER# 5001",$0D
-        .byte $B8, "STRING"
-        .byte $B9, "dO YOU WANT"
-        .byte $BA, "COMPILER"
-        .byte $D4, "<c>OMPILE"
-        .byte $BB, "LITERAL"
-        .byte $BC, "MISMATCH"
-        .byte $D5, "<s>YNTAX"
-        .byte $BD, "eRROR"
-        .byte $CE, "gAMBIT"
-        .byte $BE, "ZERO"
-        .byte $D3, "cOPYRIGHT 1983"
-        .byte $BF, "SOURCE FILE"
-        .byte $D7, "<q>UIT"
-        .byte $C0, "OF"
-        .byte $C1, "OR"
-        .byte $C2, "TO"
-        .byte $D1, 5,14,"g-pASCAL"
-        .byte $C3, "ENDED AT "
-        .byte $C4, "sYMBOL"
-        .byte $D6, "wRITTEN BY nICK gAMMON AND sUE gOBBETT",$0D
-        .byte $C6, "sTACK"
-        .byte $C7, "iNSTRUCTION"
-        .byte $D8, "rANGE"
-        .byte $C8, "TABLE"
-        .byte $C9, "tYPE"
-        .byte $CA, "LIST"
-        .byte $CB, "? y/n "
-        .byte $CC, "nUMBER"
-        .byte $CD, "lINE"
-        .byte $D9, "pARAMETER"
-        .byte $DA, "<e>DIT,"
-        .byte $DB, "<"
-EDICT:	.byte $FF
+dict: 	.byte $b0, "p-CODES"
+        .byte $b1, "FULL"
+        .byte $b2, "cONSTANT"
+        .byte $d0, "p.o. bOX 124 iVANHOE 3079 vIC aUSTRALIA",$0d
+        .byte $b3, "iDENTIFIER"
+        .byte $b4, "EXPECTED"
+        .byte $b5, "MISSING"
+        .byte $cf, "gAMES",$0d
+        .byte $b6, "iLLEGAL"
+        .byte $b7, "iNCORRECT"
+        .byte $d2, "vERSION 3.1 sER# 5001",$0d
+        .byte $b8, "STRING"
+        .byte $b9, "dO YOU WANT"
+        .byte $ba, "COMPILER"
+        .byte $d4, "<c>OMPILE"
+        .byte $bb, "LITERAL"
+        .byte $bc, "MISMATCH"
+        .byte $d5, "<s>YNTAX"
+        .byte $bd, "eRROR"
+        .byte $ce, "gAMBIT"
+        .byte $be, "ZERO"
+        .byte $d3, "cOPYRIGHT 1983"
+        .byte $bf, "SOURCE FILE"
+        .byte $d7, "<q>UIT"
+        .byte $c0, "OF"
+        .byte $c1, "OR"
+        .byte $c2, "TO"
+        .byte $d1, 5,14,"g-pASCAL"
+        .byte $c3, "ENDED AT "
+        .byte $c4, "sYMBOL"
+        .byte $d6, "wRITTEN BY nICK gAMMON AND sUE gOBBETT",$0d
+        .byte $c6, "sTACK"
+        .byte $c7, "iNSTRUCTION"
+        .byte $d8, "rANGE"
+        .byte $c8, "TABLE"
+        .byte $c9, "tYPE"
+        .byte $ca, "LIST"
+        .byte $cb, "? y/n "
+        .byte $cc, "nUMBER"
+        .byte $cd, "lINE"
+        .byte $d9, "pARAMETER"
+        .byte $da, "<e>DIT,"
+        .byte $db, "<"
+edict:	.byte $ff
 
 ;
-GETANS:
-         JSR  PT
-         JSR  RDKEY
-         AND  #$7F
-         PHA
-         CMP  #$20
-         BCS  GET1
-         LDA  #$20
-GET1:
-         JSR  PC
-         JSR  CROUT
-         PLA
-GETAN9:
-         RTS
+getans:
+         jsr  pt
+         jsr  rdkey
+         and  #$7f
+         pha
+         cmp  #$20
+         bcs  get1
+         lda  #$20
+get1:
+         jsr  pc
+         jsr  crout
+         pla
+getan9:
+         rts
 ;
 ;
-IOSAVE:
-         STA  IO_A
-         STX  IO_X
-         STY  IO_Y
-         RTS
+iosave:
+         sta  io_a
+         stx  io_x
+         sty  io_y
+         rts
 ;
-IOREST:
-         LDY  IO_Y
-         LDX  IO_X
-         LDA  IO_A
-         RTS
+iorest:
+         ldy  io_y
+         ldx  io_x
+         lda  io_a
+         rts
 ;
-;---- TKNADR --> WORK
+;---- tknadr --> work
 ;
-TKNWRK:
-         PHA
-         LDA  TKNADR
-         STA  WORK
-         LDA  TKNADR+1
-         STA  WORK+1
-         PLA
-         RTS
+tknwrk:
+         pha
+         lda  tknadr
+         sta  work
+         lda  tknadr+1
+         sta  work+1
+         pla
+         rts
 ;
-;---- WORK --> TKNADR
+;---- work --> tknadr
 ;
-WRKTKN:
-         PHA
-         LDA  WORK
-         STA  TKNADR
-         LDA  WORK+1
-         STA  TKNADR+1
-         PLA
-         RTS
-;
-;
-RDKEY:
-         LDA  #0
-         STA  BLNSW      ; blink cursor
-         STA  AUTODN     ; scroll
-         JSR  GETIN
-         CMP  #0
-         BEQ  RDKEY      ; LOOP UNTIL GOT A CHARACTER
-         PHA
-         LDA  #0
-         STA  BLNON
-         PLA
-         STA  BLNSW      ; stop blinking
-         RTS
-;
-HOME:
-         LDA  #147
-         JMP  COUT
+wrktkn:
+         pha
+         lda  work
+         sta  tknadr
+         lda  work+1
+         sta  tknadr+1
+         pla
+         rts
 ;
 ;
-         .byte  0          ; END OF FILE
+rdkey:
+         lda  #0
+         sta  blnsw      ; blink cursor
+         sta  autodn     ; scroll
+         jsr  getin
+         cmp  #0
+         beq  rdkey      ; loop until got a character
+         pha
+         lda  #0
+         sta  blnon
+         pla
+         sta  blnsw      ; stop blinking
+         rts
+;
+home:
+         lda  #147
+         jmp  cout
+;
+;
+         .byte  0          ; end of file
 
 	.endscope
 
 ;************************************************
-; PASCAL COMPILER
-; for Commodore 64
-; PART 2
-; Authors_ Nick Gammon & Sue Gobbett
-;  SYM $9000
+; pascal compiler
+; for commodore 64
+; part 2
+; authors_ nick gammon & sue gobbett
+;  sym $9000
 ;***********************************************
 
 	.scope
 
 ;***********************************************
-; PART 1 VECTORS
+; part 1 vectors
 ;***********************************************
 
-	V1	= P1
-	INIT	= V1
-	GETNEXT	= V1+3
-	COMSTL	= V1+6
-	ISITHX	= V1+9
-	ISITAL	= V1+12
-	ISITNM	= V1+15
-	CHAR	= V1+18
-	GEN2_B	= V1+21
-	DISHX	= V1+24
-	ERROR	= V1+27
-	GETCHK	= V1+30
-	CHKTKN	= V1+33
-	GENNOP	= V1+36
-	GENADR	= V1+39
-	GENNJP	= V1+42
-	GENNJM	= V1+45
-	TKNWRK	= V1+48
-	PRBYTE	= V1+51
-	GTOKEN	= V1+54
-	WRKTKN	= V1+57
-	FIXAD	= V1+60
-	PSHWRK	= V1+63
-	PULWRK	= V1+66
-	PC	= V1+69
-	PT	= V1+72
-	PL	= V1+75
-	PC8	= V1+78
-	GETANS	= V1+81
-	PUTSP	= V1+84
-	DISPAD	= V1+87
-	CROUT	= V1+90
-	SHLVAL	= V1+93
-	GET_NUM	= V1+96
-	GET_HEX	= V1+99
-	FND_ENQ	= V1+102
-	PAUSE	= V1+105
-	HOME	= V1+108
-	RDKEY	= V1+111
-	GENJMP	= V1+114
-	GENRJMP	= V1+117
+	v1	= p1
+	init	= v1
+	getnext	= v1+3
+	comstl	= v1+6
+	isithx	= v1+9
+	isital	= v1+12
+	isitnm	= v1+15
+	char	= v1+18
+	gen2_b	= v1+21
+	dishx	= v1+24
+	error	= v1+27
+	getchk	= v1+30
+	chktkn	= v1+33
+	gennop	= v1+36
+	genadr	= v1+39
+	gennjp	= v1+42
+	gennjm	= v1+45
+	tknwrk	= v1+48
+	prbyte	= v1+51
+	gtoken	= v1+54
+	wrktkn	= v1+57
+	fixad	= v1+60
+	pshwrk	= v1+63
+	pulwrk	= v1+66
+	pc	= v1+69
+	pt	= v1+72
+	pl	= v1+75
+	pc8	= v1+78
+	getans	= v1+81
+	putsp	= v1+84
+	dispad	= v1+87
+	crout	= v1+90
+	shlval	= v1+93
+	get_num	= v1+96
+	get_hex	= v1+99
+	fnd_enq	= v1+102
+	pause	= v1+105
+	home	= v1+108
+	rdkey	= v1+111
+	genjmp	= v1+114
+	genrjmp	= v1+117
 
 ;***********************************************
-; PART 2 STARTS HERE
+; part 2 starts here
 ;***********************************************
 
 	.res 10			;xxxcjb
-        ;.org $8DD4 ; P2
+        ;.org $8dd4 ; p2
 
 ;***********************************************
-; PART 2 VECTORS
+; part 2 vectors
 ;***********************************************
 
-         JMP STMNT
-         JMP EXPRES
-         JMP CHKLHP
-         JMP CHKRHP
-         JMP CHKLHB
-         JMP CHKRHB
-         JMP LOOKUP
-         JMP CHKDUP
-         JMP CONDEC
-         JMP VARDEC
-         JMP CONST
-         JMP GETSUB
-         JMP W_STRING
-         JMP WRKTKN
-         JMP SYMWRK
-         JMP WRKSYM
-         JMP PSHPCODE
-         JMP CHK_STAK
-         JMP SEARCH
-         JMP ADDSYM
-         JMP TKNJMP
+         jmp stmnt
+         jmp expres
+         jmp chklhp
+         jmp chkrhp
+         jmp chklhb
+         jmp chkrhb
+         jmp lookup
+         jmp chkdup
+         jmp condec
+         jmp vardec
+         jmp const
+         jmp getsub
+         jmp w_string
+         jmp wrktkn
+         jmp symwrk
+         jmp wrksym
+         jmp pshpcode
+         jmp chk_stak
+         jmp search
+         jmp addsym
+         jmp tknjmp
 
 ;***********************************************
-; PART 6 VECTORS
+; part 6 vectors
 ;***********************************************
 
-	BLOCK = P6
+	block = p6
 
 ;
-CHKLHP:
-         LDA  #'('
-         LDX  #31
-         JMP  GETCHK
+chklhp:
+         lda  #'('
+         ldx  #31
+         jmp  getchk
 ;
-CHKRHP:
-         LDA  #')'
-         LDX  #22
-         JSR  CHKTKN
-         JMP  GTOKEN
+chkrhp:
+         lda  #')'
+         ldx  #22
+         jsr  chktkn
+         jmp  gtoken
 ;
-GETSUB:
-         JSR  CHKLHB
-         JSR  EXPRES
-         JMP  CHKRHB
+getsub:
+         jsr  chklhb
+         jsr  expres
+         jmp  chkrhb
 ;
-CHKLHB:
-         LDA  LHB
-         LDX  #33
-         JSR  GETCHK
-         JMP  GTOKEN
+chklhb:
+         lda  lhb
+         ldx  #33
+         jsr  getchk
+         jmp  gtoken
 ;
-CHKRHB:
-         LDA  RHB
-         LDX  #34
-         JSR  CHKTKN
-         JMP  GTOKEN
+chkrhb:
+         lda  rhb
+         ldx  #34
+         jsr  chktkn
+         jmp  gtoken
 ;
-GET_LEV:
-         LDA  LEVEL
-         LDY  #SYMLVL
-         SEC
-         SBC  (SYMITM),Y
-         STA  DISPL
-         RTS
+get_lev:
+         lda  level
+         ldy  #symlvl
+         sec
+         sbc  (symitm),y
+         sta  displ
+         rts
 ;
-GET_DAT:
-         LDY  #SYMDAT
-         LDA  (SYMITM),Y
-         STA  DATTYP
-         RTS
+get_dat:
+         ldy  #symdat
+         lda  (symitm),y
+         sta  dattyp
+         rts
 ;
 ;
 ;***********************************************
-;SEARCH SYMBOL TABLE
+;search symbol table
 ;***********************************************
-SEARCH:
-         LDA  ENDSYM
-         STA  SYMITM
-         LDA  ENDSYM+1
-         STA  SYMITM+1
-SEA1:
-         LDY  #SYMPRV
-         LDA  (SYMITM),Y
-         TAX
-         INY
-         LDA  (SYMITM),Y
-         STA  SYMITM+1   ; PREVIOUS LINK
-         TXA
-         STA  SYMITM
-         ORA  SYMITM+1
-         BNE  SEA2       ; MORE TO GO
-         RTS             ; FINISHED
-SEA2:
-         LDY  #SYMLEN
-         LDA  (SYMITM),Y
-         CMP  TKNLEN
-         BNE  SEA1       ; WRONG LENGTH
-         LDA  SYMITM
-         CLC
-         ADC  #SYMNAM
-         STA  DEST
-         LDA  SYMITM+1
-         ADC  #0
-         STA  DEST+1
-         LDA  TKNADR
-         STA  SRCE
-         LDA  TKNADR+1
-         STA  SRCE+1
-         LDY  TKNLEN
-         JSR  COMSTL
-         BNE  SEA1       ; NOT THAT ONE
-         JSR  GET_DAT
-         LDY  #SYMLVL
-         LDA  (SYMITM),Y
-         TAX             ; LEVEL
-         LDY  #SYMTYP
-         LDA  (SYMITM),Y
-         STA  BSAVE
-         CMP  #'C'       ; CONSTANT
-         BNE  SEA4
-         LDY  #SYMDSP
-         LDA  (SYMITM),Y
-         STA  VALUE
-         INY
-         LDA  (SYMITM),Y
-         STA  VALUE+1
-         INY
-         LDA  (SYMITM),Y
-         STA  VALUE+2
-         JMP  SEA3
-SEA4:          ; NOT CONSTANT
-         CMP  #'V'       ; VARIABLE?
-         BEQ  SEA5       ; YES
-         CMP  #'Y'       ; ARGUMENT?
-         BNE  SEA3       ; NO
-SEA5:
-         JSR  GET_OFF
-SEA3:
-         LDA  BSAVE
-         RTS             ; SHOULD SET 'NEQ' FLAG
+search:
+         lda  endsym
+         sta  symitm
+         lda  endsym+1
+         sta  symitm+1
+sea1:
+         ldy  #symprv
+         lda  (symitm),y
+         tax
+         iny
+         lda  (symitm),y
+         sta  symitm+1   ; previous link
+         txa
+         sta  symitm
+         ora  symitm+1
+         bne  sea2       ; more to go
+         rts             ; finished
+sea2:
+         ldy  #symlen
+         lda  (symitm),y
+         cmp  tknlen
+         bne  sea1       ; wrong length
+         lda  symitm
+         clc
+         adc  #symnam
+         sta  dest
+         lda  symitm+1
+         adc  #0
+         sta  dest+1
+         lda  tknadr
+         sta  srce
+         lda  tknadr+1
+         sta  srce+1
+         ldy  tknlen
+         jsr  comstl
+         bne  sea1       ; not that one
+         jsr  get_dat
+         ldy  #symlvl
+         lda  (symitm),y
+         tax             ; level
+         ldy  #symtyp
+         lda  (symitm),y
+         sta  bsave
+         cmp  #'C'       ; constant
+         bne  sea4
+         ldy  #symdsp
+         lda  (symitm),y
+         sta  value
+         iny
+         lda  (symitm),y
+         sta  value+1
+         iny
+         lda  (symitm),y
+         sta  value+2
+         jmp  sea3
+sea4:          ; not constant
+         cmp  #'V'       ; variable?
+         beq  sea5       ; yes
+         cmp  #'Y'       ; argument?
+         bne  sea3       ; no
+sea5:
+         jsr  get_off
+sea3:
+         lda  bsave
+         rts             ; should set 'neq' flag
 
 ;***********************************************
-; ADD SYMBOL TO SYMBOL TABLE
+; add symbol to symbol table
 ;***********************************************
 
-ADDSYM: LDX  ENDSYM
-        STX  SYMITM
-        LDX  ENDSYM+1
-        STX  SYMITM+1
-        LDY  #SYMTYP
-        STA  (SYMITM),Y
-        LDY  #SYMLVL
-        PHA
-        LDA  LEVEL
-        STA  (SYMITM),Y
-        LDY  #SYMLEN
-        LDA  TKNLEN
-        STA  (SYMITM),Y
-        TAY
-        DEY
-        LDA  SYMITM
-        CLC
-        ADC  #SYMNAM
-        STA  DEST
-        LDA  SYMITM+1
-        ADC  #0
-        STA  DEST+1
-ADD1:
-        LDA  (TKNADR),Y
-        CMP  #$C1
-        BCC  ADD2
-        AND  #$7F       ; UPPER CASE
-ADD2:
-        STA  (DEST),Y
-        DEY
-        BPL  ADD1
-        LDA  DEST
-        CLC
-        ADC  TKNLEN
-        STA  ENDSYM
-        LDA  DEST+1
-        ADC  #0
-        STA  ENDSYM+1
-        LDA  SYM_USE+1
-        CMP  ENDSYM+1
-        BCC  SYM_NEW
-        BNE  SYM_LOW
-        LDA  SYM_USE
-        CMP  ENDSYM
-        BCS  SYM_LOW
-SYM_NEW:
-	LDA  ENDSYM
-        STA  SYM_USE
-        LDA  ENDSYM+1
-        STA  SYM_USE+1
-SYM_LOW:
-        LDA  ENDSYM+1
-        CMP  HIMEM+1
-        BCC  SYM_NTFL
-        BNE  SYM_FULL
-        LDA  ENDSYM
-        CMP  HIMEM
-         BCC  SYM_NTFL
-SYM_FULL:
-	LDX  #37
-        JSR  ERROR
-SYM_NTFL:
+addsym: ldx  endsym
+        stx  symitm
+        ldx  endsym+1
+        stx  symitm+1
+        ldy  #symtyp
+        sta  (symitm),y
+        ldy  #symlvl
+        pha
+        lda  level
+        sta  (symitm),y
+        ldy  #symlen
+        lda  tknlen
+        sta  (symitm),y
+        tay
+        dey
+        lda  symitm
+        clc
+        adc  #symnam
+        sta  dest
+        lda  symitm+1
+        adc  #0
+        sta  dest+1
+add1:
+        lda  (tknadr),y
+        cmp  #$c1
+        bcc  add2
+        and  #$7f       ; upper case
+add2:
+        sta  (dest),y
+        dey
+        bpl  add1
+        lda  dest
+        clc
+        adc  tknlen
+        sta  endsym
+        lda  dest+1
+        adc  #0
+        sta  endsym+1
+        lda  sym_use+1
+        cmp  endsym+1
+        bcc  sym_new
+        bne  sym_low
+        lda  sym_use
+        cmp  endsym
+        bcs  sym_low
+sym_new:
+	lda  endsym
+        sta  sym_use
+        lda  endsym+1
+        sta  sym_use+1
+sym_low:
+        lda  endsym+1
+        cmp  himem+1
+        bcc  sym_ntfl
+        bne  sym_full
+        lda  endsym
+        cmp  himem
+         bcc  sym_ntfl
+sym_full:
+	ldx  #37
+        jsr  error
+sym_ntfl:
 ;
-        PLA
-        TAX             ; ENTRY TYPE
-        CMP  #'C'       ; CONSTANT??
-        BNE  ADD4
-        LDY  #SYMDSP
-        LDA  VALUE
-        STA  (SYMITM),Y
-        INY
-        LDA  VALUE+1
-        STA  (SYMITM),Y
-        INY
-        LDA  VALUE+2
-        STA  (SYMITM),Y
-        JMP  ADD9
-ADD4:
-        LDY  #SYMDAT
-        LDA  #1
-        STA  (SYMITM),Y
-        TXA
-        CMP  #'V'
-        BNE  ADD9
-        LDY  #SYMDSP+1
-        LDA  FRAME+1
-        STA  (SYMITM),Y
-         DEY
-         LDA  FRAME
-         STA  (SYMITM),Y
-         INC  FRAME
-         BNE  ADD9
-         INC  FRAME+1
-ADD9:
-         LDY  #SYMPRV
-         LDA  SYMITM
-         STA  (ENDSYM),Y
-         INY
-         LDA  SYMITM+1
-         STA  (ENDSYM),Y
-         RTS
+        pla
+        tax             ; entry type
+        cmp  #'C'       ; constant??
+        bne  add4
+        ldy  #symdsp
+        lda  value
+        sta  (symitm),y
+        iny
+        lda  value+1
+        sta  (symitm),y
+        iny
+        lda  value+2
+        sta  (symitm),y
+        jmp  add9
+add4:
+        ldy  #symdat
+        lda  #1
+        sta  (symitm),y
+        txa
+        cmp  #'V'
+        bne  add9
+        ldy  #symdsp+1
+        lda  frame+1
+        sta  (symitm),y
+         dey
+         lda  frame
+         sta  (symitm),y
+         inc  frame
+         bne  add9
+         inc  frame+1
+add9:
+         ldy  #symprv
+         lda  symitm
+         sta  (endsym),y
+         iny
+         lda  symitm+1
+         sta  (endsym),y
+         rts
 ;
 ;***********************************************
-; JUMP ON TOKEN
-; X/Y = START OF TABLE
-; END OF TABLE IS A NULL
-; A = TOKEN
+; jump on token
+; x/y = start of table
+; end of table is a null
+; a = token
 ;***********************************************
-TKNJMP:
-         STX  REG
-         STY  REG+1
-         TAX
-JMP1:
-         LDY  #0
-         LDA  (REG),Y
-         BNE  JMP2
-         TXA
-         RTS
-JMP2:
-         TXA
-         CMP  (REG),Y
-         BNE  JMP3
-         PLA
-         PLA             ; REMOVE RETURN ADDRESS
-         INY
-         LDA  (REG),Y
-         STA  REG2
-         INY
-         LDA  (REG),Y
-         STA  REG2+1
-         TXA
-         JMP  (REG2)
-JMP3:
-         LDA  REG
-         CLC
-         ADC  #3
-         STA  REG
-         BCC  JMP1
-         INC  REG+1
-         BNE  JMP1
+tknjmp:
+         stx  reg
+         sty  reg+1
+         tax
+jmp1:
+         ldy  #0
+         lda  (reg),y
+         bne  jmp2
+         txa
+         rts
+jmp2:
+         txa
+         cmp  (reg),y
+         bne  jmp3
+         pla
+         pla             ; remove return address
+         iny
+         lda  (reg),y
+         sta  reg2
+         iny
+         lda  (reg),y
+         sta  reg2+1
+         txa
+         jmp  (reg2)
+jmp3:
+         lda  reg
+         clc
+         adc  #3
+         sta  reg
+         bcc  jmp1
+         inc  reg+1
+         bne  jmp1
 ;
-LOOKUP:
-        JSR  SEARCH
-        BNE  LOOK1
-        LDX  #11
-        JSR  ERROR
-LOOK1:	RTS
+lookup:
+        jsr  search
+        bne  look1
+        ldx  #11
+        jsr  error
+look1:	rts
 ;
-CHKDUP:	JSR  SEARCH
-        BEQ  DUP9
-        TXA
-        CMP  LEVEL
-        BNE  DUP9
-        LDX  #38
-        JSR  ERROR
-DUP9:	RTS
+chkdup:	jsr  search
+        beq  dup9
+        txa
+        cmp  level
+        bne  dup9
+        ldx  #38
+        jsr  error
+dup9:	rts
 
 ;
-; CONSTANT DEC
+; constant dec
 ;
 
-CONDEC:
-         LDA  #'I'
-         LDX  #4
-         JSR  CHKTKN
-         JSR  TKNWRK
-         LDA  TKNLEN
-         PHA
-         LDA  #'='
-         LDX  #3
-         JSR  GETCHK
-         JSR  GTOKEN
-         JSR  CONST
-         JSR  WRKTKN
-         PLA
-         STA  TKNLEN
-         JSR  CHKDUP
-         LDA  #'C'
-         JSR  ADDSYM
-         JMP  GTOKEN
+condec:
+         lda  #'I'
+         ldx  #4
+         jsr  chktkn
+         jsr  tknwrk
+         lda  tknlen
+         pha
+         lda  #'='
+         ldx  #3
+         jsr  getchk
+         jsr  gtoken
+         jsr  const
+         jsr  wrktkn
+         pla
+         sta  tknlen
+         jsr  chkdup
+         lda  #'C'
+         jsr  addsym
+         jmp  gtoken
 ;
 ;
-;--- SYMITM --> WORK
+;--- symitm --> work
 ;
-SYMWRK:
-         PHA
-         LDA  SYMITM
-         STA  WORK
-         LDA  SYMITM+1
-         STA  WORK+1
-         PLA
-         RTS
+symwrk:
+         pha
+         lda  symitm
+         sta  work
+         lda  symitm+1
+         sta  work+1
+         pla
+         rts
 ;
-;--- WORK --> SYMITM
+;--- work --> symitm
 ;
-WRKSYM:
-         PHA
-         LDA  WORK
-         STA  SYMITM
-         LDA  WORK+1
-         STA  SYMITM+1
-         PLA
-         RTS
+wrksym:
+         pha
+         lda  work
+         sta  symitm
+         lda  work+1
+         sta  symitm+1
+         pla
+         rts
 ;
-; PUSH PCODE ONTO STACK
+; push pcode onto stack
 ;
-PSHPCODE:
-         STA  BSAVE
-         PLA
-         TAX
-         PLA
-         TAY
-         LDA  PCODE+1
-         PHA
-         LDA  PCODE
-         PHA
-         TYA
-         PHA
-         TXA
-         PHA
-         LDA  BSAVE
-         RTS
+pshpcode:
+         sta  bsave
+         pla
+         tax
+         pla
+         tay
+         lda  pcode+1
+         pha
+         lda  pcode
+         pha
+         tya
+         pha
+         txa
+         pha
+         lda  bsave
+         rts
 ;
-GET_OFF:
-         PHA
-         LDY  #SYMDSP
-         LDA  (SYMITM),Y
-         STA  OFFSET
-         INY
-         LDA  (SYMITM),Y
-         STA  OFFSET+1
-         LDY  #SYMTYP
-         LDA  (SYMITM),Y
-         CMP  #'V'
-         BEQ  GETO_1
-         CMP  #'A'
-         BEQ  GETO_1
-         CMP  #'Y'
-         BNE  GETO_2
-GETO_1:
-         SEC
-         LDA  #$FD
-         SBC  OFFSET
-         STA  OFFSET
-         LDA  #$FF
-         SBC  OFFSET+1
-         STA  OFFSET+1
-GETO_2:
-         PLA
-         RTS
+get_off:
+         pha
+         ldy  #symdsp
+         lda  (symitm),y
+         sta  offset
+         iny
+         lda  (symitm),y
+         sta  offset+1
+         ldy  #symtyp
+         lda  (symitm),y
+         cmp  #'V'
+         beq  geto_1
+         cmp  #'A'
+         beq  geto_1
+         cmp  #'Y'
+         bne  geto_2
+geto_1:
+         sec
+         lda  #$fd
+         sbc  offset
+         sta  offset
+         lda  #$ff
+         sbc  offset+1
+         sta  offset+1
+geto_2:
+         pla
+         rts
 ;
-GETEXPR:
-         JSR  GTOKEN
-         JMP  EXPRES
-;
-;
-PCD_WRKD:
-         PHA
-         LDA  PCODE
-         STA  WORKD
-         LDA  PCODE+1
-         STA  WORKD+1
-         PLA
-         RTS
-;
-WRK_OPND:
-         PHA
-         LDA  WORK
-         STA  OPND
-         LDA  WORK+1
-         STA  OPND+1
-         PLA
-         RTS
-;
-WRKD_WRK:
-         PHA
-         LDA  WORKD
-         STA  WORK
-         LDA  WORKD+1
-         STA  WORK+1
-         PLA
-         RTS
-;
-WRK_WRKD:
-         PHA
-         LDA  WORK
-         STA  WORKD
-         LDA  WORK+1
-         STA  WORKD+1
-         PLA
-         RTS
-;
-GET_COMM:
-         LDA  #','
-         LDX  #32
-         JMP  CHKTKN
-;
-GET_ITEM:
-         JSR  GET_COMM   ; check for comma
-         JMP  GETEXPR
-;
-VAL_MOVE:
-         PHA
-         CLC
-         LDA  VALUE
-         STA  DISPL
-         BPL  VAL_1
-         SEC
-VAL_1:
-         LDA  VALUE+1
-         BEQ  VAL_2
-         SEC
-VAL_2:
-         STA  OFFSET
-         LDA  VALUE+2
-         STA  OFFSET+1
-         BEQ  VAL_3
-         SEC
-VAL_3:
-         BCC  VAL_5
-         LDA  #0
-         JSR  GENADR
-         PLA
-         RTS
-VAL_5:
-         LDA  VALUE
-         ORA  #$80
-         JSR  GENNOP
-         PLA
-         RTS
+getexpr:
+         jsr  gtoken
+         jmp  expres
 ;
 ;
-CHK_STAK:
-        TSX
-        TXA
-        CMP  #MAX_STK
-        BCC  STK_FULL
-        RTS
-STK_FULL:
-STK_ERR:
-	LDX  #27
-        JSR  ERROR      ; FULL
+pcd_wrkd:
+         pha
+         lda  pcode
+         sta  workd
+         lda  pcode+1
+         sta  workd+1
+         pla
+         rts
+;
+wrk_opnd:
+         pha
+         lda  work
+         sta  opnd
+         lda  work+1
+         sta  opnd+1
+         pla
+         rts
+;
+wrkd_wrk:
+         pha
+         lda  workd
+         sta  work
+         lda  workd+1
+         sta  work+1
+         pla
+         rts
+;
+wrk_wrkd:
+         pha
+         lda  work
+         sta  workd
+         lda  work+1
+         sta  workd+1
+         pla
+         rts
+;
+get_comm:
+         lda  #','
+         ldx  #32
+         jmp  chktkn
+;
+get_item:
+         jsr  get_comm   ; check for comma
+         jmp  getexpr
+;
+val_move:
+         pha
+         clc
+         lda  value
+         sta  displ
+         bpl  val_1
+         sec
+val_1:
+         lda  value+1
+         beq  val_2
+         sec
+val_2:
+         sta  offset
+         lda  value+2
+         sta  offset+1
+         beq  val_3
+         sec
+val_3:
+         bcc  val_5
+         lda  #0
+         jsr  genadr
+         pla
+         rts
+val_5:
+         lda  value
+         ora  #$80
+         jsr  gennop
+         pla
+         rts
+;
+;
+chk_stak:
+        tsx
+        txa
+        cmp  #max_stk
+        bcc  stk_full
+        rts
+stk_full:
+stk_err:
+	ldx  #27
+        jsr  error      ; full
 
 ;
-; CONST
+; const
 ;
 
-CONST:
-         LDA  TOKEN
-         CMP  #'N'
-         BEQ  CONST9
-         CMP  #'I'
-         BEQ  CONST1
-         CMP  QUOT_SYM
-         BNE  CONST3
-         LDX  TKNLEN
-         CPX  #4
-         BCC  CONST9
-         JMP  FACERR1    ; STRING TOO BIG
-CONST1:	JSR  SEARCH
-        BNE  CONST2
-CONST3:
-         LDX  #2
-         JSR  ERROR
-CONST2:	CMP  #'C'
-         BNE  CONST3
-CONST9:	RTS
+const:
+         lda  token
+         cmp  #'N'
+         beq  const9
+         cmp  #'I'
+         beq  const1
+         cmp  quot_sym
+         bne  const3
+         ldx  tknlen
+         cpx  #4
+         bcc  const9
+         jmp  facerr1    ; string too big
+const1:	jsr  search
+        bne  const2
+const3:
+         ldx  #2
+         jsr  error
+const2:	cmp  #'C'
+         bne  const3
+const9:	rts
 ;
-; VARIABLE DEC
+; variable dec
 ;
-VARDEC:	LDA  #'I'
-         LDX  #4
-         JSR  CHKTKN
-         JSR  CHKDUP
-         LDA  #'V'
-         JSR  ADDSYM
-         JMP  GTOKEN
+vardec:	lda  #'I'
+         ldx  #4
+         jsr  chktkn
+         jsr  chkdup
+         lda  #'V'
+         jsr  addsym
+         jmp  gtoken
 ;
-; SIMPLE EXPRESSION
+; simple expression
 ;
-SIMEXP:
-         LDA  TOKEN
-         CMP  #'+'
-         BEQ  SIM1
-         CMP  #'-'
-         BNE  SIM2
-SIM1:	PHA
-         JSR  GTOKEN
-         JSR  TERM
-         PLA
-         CMP  #'-'
-         BNE  SIM3
-         LDA  #2
-         JSR  GENNOP     ; NEGATE
-SIM3:	LDA  TOKEN
-         CMP  #'+'
-         BEQ  SIM4
-         CMP  #'-'
-         BEQ  SIM4
-         CMP  #$8A       ; OR
-         BEQ  SIM4
-         CMP  #$A4       ; XOR
-         BEQ  SIM4
-         RTS
-SIM4:	PHA
-         JSR  GTOKEN
-         JSR  TERM
-         PLA
-         CMP  #'-'
-         BEQ  SIM5
-         CMP  #'+'
-         BEQ  SIM6
-         CMP  #$A4       ; XOR
-         BEQ  SIM8
-         LDA  #26        ; OR
-SIM7:	JSR  GENNOP
-	JMP  SIM3
-SIM5:	LDA  #6         ; MINUS
-        BNE  SIM7
-SIM6:	LDA  #4         ; PLUS
-        BNE  SIM7
-SIM2:	JSR  TERM
-        JMP  SIM3
-SIM8:	LDA  #58        ; XOR
-        BNE  SIM7
+simexp:
+         lda  token
+         cmp  #'+'
+         beq  sim1
+         cmp  #'-'
+         bne  sim2
+sim1:	pha
+         jsr  gtoken
+         jsr  term
+         pla
+         cmp  #'-'
+         bne  sim3
+         lda  #2
+         jsr  gennop     ; negate
+sim3:	lda  token
+         cmp  #'+'
+         beq  sim4
+         cmp  #'-'
+         beq  sim4
+         cmp  #$8a       ; or
+         beq  sim4
+         cmp  #$a4       ; xor
+         beq  sim4
+         rts
+sim4:	pha
+         jsr  gtoken
+         jsr  term
+         pla
+         cmp  #'-'
+         beq  sim5
+         cmp  #'+'
+         beq  sim6
+         cmp  #$a4       ; xor
+         beq  sim8
+         lda  #26        ; or
+sim7:	jsr  gennop
+	jmp  sim3
+sim5:	lda  #6         ; minus
+        bne  sim7
+sim6:	lda  #4         ; plus
+        bne  sim7
+sim2:	jsr  term
+        jmp  sim3
+sim8:	lda  #58        ; xor
+        bne  sim7
 ;
-; TERM
+; term
 ;
-TERMT1:	.byte '*'
-        .word  TERM1
-        .byte $8B
-        .word  TERM1
+termt1:	.byte '*'
+        .word  term1
+        .byte $8b
+        .word  term1
         .byte '/'
-        .word  TERM1
-        .byte $8D
-        .word  TERM1
-        .byte $8C
-        .word  TERM1
-        .byte $8E
-        .word  TERM1
-        .byte $8F
-        .word  TERM1
+        .word  term1
+        .byte $8d
+        .word  term1
+        .byte $8c
+        .word  term1
+        .byte $8e
+        .word  term1
+        .byte $8f
+        .word  term1
         .byte 0
 ;
-TERM:	JSR  FACTOR
-TERM2:	LDX  #<TERMT1
-        LDY  #>TERMT1
-        LDA  TOKEN
-        JSR  TKNJMP
-        RTS
+term:	jsr  factor
+term2:	ldx  #<termt1
+        ldy  #>termt1
+        lda  token
+        jsr  tknjmp
+        rts
 ;
-TERM1:	PHA
-        JSR  GTOKEN
-        JSR  FACTOR
-        PLA
-        LDX  #<TERMT3
-        LDY  #>TERMT3
-        JSR  TKNJMP
+term1:	pha
+        jsr  gtoken
+        jsr  factor
+        pla
+        ldx  #<termt3
+        ldy  #>termt3
+        jsr  tknjmp
 ;
-TERM4:	LDA  #10
-TERM3:	JSR  GENNOP
-        JMP  TERM2
-TERM5:	LDA  #27        ; AND
-        BNE  TERM3
-TERM6:	LDA  #11        ; MOD
-        BNE  TERM3
-TERM7:	LDA  #34
-        BNE  TERM3
-TERM8:	LDA  #36
-        BNE  TERM3
-TERM9:	LDA  #8
-        BNE  TERM3
+term4:	lda  #10
+term3:	jsr  gennop
+        jmp  term2
+term5:	lda  #27        ; and
+        bne  term3
+term6:	lda  #11        ; mod
+        bne  term3
+term7:	lda  #34
+        bne  term3
+term8:	lda  #36
+        bne  term3
+term9:	lda  #8
+        bne  term3
 ;
-TERMT3:	.byte $8B
-        .word  TERM4
+termt3:	.byte $8b
+        .word  term4
         .byte '/'
-        .word  TERM4
-        .byte $8D
-        .word  TERM5
-        .byte $8C
-        .word  TERM6
-        .byte $8E
-        .word  TERM7
-        .byte $8F
-        .word  TERM8
+        .word  term4
+        .byte $8d
+        .word  term5
+        .byte $8c
+        .word  term6
+        .byte $8e
+        .word  term7
+        .byte $8f
+        .word  term8
         .byte '*'
-        .word  TERM9
+        .word  term9
         .byte 0
 
 ;
-; FACTOR
+; factor
 ;
-FACTOR:	JSR  CHK_STAK
-        LDA  TOKEN
-        LDX  #<FACTB1
-        LDY  #>FACTB1
-        JSR  TKNJMP
-        LDX  #23
-        JSR  ERROR
+factor:	jsr  chk_stak
+        lda  token
+        ldx  #<factb1
+        ldy  #>factb1
+        jsr  tknjmp
+        ldx  #23
+        jsr  error
 ;
-IDENT:	JSR  LOOKUP
-IDENT1:	CMP  #'P'
-         BNE  IDENT2
-         LDX  #21
-         JSR  ERROR
-IDENT2:	CMP  #'Y'
-         BNE  IDENT3
-         LDA  #0
-         STA  OPND+1
-         LDA  #3
-         STA  OPND
-         LDY  #SYMPRV
-         LDA  (SYMITM),Y
-         TAX
-         INY
-         LDA  (SYMITM),Y
-         STA  SYMITM+1
-         TXA
-         STA  SYMITM
-         LDA  #59
-         JSR  GENJMP
-         JMP  FNCPRC
+ident:	jsr  lookup
+ident1:	cmp  #'P'
+         bne  ident2
+         ldx  #21
+         jsr  error
+ident2:	cmp  #'Y'
+         bne  ident3
+         lda  #0
+         sta  opnd+1
+         lda  #3
+         sta  opnd
+         ldy  #symprv
+         lda  (symitm),y
+         tax
+         iny
+         lda  (symitm),y
+         sta  symitm+1
+         txa
+         sta  symitm
+         lda  #59
+         jsr  genjmp
+         jmp  fncprc
 ;
-IDENT3:	CMP  #'A'
-         BEQ  IDENT4
-         CMP  #'C'
-         BNE  IDENT5
-         JSR  VAL_MOVE
-         JMP  IDENT7
+ident3:	cmp  #'A'
+         beq  ident4
+         cmp  #'C'
+         bne  ident5
+         jsr  val_move
+         jmp  ident7
 ;
-FACAD1:	LDA  #12
-         JSR  IDENT5_A
-         JMP  CHKRHP
+facad1:	lda  #12
+         jsr  ident5_a
+         jmp  chkrhp
 ;
-IDENT5:	LDA  #44
-IDENT5_A: PHA
+ident5:	lda  #44
+ident5_a: pha
 ;
-        STX  BSAVE
-        LDA  LEVEL
-        SEC
-        SBC  BSAVE
-        STA  DISPL
-        PLA
-IDENT6:	CLC
-        ADC  DATTYP
-        JSR  GENADR
-IDENT7:	JMP  GTOKEN
+        stx  bsave
+        lda  level
+        sec
+        sbc  bsave
+        sta  displ
+        pla
+ident6:	clc
+        adc  dattyp
+        jsr  genadr
+ident7:	jmp  gtoken
 ;
-FACAD2:	LDA  #14
-        JSR  IDENT4_A
-        JMP  CHKRHP
+facad2:	lda  #14
+        jsr  ident4_a
+        jmp  chkrhp
 ;
-IDENT4:	LDA  #48
-IDENT4_A: PHA
+ident4:	lda  #48
+ident4_a: pha
 ;
-        JSR  SYMWRK
-        JSR  PSHWRK
-        JSR  GETSUB
-        JSR  PULWRK
-        JSR  WRKSYM
-        JSR  GET_DAT
-        JSR  GET_LEV
-        JSR  GET_OFF
-        PLA
-        CLC
-        ADC  DATTYP
-        JMP  GENADR
+        jsr  symwrk
+        jsr  pshwrk
+        jsr  getsub
+        jsr  pulwrk
+        jsr  wrksym
+        jsr  get_dat
+        jsr  get_lev
+        jsr  get_off
+        pla
+        clc
+        adc  dattyp
+        jmp  genadr
 ;
-; ADDRESS (IDENTIFIER)
-;
-;
-FACADR:
-         JSR  CHKLHP
-         JSR  GET_LOOK
-         CMP  #'V'
-         BEQ  FACAD1
-         CMP  #'A'
-         BEQ  FACAD2
-         LDX  #23
-         JSR  ERROR
+; address (identifier)
 ;
 ;
-FACSTR:	LDA  TKNLEN
-         CMP  #4
-         BCC  FACNUM
-FACERR1: LDX  #29        ; STRING TOO BIG
-         JSR  ERROR
-FACNUM:
-         JSR  VAL_MOVE
-         JMP  IDENT7
-;
-PAREN:	JSR  GETEXPR
-         JMP  CHKRHP
-;
-FACMEM:	LDA  #0
-         STA  DATTYP
-         BEQ  FACM2
-FACMMC:	LDA  #1
-         STA  DATTYP
-FACM2:	LDA  DATTYP
-         PHA
-         JSR  GETSUB
-         PLA
-         CLC
-         ADC  #46
-         BNE  GENNOP1
-;
-FACNOT:	 JSR  GTOKEN
-         JSR  FACTOR
-         LDA  #32
-GENNOP1: JMP  GENNOP
-;
-SPCL_FAC: JSR  TKNCNV
-FACRND1: JSR  GENNOP
-         JMP  GTOKEN
-;
-S_FREEZE: LDA  #$15
-         BNE  WAIT1_J
-;
-CLOSE_FL: LDA  #$5F
-         BNE  WAIT1_J
-;
-GET: 	LDA  #$60
-        BNE  WAIT1_J
-;
-PUT:	LDA  #$61
-        BNE  WAIT1_J
+facadr:
+         jsr  chklhp
+         jsr  get_look
+         cmp  #'V'
+         beq  facad1
+         cmp  #'A'
+         beq  facad2
+         ldx  #23
+         jsr  error
 ;
 ;
-SPC_FAC2:
-	JSR  TKNCNV
-WAIT1_J:
-	JMP  WAIT_1     ; now get its argument
+facstr:	lda  tknlen
+         cmp  #4
+         bcc  facnum
+facerr1: ldx  #29        ; string too big
+         jsr  error
+facnum:
+         jsr  val_move
+         jmp  ident7
 ;
-TKNCNV:
-         LDA  TOKEN
-         SEC
-         SBC  #$A0
-         RTS
+paren:	jsr  getexpr
+         jmp  chkrhp
 ;
-FACGTKY:
-	LDA  #7
-        BNE  FACRND1    ; getkey
+facmem:	lda  #0
+         sta  dattyp
+         beq  facm2
+facmmc:	lda  #1
+         sta  dattyp
+facm2:	lda  dattyp
+         pha
+         jsr  getsub
+         pla
+         clc
+         adc  #46
+         bne  gennop1
 ;
-FACTB1:	.byte 'I'
-        .word  IDENT
+facnot:	 jsr  gtoken
+         jsr  factor
+         lda  #32
+gennop1: jmp  gennop
+;
+spcl_fac: jsr  tkncnv
+facrnd1: jsr  gennop
+         jmp  gtoken
+;
+s_freeze: lda  #$15
+         bne  wait1_j
+;
+close_fl: lda  #$5f
+         bne  wait1_j
+;
+get: 	lda  #$60
+        bne  wait1_j
+;
+put:	lda  #$61
+        bne  wait1_j
+;
+;
+spc_fac2:
+	jsr  tkncnv
+wait1_j:
+	jmp  wait_1     ; now get its argument
+;
+tkncnv:
+         lda  token
+         sec
+         sbc  #$a0
+         rts
+;
+facgtky:
+	lda  #7
+        bne  facrnd1    ; getkey
+;
+factb1:	.byte 'I'
+        .word  ident
         .byte 'N'
-        .word  FACNUM
-FACTQT1:
-	.byte $22        ; QUOTE SYMBOL
-        .word FACSTR
+        .word  facnum
+factqt1:
+	.byte $22        ; quote symbol
+        .word facstr
         .byte '('
-        .word PAREN
+        .word paren
         .byte $91
-        .word FACMEM     ; MEM
+        .word facmem     ; mem
         .byte $90
-        .word FACNOT
-        .byte $A2
-        .word FACMMC     ; MEMC
-        .byte $A9
-        .word FACADR
-        .byte $E6
-        .word SPCL_FAC   ; spritecollide
-        .byte $E7
-        .word SPCL_FAC   ; bkgndcollide
-        .byte $E8
-        .word SPCL_FAC   ; cursorx
-        .byte $E9
-        .word SPCL_FAC   ; cursory
-        .byte $EA
-        .word SPC_FAC2   ; clock
-        .byte $EB
-        .word SPC_FAC2   ; paddle
-        .byte $ED
-        .word SPC_FAC2   ; joystick
-        .byte $EF
-        .word SPCL_FAC   ; random
-        .byte $F0
-        .word SPCL_FAC   ; envelope
-        .byte $F1
-        .word SPCL_FAC   ; scrollx
-        .byte $F2
-        .word SPCL_FAC   ; scrolly
-        .byte $F3
-        .word SPC_FAC2   ; spritestatus
-        .byte $A7
-        .word FACGTKY    ; getkey
-        .byte $EC
-        .word SPC_FAC2   ; spritex
-        .byte $EE
-        .word SPC_FAC2   ; spritey
-        .byte $F9
-        .word SPCL_FAC   ; invalid
-        .byte $F8
-        .word SPC_FAC2   ; abs
-        .byte $FD
-        .word SPCL_FAC   ; freezestatus
+        .word facnot
+        .byte $a2
+        .word facmmc     ; memc
+        .byte $a9
+        .word facadr
+        .byte $e6
+        .word spcl_fac   ; spritecollide
+        .byte $e7
+        .word spcl_fac   ; bkgndcollide
+        .byte $e8
+        .word spcl_fac   ; cursorx
+        .byte $e9
+        .word spcl_fac   ; cursory
+        .byte $ea
+        .word spc_fac2   ; clock
+        .byte $eb
+        .word spc_fac2   ; paddle
+        .byte $ed
+        .word spc_fac2   ; joystick
+        .byte $ef
+        .word spcl_fac   ; random
+        .byte $f0
+        .word spcl_fac   ; envelope
+        .byte $f1
+        .word spcl_fac   ; scrollx
+        .byte $f2
+        .word spcl_fac   ; scrolly
+        .byte $f3
+        .word spc_fac2   ; spritestatus
+        .byte $a7
+        .word facgtky    ; getkey
+        .byte $ec
+        .word spc_fac2   ; spritex
+        .byte $ee
+        .word spc_fac2   ; spritey
+        .byte $f9
+        .word spcl_fac   ; invalid
+        .byte $f8
+        .word spc_fac2   ; abs
+        .byte $fd
+        .word spcl_fac   ; freezestatus
         .byte 0
 
 ;
-; EXPRESSION
+; expression
 ;
 
-EXPRES:	JSR  CHK_STAK
-        JSR  SIMEXP
-        LDA  TOKEN
-        LDX  #<EXPTB1
-        LDY  #>EXPTB1
-        JSR  TKNJMP
-        RTS
+expres:	jsr  chk_stak
+        jsr  simexp
+        lda  token
+        ldx  #<exptb1
+        ldy  #>exptb1
+        jsr  tknjmp
+        rts
 ;
-EXPTB1:	.byte '='
-        .word  EXPR1
+exptb1:	.byte '='
+        .word  expr1
         .byte 'U'
-        .word  EXPR1
+        .word  expr1
         .byte '<'
-        .word  EXPR1
+        .word  expr1
         .byte $80
-        .word  EXPR1
+        .word  expr1
         .byte $81
-        .word  EXPR1
+        .word  expr1
         .byte '>'
-        .word  EXPR1
+        .word  expr1
         .byte 0
 ;
-EXPR1:	PHA
-        JSR  GTOKEN
-        JSR  SIMEXP
-        PLA
-        LDX  #<EXPTB3
-        LDY  #>EXPTB3
-        JSR  TKNJMP
+expr1:	pha
+        jsr  gtoken
+        jsr  simexp
+        pla
+        ldx  #<exptb3
+        ldy  #>exptb3
+        jsr  tknjmp
 ;
-EXPTB3:	.byte '='
-        .word  EXPR2
+exptb3:	.byte '='
+        .word  expr2
         .byte 'U'
-        .word  EXPR3
+        .word  expr3
         .byte '<'
-        .word  EXPR4
+        .word  expr4
         .byte $81
-        .word  EXPR5
+        .word  expr5
         .byte '>'
-        .word  EXPR6
+        .word  expr6
         .byte $80
-        .word  EXPR7
+        .word  expr7
         .byte 0
 ;
-EXPR2:	LDA  #16
-EXPR8:	JSR  GENNOP
-         RTS
-EXPR3:	LDA  #18
-         BNE  EXPR8
-EXPR4:	LDA  #20
-         BNE  EXPR8
-EXPR5:	LDA  #22
-         BNE  EXPR8
-EXPR6:	LDA  #24
-         BNE  EXPR8
-EXPR7:	LDA  #25
-         BNE  EXPR8
+expr2:	lda  #16
+expr8:	jsr  gennop
+         rts
+expr3:	lda  #18
+         bne  expr8
+expr4:	lda  #20
+         bne  expr8
+expr5:	lda  #22
+         bne  expr8
+expr6:	lda  #24
+         bne  expr8
+expr7:	lda  #25
+         bne  expr8
 ;
-; STATEMENT
+; statement
 ;
-STMNT:	JSR  CHK_STAK
-        LDA  TOKEN
-        LDX  #<STMNT1
-        LDY  #>STMNT1
-        JSR  TKNJMP
-        RTS
+stmnt:	jsr  chk_stak
+        lda  token
+        ldx  #<stmnt1
+        ldy  #>stmnt1
+        jsr  tknjmp
+        rts
 ;
-STMNT1:	.byte 'I'
-        .word ASSIGN
+stmnt1:	.byte 'I'
+        .word assign
         .byte $92
-        .word IF
-        .byte $9A
-        .word FOR
+        .word if
+        .byte $9a
+        .word for
         .byte $96
-        .word WHILE
+        .word while
         .byte $95
-        .word CASE
+        .word case
         .byte $98
-        .word REPEAT
+        .word repeat
         .byte $88
-        .word BEG
-        .byte $9E
-        .word READ
-        .byte $9D
-        .word WRITE
+        .word beg
+        .byte $9e
+        .word read
+        .byte $9d
+        .word write
         .byte $91
-        .word MEM
-        .byte $9F
-        .word CALLSB
-        .byte $A2
-        .word MEMC
-        .byte $A3
-        .word CURSOR
-        .byte $A5
-        .word DEF_SPRT
-        .byte $A6
-        .word HPLOT
-        .byte $AA
-        .word WAIT
+        .word mem
+        .byte $9f
+        .word callsb
+        .byte $a2
+        .word memc
+        .byte $a3
+        .word cursor
+        .byte $a5
+        .word def_sprt
+        .byte $a6
+        .word hplot
+        .byte $aa
+        .word wait
         .byte $81
-        .word GET
-        .byte $AD
-        .word S_FREEZE   ; freezesprite (n)
-        .byte $AE
-        .word CLOSE_FL
-        .byte $AF
-        .word PUT
-        .byte $DF
-        .word SPRITE
-        .byte $E0
-        .word MVE_SPRT
-        .byte $E1
-        .word VOICE
-        .byte $E2
-        .word GRAPHICS
-        .byte $E3
-        .word SOUND
-        .byte $E4
-        .word SETCLOCK
-        .byte $E5
-        .word SCROLL
-        .byte $A8
-        .word CLEAR
-        .byte $F4
-        .word MVE_SPRT   ; movesprite (6 args)
-        .byte $F5
-        .word SPC_FAC2   ; stopsprite
-        .byte $F6
-        .word SPC_FAC2   ; startsprite
-        .byte $F7
-        .word ANIM_SPT
-        .byte $FA
-        .word LOAD_FIL
-        .byte $FB
-        .word SAVE_FIL
-        .byte $FC
-        .word OPEN_FIL
-        .byte $FF
-        .word WRITELN
+        .word get
+        .byte $ad
+        .word s_freeze   ; freezesprite (n)
+        .byte $ae
+        .word close_fl
+        .byte $af
+        .word put
+        .byte $df
+        .word sprite
+        .byte $e0
+        .word mve_sprt
+        .byte $e1
+        .word voice
+        .byte $e2
+        .word graphics
+        .byte $e3
+        .word sound
+        .byte $e4
+        .word setclock
+        .byte $e5
+        .word scroll
+        .byte $a8
+        .word clear
+        .byte $f4
+        .word mve_sprt   ; movesprite (6 args)
+        .byte $f5
+        .word spc_fac2   ; stopsprite
+        .byte $f6
+        .word spc_fac2   ; startsprite
+        .byte $f7
+        .word anim_spt
+        .byte $fa
+        .word load_fil
+        .byte $fb
+        .word save_fil
+        .byte $fc
+        .word open_fil
+        .byte $ff
+        .word writeln
         .byte 0
 
 ;
-; ASSIGNMENT
+; assignment
 ;
 
-ASSIGN:	JSR  LOOKUP
-ASS1: 	LDX  #<ASSTB1
-        LDY  #>ASSTB1
-        JSR  TKNJMP
-        LDX  #24
-        JSR  ERROR
+assign:	jsr  lookup
+ass1: 	ldx  #<asstb1
+        ldy  #>asstb1
+        jsr  tknjmp
+        ldx  #24
+        jsr  error
 ;
-ASSTB1:	.byte 'A'
-        .word  ASSARR
+asstb1:	.byte 'A'
+        .word  assarr
         .byte 'V'
-        .word  ASSVAR
+        .word  assvar
         .byte 'Y'
-        .word  ASSVAR
+        .word  assvar
         .byte 'P'
-        .word FNCPRC
+        .word fncprc
         .byte 0
 
 ;
-ASSARR:	JSR  SYMWRK
-         JSR  PSHWRK
-         LDA  #54
-         CLC
-         ADC  DATTYP
-         PHA
-         JSR  GETSUB
-         JMP  ASS2
+assarr:	jsr  symwrk
+         jsr  pshwrk
+         lda  #54
+         clc
+         adc  dattyp
+         pha
+         jsr  getsub
+         jmp  ass2
 ;
-ASSVAR:	JSR  SYMWRK
-         JSR  PSHWRK
-         LDA  #50
-         CLC
-         ADC  DATTYP
-         PHA
-         JSR  GTOKEN
-ASS2:	LDA  #'A'
-         LDX  #13
-         JSR  CHKTKN
-         JSR  GETEXPR
-         PLA
-         JSR  PULWRK
-         JSR  WRKSYM
-         PHA
-         JSR  GET_LEV
-         JSR  GET_OFF
-         PLA
-         JMP  GENADR
+assvar:	jsr  symwrk
+         jsr  pshwrk
+         lda  #50
+         clc
+         adc  dattyp
+         pha
+         jsr  gtoken
+ass2:	lda  #'A'
+         ldx  #13
+         jsr  chktkn
+         jsr  getexpr
+         pla
+         jsr  pulwrk
+         jsr  wrksym
+         pha
+         jsr  get_lev
+         jsr  get_off
+         pla
+         jmp  genadr
 ;
-; LOAD/SAVE
+; load/save
 ;
-OPEN_FIL:
-LOAD_FIL:
-SAVE_FIL:
-         JSR  ARGS3
-         PHA
-         JSR  GET_COMM
-         LDA  QUOT_SYM
-         LDX  #8         ; " expected
-         JSR  GETCHK
-         PLA
-         JSR  W_STRING
-         JMP  CHKRHP
+open_fil:
+load_fil:
+save_fil:
+         jsr  args3
+         pha
+         jsr  get_comm
+         lda  quot_sym
+         ldx  #8         ; " expected
+         jsr  getchk
+         pla
+         jsr  w_string
+         jmp  chkrhp
 ;
 ;
-; WRITELN
+; writeln
 ;
-WRITELN:
-	JSR  GTOKEN     ; SEE IF ( PRESENT
-        CMP  #'('
-        BNE  WRITELN9   ; NOPE
-        JSR  WRIT9
-WRITELN9:
-         LDA  #$5E       ; OUTPUT C/R
-         JMP  GENNOP
+writeln:
+	jsr  gtoken     ; see if ( present
+        cmp  #'('
+        bne  writeln9   ; nope
+        jsr  writ9
+writeln9:
+         lda  #$5e       ; output c/r
+         jmp  gennop
 
 ;
-; WRITE
+; write
 ;
 
-WRITE:	JSR  CHKLHP
-WRIT9:	JSR  GTOKEN
-         CMP  QUOT_SYM
-         BNE  WRIT1
-         LDA  #35
-         JSR  W_STRING
-         JMP  WRIT5
+write:	jsr  chklhp
+writ9:	jsr  gtoken
+         cmp  quot_sym
+         bne  writ1
+         lda  #35
+         jsr  w_string
+         jmp  writ5
 ;
-W_STRING:
-         JSR  GENNOP
-         LDA  TKNLEN
-         JSR  GENNOP
-         LDY  #0
-WRIT2:	LDA  (TKNADR),Y
-         CMP  QUOT_SYM
-         BNE  WRIT10
-         INY
-WRIT10:	INY
-         TAX             ; save A temporarily
-         TYA             ; save Y on stack
-         PHA
-         TXA
-         JSR  GENNOP
-         PLA
-         TAY
-         DEC  TKNLEN
-         BNE  WRIT2
-         JMP  GTOKEN
+w_string:
+         jsr  gennop
+         lda  tknlen
+         jsr  gennop
+         ldy  #0
+writ2:	lda  (tknadr),y
+         cmp  quot_sym
+         bne  writ10
+         iny
+writ10:	iny
+         tax             ; save a temporarily
+         tya             ; save y on stack
+         pha
+         txa
+         jsr  gennop
+         pla
+         tay
+         dec  tknlen
+         bne  writ2
+         jmp  gtoken
 ;
-WRIT1:          ; here if not string
-         CMP  #$AB       ; CHR?
-         BEQ  W_CHR      ; yes
-         CMP  #$AC       ; HEX?
-         BEQ  W_HEX      ; yes
-         JSR  EXPRES     ; just ordinary number - get it
-         LDA  #30        ; output number
-         JSR  GENNOP
-WRIT5:	LDA  TOKEN
-         CMP  #','
-         BEQ  WRIT9
-         JMP  CHKRHP
+writ1:          ; here if not string
+         cmp  #$ab       ; chr?
+         beq  w_chr      ; yes
+         cmp  #$ac       ; hex?
+         beq  w_hex      ; yes
+         jsr  expres     ; just ordinary number - get it
+         lda  #30        ; output number
+         jsr  gennop
+writ5:	lda  token
+         cmp  #','
+         beq  writ9
+         jmp  chkrhp
 ;
 ; here for write (chr(x))
 ;
-W_CHR:
-         LDA  #31        ; output character
-W_CHR1:
-         JSR  WAIT_1     ; process expression in parentheses
-         JMP  WRIT5      ; back for next item
+w_chr:
+         lda  #31        ; output character
+w_chr1:
+         jsr  wait_1     ; process expression in parentheses
+         jmp  writ5      ; back for next item
 ;
 ; here for write (hex(x))
 ;
-W_HEX:
-         LDA  #33        ; output hex
-         BNE  W_CHR1
+w_hex:
+         lda  #33        ; output hex
+         bne  w_chr1
 ;
 ;
 ;
-; GET NEXT TOKEN - MUST BE IDENTIFIER
-; THEN LOOK IT UP IN SYMBOL TABLE
+; get next token - must be identifier
+; then look it up in symbol table
 ;
-GET_LOOK:
-	LDA  #'I'
-        LDX  #4
-        JSR  GETCHK
-        JMP  LOOKUP
+get_look:
+	lda  #'I'
+        ldx  #4
+        jsr  getchk
+        jmp  lookup
 
 ;
-; READ
+; read
 ;
-READ:	JSR  CHKLHP
-READ8:	JSR  GET_LOOK
-READ2:	JSR  SYMWRK
-         JSR  PSHWRK
-         LDX  #0
-         STX  COUNT1
-         CMP  #'A'
-         BEQ  READ3
-         CMP  #'V'
-         BEQ  READ9
-         LDX  #12
-         JSR  ERROR
-READ9:	JSR  GTOKEN
-READ11:	PHA
-         LDA  #28
-         CLC
-         ADC  DATTYP
-         TAX
-         PLA
-READ4:	CMP  #'$'
-         BNE  READ6
-         LDX  #23
-READ5:	TXA
-         PHA
-         JSR  GTOKEN
-         PLA
-         TAX
-READ6:	TXA
-         JSR  GENNOP
-         JSR  PULWRK
-         JSR  WRKSYM
-         JSR  GET_DAT
-READ10:	JSR  GET_LEV
-         JSR  GET_OFF
-         LDA  #50
-         LDX  COUNT1
-         BEQ  READ7
-         LDA  #54
-READ7:	CLC
-         ADC  DATTYP
-         JSR  GENADR
-READ7_A: LDA  TOKEN
-         CMP  #','
-         BEQ  READ8
-         JSR  CHKRHP
-         RTS
-READ3:	LDA  DATTYP
-         PHA
-         JSR  GTOKEN
-         CMP  LHB
-         BEQ  READ3_A
-         PLA
-         STA  DATTYP
-         BNE  READ3_B
-         LDX  #24
-         JSR  ERROR
-READ3_B: JSR  PULWRK
-         JSR  WRKSYM
-         LDA  #37        ; READ STRING
-         JSR  GENNOP
-         JSR  GET_LEV
-         JSR  GET_OFF
-         LDY  #SYMSUB
-         LDA  (SYMITM),Y
-         JSR  GENADR     ; A = LENGTH
-         JMP  READ7_A
+read:	jsr  chklhp
+read8:	jsr  get_look
+read2:	jsr  symwrk
+         jsr  pshwrk
+         ldx  #0
+         stx  count1
+         cmp  #'A'
+         beq  read3
+         cmp  #'V'
+         beq  read9
+         ldx  #12
+         jsr  error
+read9:	jsr  gtoken
+read11:	pha
+         lda  #28
+         clc
+         adc  dattyp
+         tax
+         pla
+read4:	cmp  #'$'
+         bne  read6
+         ldx  #23
+read5:	txa
+         pha
+         jsr  gtoken
+         pla
+         tax
+read6:	txa
+         jsr  gennop
+         jsr  pulwrk
+         jsr  wrksym
+         jsr  get_dat
+read10:	jsr  get_lev
+         jsr  get_off
+         lda  #50
+         ldx  count1
+         beq  read7
+         lda  #54
+read7:	clc
+         adc  dattyp
+         jsr  genadr
+read7_a: lda  token
+         cmp  #','
+         beq  read8
+         jsr  chkrhp
+         rts
+read3:	lda  dattyp
+         pha
+         jsr  gtoken
+         cmp  lhb
+         beq  read3_a
+         pla
+         sta  dattyp
+         bne  read3_b
+         ldx  #24
+         jsr  error
+read3_b: jsr  pulwrk
+         jsr  wrksym
+         lda  #37        ; read string
+         jsr  gennop
+         jsr  get_lev
+         jsr  get_off
+         ldy  #symsub
+         lda  (symitm),y
+         jsr  genadr     ; a = length
+         jmp  read7_a
 ;
-READ3_A: JSR  GETEXPR
-         JSR  CHKRHB
-         INC  COUNT1
-         PLA
-         STA  DATTYP
-         LDA  TOKEN
-         JMP  READ11
+read3_a: jsr  getexpr
+         jsr  chkrhb
+         inc  count1
+         pla
+         sta  dattyp
+         lda  token
+         jmp  read11
 ;
-; CLEAR
+; clear
 ;
-CLEAR:	LDA  #9
-         JMP  SCROLL_1
+clear:	lda  #9
+         jmp  scroll_1
 
 ;
-; CURSOR
+; cursor
 ;
-CURSOR:	 LDA  #19
-         PHA
-;
-;
-TWO_OP:	 JSR  CHKLHP
-         JSR  GETEXPR
-ONE_OP2: JSR  GET_ITEM
-ONE_OP:	 JSR  CHKRHP
-         PLA
-         JMP  GENNOP
-;
-; GRAPHICS/SOUND/SPRITE/MOVESPRITE/VOICE
-;
-GRAPHICS:
-SOUND:
-SPRITE:
-MVE_SPRT:
-VOICE:
-         JSR  TKNCNV
-         PHA             ; SAVE FOR LATER
-         JSR  CHKLHP
-VOICE_1:
-         JSR  GETEXPR
-         JSR  GET_ITEM
-         PLA
-         PHA
-         CMP  #$54       ; 6-arg move sprite
-         BEQ  VOICE_3
-         CMP  #$42       ; graphics
-         BCS  VOICE_2    ; only 2 arguments wanted
-         JSR  GET_ITEM
-         JMP  VOICE_2
-VOICE_3:          ; want 4 more args
-         JSR  GET_ITEM
-         JSR  GET_ITEM
-         JSR  GET_ITEM
-         JSR  GET_ITEM
-VOICE_2:
-         PLA
-         PHA
-         JSR  GENNOP
-         LDA  TOKEN
-         CMP  #','
-         BEQ  VOICE_1    ; another 3
-         PLA
-         JMP  CHKRHP
-;
-; Process 3 arguments
-;
-ARGS3:
-         JSR  TKNCNV
-         PHA
-         JSR  CHKLHP
-         JSR  GETEXPR
-         JSR  GET_ITEM
-         JSR  GET_ITEM
-         PLA
-         RTS
-;
-; SETCLOCK ( hours, mins, secs, 10ths. )
-;
-SETCLOCK:
-         JSR  ARGS3
-         PHA
-         JMP  ONE_OP2
-;
-WAIT:	LDA  #57
-WAIT_1:	PHA
-         JSR  CHKLHP
-         JSR  GETEXPR
-         JMP  ONE_OP
-;
-; SCROLL
-;
-SCROLL:
-         LDA  #69
-SCROLL_1: PHA
-         JMP  TWO_OP
-;
-ANIM_SPT:
-         LDA  #$57
-         PHA
-         LDA  #17        ; count plus 16 pointers
-         BNE  DEF_SPT2
+cursor:	 lda  #19
+         pha
 ;
 ;
-; DEFINESPRITE
+two_op:	 jsr  chklhp
+         jsr  getexpr
+one_op2: jsr  get_item
+one_op:	 jsr  chkrhp
+         pla
+         jmp  gennop
 ;
-DEF_SPRT:
-         LDA  #1         ; PCODE
-         PHA
-         LDA  #21        ; row count
-DEF_SPT2:	PHA
-         JSR  CHKLHP
-         JSR  GETEXPR    ; sprite pointer
-DEF_1:	JSR  GET_ITEM   ; next row
-         PLA
-         TAX
-         DEX             ; one less row
-         BEQ  DEF_8      ; zero? none left
-         TXA
-         PHA
-         LDA  TOKEN
-         CMP  #','
-         BEQ  DEF_1      ; more supplied
+; graphics/sound/sprite/movesprite/voice
+;
+graphics:
+sound:
+sprite:
+mve_sprt:
+voice:
+         jsr  tkncnv
+         pha             ; save for later
+         jsr  chklhp
+voice_1:
+         jsr  getexpr
+         jsr  get_item
+         pla
+         pha
+         cmp  #$54       ; 6-arg move sprite
+         beq  voice_3
+         cmp  #$42       ; graphics
+         bcs  voice_2    ; only 2 arguments wanted
+         jsr  get_item
+         jmp  voice_2
+voice_3:          ; want 4 more args
+         jsr  get_item
+         jsr  get_item
+         jsr  get_item
+         jsr  get_item
+voice_2:
+         pla
+         pha
+         jsr  gennop
+         lda  token
+         cmp  #','
+         beq  voice_1    ; another 3
+         pla
+         jmp  chkrhp
+;
+; process 3 arguments
+;
+args3:
+         jsr  tkncnv
+         pha
+         jsr  chklhp
+         jsr  getexpr
+         jsr  get_item
+         jsr  get_item
+         pla
+         rts
+;
+; setclock ( hours, mins, secs, 10ths. )
+;
+setclock:
+         jsr  args3
+         pha
+         jmp  one_op2
+;
+wait:	lda  #57
+wait_1:	pha
+         jsr  chklhp
+         jsr  getexpr
+         jmp  one_op
+;
+; scroll
+;
+scroll:
+         lda  #69
+scroll_1: pha
+         jmp  two_op
+;
+anim_spt:
+         lda  #$57
+         pha
+         lda  #17        ; count plus 16 pointers
+         bne  def_spt2
+;
+;
+; definesprite
+;
+def_sprt:
+         lda  #1         ; pcode
+         pha
+         lda  #21        ; row count
+def_spt2:	pha
+         jsr  chklhp
+         jsr  getexpr    ; sprite pointer
+def_1:	jsr  get_item   ; next row
+         pla
+         tax
+         dex             ; one less row
+         beq  def_8      ; zero? none left
+         txa
+         pha
+         lda  token
+         cmp  #','
+         beq  def_1      ; more supplied
 ;
 ; no more supplied - zero out rest
 ;
-DEF_2:	LDA  #$80       ; load zero pcode
-         JSR  GENNOP
-         PLA
-         TAX
-         DEX
-         BEQ  DEF_8      ; all done
-         TXA
-         PHA
-         BNE  DEF_2      ; do another
-DEF_8:	JSR  CHKRHP
-         PLA             ; pcode for define/animate sprite
-GENNOP2: JMP  GENNOP
+def_2:	lda  #$80       ; load zero pcode
+         jsr  gennop
+         pla
+         tax
+         dex
+         beq  def_8      ; all done
+         txa
+         pha
+         bne  def_2      ; do another
+def_8:	jsr  chkrhp
+         pla             ; pcode for define/animate sprite
+gennop2: jmp  gennop
 ;
 ;
-; HPLOT
+; hplot
 ;
-HPLOT:	JSR  CHKLHP
-         JSR  GETEXPR    ; colour
-         LDA  #3
-         PHA
-         JSR  GET_ITEM
-         JMP  ONE_OP2
-;
-;
-; MEM
-;
-MEM:	LDA  #0
-         PHA
-         BEQ  MEM2
-MEMC:	LDA  #1
-         PHA
-MEM2:	JSR  GETSUB
-         LDA  #'A'
-         LDX  #13
-         JSR  CHKTKN
-         JSR  GETEXPR
-         PLA
-         CLC
-         ADC  #52
-         BNE  GENNOP2
-;
-; CALL ABSOLUTE ADDRESS
-;
-CALLSB:	JSR  CHKLHP
-         JSR  GETEXPR
-         JSR  CHKRHP
-         LDA  #43
-         BNE  GENNOP2
-;
-; FUNCTION OR PROCEDURE CALL
-;
-FNCPRC:	LDA  #0
-         STA  COUNT1
-         LDY  #SYMARG
-         LDA  (SYMITM),Y
-         BEQ  FNC1
-         JSR  CHKLHP
-FNC2:	LDA  COUNT1
-         PHA
-         JSR  SYMWRK
-         JSR  PSHWRK
-         JSR  GETEXPR
-         JSR  PULWRK
-         JSR  WRKSYM
-         PLA
-         STA  COUNT1
-         INC  COUNT1
-         LDA  TOKEN
-         CMP  #','
-         BEQ  FNC2
-         LDA  COUNT1
-         LDY  #SYMARG
-         CMP  (SYMITM),Y
-         BEQ  FNC3
-         LDX  #35
-         JSR  ERROR
-FNC3:	JSR  CHKRHP
-         JMP  FNC5
-FNC1:	JSR  GTOKEN
-FNC5:	JSR  GET_LEV
-         JSR  GET_OFF
-         LDY  #SYMDAT
-         LDA  (SYMITM),Y
-         BNE  FNC5A
-         LDA  OFFSET
-         SEC
-         SBC  PCODE
-         STA  OFFSET
-         LDA  OFFSET+1
-         SBC  PCODE+1
-         STA  OFFSET+1
-         LDA  #39
-         BNE  FNC5B
-FNC5A:	LDA  #56
-FNC5B:	JSR  GENADR
-         LDA  COUNT1
-         BEQ  FNC4
-         LDA  COUNT1     ; TIMES 3
-         ASL
-         BCS  FNC6
-         ADC  COUNT1
-         STA  COUNT1
-         BCS  FNC6
-         LDA  #0
-         SEC
-         SBC  COUNT1
-         STA  OPND
-         LDA  #$FF
-         STA  OPND+1
-         LDA  #59
-         JSR  GENJMP
-FNC4:	RTS
-FNC6:	LDX  #15
-         JSR  ERROR
+hplot:	jsr  chklhp
+         jsr  getexpr    ; colour
+         lda  #3
+         pha
+         jsr  get_item
+         jmp  one_op2
 ;
 ;
-; IF
+; mem
 ;
-IF:	JSR  GETEXPR
-         LDA  #$93
-         LDX  #16
-         JSR  CHKTKN
-         JSR  GTOKEN
-         JSR  PSHPCODE
-         LDA  #61
-         JSR  GENNJM
-         JSR  STMNT
-         LDA  TOKEN
-         CMP  #$94       ; ELSE
-         BEQ  IF1
-IF2:	JSR  PULWRK
-         JSR  FIXAD
-         RTS
-IF1:	JSR  PULWRK     ; HERE FOR ELSE
-         JSR  WRK_WRKD
-         JSR  PSHPCODE
-         JSR  GENNJP
-         JSR  WRKD_WRK
-         JSR  FIXAD
-         JSR  GTOKEN
-         JSR  STMNT
-         JMP  IF2
+mem:	lda  #0
+         pha
+         beq  mem2
+memc:	lda  #1
+         pha
+mem2:	jsr  getsub
+         lda  #'A'
+         ldx  #13
+         jsr  chktkn
+         jsr  getexpr
+         pla
+         clc
+         adc  #52
+         bne  gennop2
 ;
-; BEGIN
+; call absolute address
 ;
-BEG:	JSR  GTOKEN
-         JSR  STMNT
-         LDA  TOKEN
-         CMP  #';'
-         BEQ  BEG
-         LDA  #$89       ; END
-         LDX  #17
-         JSR  CHKTKN
-         JMP  GTOKEN
+callsb:	jsr  chklhp
+         jsr  getexpr
+         jsr  chkrhp
+         lda  #43
+         bne  gennop2
 ;
-; REPEAT
+; function or procedure call
 ;
-REPEAT:	JSR  PSHPCODE
-REP1:	JSR  GTOKEN
-         JSR  STMNT
-         LDA  TOKEN
-         CMP  #';'
-         BEQ  REP1
-         LDA  #$99
-         LDX  #10
-         JSR  CHKTKN
-         JSR  GETEXPR
-         JSR  PULWRK
-         JSR  WRK_OPND
-         LDA  #61
-         JMP  GENRJMP
+fncprc:	lda  #0
+         sta  count1
+         ldy  #symarg
+         lda  (symitm),y
+         beq  fnc1
+         jsr  chklhp
+fnc2:	lda  count1
+         pha
+         jsr  symwrk
+         jsr  pshwrk
+         jsr  getexpr
+         jsr  pulwrk
+         jsr  wrksym
+         pla
+         sta  count1
+         inc  count1
+         lda  token
+         cmp  #','
+         beq  fnc2
+         lda  count1
+         ldy  #symarg
+         cmp  (symitm),y
+         beq  fnc3
+         ldx  #35
+         jsr  error
+fnc3:	jsr  chkrhp
+         jmp  fnc5
+fnc1:	jsr  gtoken
+fnc5:	jsr  get_lev
+         jsr  get_off
+         ldy  #symdat
+         lda  (symitm),y
+         bne  fnc5a
+         lda  offset
+         sec
+         sbc  pcode
+         sta  offset
+         lda  offset+1
+         sbc  pcode+1
+         sta  offset+1
+         lda  #39
+         bne  fnc5b
+fnc5a:	lda  #56
+fnc5b:	jsr  genadr
+         lda  count1
+         beq  fnc4
+         lda  count1     ; times 3
+         asl
+         bcs  fnc6
+         adc  count1
+         sta  count1
+         bcs  fnc6
+         lda  #0
+         sec
+         sbc  count1
+         sta  opnd
+         lda  #$ff
+         sta  opnd+1
+         lda  #59
+         jsr  genjmp
+fnc4:	rts
+fnc6:	ldx  #15
+         jsr  error
 ;
-; WHILE
 ;
-WHILE:	JSR  PSHPCODE
-        JSR  GETEXPR
-        JSR  PSHPCODE
-        LDA  #61
-        JSR  GENNJM
-        LDA  #$97
-        LDX  #18
-        JSR  CHKTKN
-        JSR  GTOKEN
-        JSR  STMNT
-        JSR  PULWRK
-        JSR  WRK_WRKD
-        JSR  PULWRK
-        JSR  WRK_OPND
-        LDA  #60
-        JSR  GENRJMP
-        JSR  WRKD_WRK
-        JMP  FIXAD
+; if
+;
+if:	jsr  getexpr
+         lda  #$93
+         ldx  #16
+         jsr  chktkn
+         jsr  gtoken
+         jsr  pshpcode
+         lda  #61
+         jsr  gennjm
+         jsr  stmnt
+         lda  token
+         cmp  #$94       ; else
+         beq  if1
+if2:	jsr  pulwrk
+         jsr  fixad
+         rts
+if1:	jsr  pulwrk     ; here for else
+         jsr  wrk_wrkd
+         jsr  pshpcode
+         jsr  gennjp
+         jsr  wrkd_wrk
+         jsr  fixad
+         jsr  gtoken
+         jsr  stmnt
+         jmp  if2
+;
+; begin
+;
+beg:	jsr  gtoken
+         jsr  stmnt
+         lda  token
+         cmp  #';'
+         beq  beg
+         lda  #$89       ; end
+         ldx  #17
+         jsr  chktkn
+         jmp  gtoken
+;
+; repeat
+;
+repeat:	jsr  pshpcode
+rep1:	jsr  gtoken
+         jsr  stmnt
+         lda  token
+         cmp  #';'
+         beq  rep1
+         lda  #$99
+         ldx  #10
+         jsr  chktkn
+         jsr  getexpr
+         jsr  pulwrk
+         jsr  wrk_opnd
+         lda  #61
+         jmp  genrjmp
+;
+; while
+;
+while:	jsr  pshpcode
+        jsr  getexpr
+        jsr  pshpcode
+        lda  #61
+        jsr  gennjm
+        lda  #$97
+        ldx  #18
+        jsr  chktkn
+        jsr  gtoken
+        jsr  stmnt
+        jsr  pulwrk
+        jsr  wrk_wrkd
+        jsr  pulwrk
+        jsr  wrk_opnd
+        lda  #60
+        jsr  genrjmp
+        jsr  wrkd_wrk
+        jmp  fixad
 
 ;
-; CASE
+; case
 ;
-CASE:	JSR  GETEXPR
-        LDA  #$85       ; OF
-        LDX  #25
-        JSR  CHKTKN
-        LDA  #1
-        STA  COUNT1
-CASE7:	LDA  #0
-        STA  COUNT2
-CASE2:
-        LDA  #42        ; make copy of selector
-        JSR  GENNOP
-        JSR  GETEXPR    ; next expression to compare
-        LDA  #16
-        JSR  GENNOP
-        LDA  TOKEN
-        CMP  #':'
-        BEQ  CASE1
-        LDA  #','
-        LDX  #5
-        JSR  CHKTKN
-        JSR  PSHPCODE
-        LDA  #62
-        JSR  GENNJM
-        INC  COUNT2
-        JMP  CASE2
-CASE1:	JSR  PCD_WRKD
-        LDA  #61
-        JSR  GENNJM
-        LDA  COUNT2
-        BEQ  CASE3
-CASE4:	JSR  PULWRK
-        JSR  FIXAD
-        DEC  COUNT2
-        BNE  CASE4
-CASE3:	JSR  WRKD_WRK
-         JSR  PSHWRK
-         JSR  GTOKEN
-         LDA  COUNT1
-         PHA
-         JSR  STMNT
-         PLA
-         STA  COUNT1
-         LDA  TOKEN
-         CMP  #$94       ; ELSE
-         BEQ  CASE5
-         CMP  #';'
-         BNE  CASE6
-         JSR  PCD_WRKD
-         JSR  GENNJP
-         JSR  PULWRK
-         JSR  FIXAD
-         JSR  WRKD_WRK
-         JSR  PSHWRK
-         INC  COUNT1
-         JMP  CASE7
-CASE5:	JSR  PCD_WRKD
-         JSR  GENNJP
-         JSR  PULWRK
-         JSR  FIXAD
-         JSR  WRKD_WRK
-         JSR  PSHWRK
-         JSR  GTOKEN
-         LDA  COUNT1
-         PHA
-         JSR  STMNT
-         PLA
-         STA  COUNT1
-CASE6:	LDA  #$89       ; END
-         LDX  #17
-         JSR  CHKTKN
-         LDA  COUNT1
-         BEQ  CASE8
-CASE9:	JSR  PULWRK
-         JSR  FIXAD
-         DEC  COUNT1
-         BNE  CASE9
-CASE8:	JSR  FOR6
-         JMP  GTOKEN
+case:	jsr  getexpr
+        lda  #$85       ; of
+        ldx  #25
+        jsr  chktkn
+        lda  #1
+        sta  count1
+case7:	lda  #0
+        sta  count2
+case2:
+        lda  #42        ; make copy of selector
+        jsr  gennop
+        jsr  getexpr    ; next expression to compare
+        lda  #16
+        jsr  gennop
+        lda  token
+        cmp  #':'
+        beq  case1
+        lda  #','
+        ldx  #5
+        jsr  chktkn
+        jsr  pshpcode
+        lda  #62
+        jsr  gennjm
+        inc  count2
+        jmp  case2
+case1:	jsr  pcd_wrkd
+        lda  #61
+        jsr  gennjm
+        lda  count2
+        beq  case3
+case4:	jsr  pulwrk
+        jsr  fixad
+        dec  count2
+        bne  case4
+case3:	jsr  wrkd_wrk
+         jsr  pshwrk
+         jsr  gtoken
+         lda  count1
+         pha
+         jsr  stmnt
+         pla
+         sta  count1
+         lda  token
+         cmp  #$94       ; else
+         beq  case5
+         cmp  #';'
+         bne  case6
+         jsr  pcd_wrkd
+         jsr  gennjp
+         jsr  pulwrk
+         jsr  fixad
+         jsr  wrkd_wrk
+         jsr  pshwrk
+         inc  count1
+         jmp  case7
+case5:	jsr  pcd_wrkd
+         jsr  gennjp
+         jsr  pulwrk
+         jsr  fixad
+         jsr  wrkd_wrk
+         jsr  pshwrk
+         jsr  gtoken
+         lda  count1
+         pha
+         jsr  stmnt
+         pla
+         sta  count1
+case6:	lda  #$89       ; end
+         ldx  #17
+         jsr  chktkn
+         lda  count1
+         beq  case8
+case9:	jsr  pulwrk
+         jsr  fixad
+         dec  count1
+         bne  case9
+case8:	jsr  for6
+         jmp  gtoken
 ;
-; FOR
+; for
 ;
-FOR:	LDA  #'I'
-         LDX  #4
-         JSR  GETCHK
-         JSR  LOOKUP
-FOR1:	CMP  #'V'
-         BEQ  FOR2
-         CMP  #'Y'
-         BEQ  FOR2
-         LDX  #12
-         JSR  ERROR
-FOR2:	JSR  ASSVAR
-         JSR  SYMWRK
-         LDA  #0
-         STA  COUNT1
-         LDA  TOKEN
-         CMP  #$9B       ; TO
-         BEQ  FOR3
-         LDA  #$9C       ; DOWNTO
-         LDX  #28
-         JSR  CHKTKN
-         DEC  COUNT1
-FOR3:	LDA  COUNT1
-         PHA
-         JSR  PSHWRK
-         JSR  GETEXPR
-         JSR  PULWRK
-         JSR  WRKSYM
-         PLA
-         STA  COUNT1
-         JSR  PSHPCODE
-         LDA  #42
-         JSR  GENNOP
-         JSR  GET_LEV
-         JSR  GET_OFF
-         JSR  GET_DAT
-         CLC
-         ADC  #44
-         JSR  GENADR
-         LDA  #22        ; UP (GEQ)
-         LDX  COUNT1
-         BEQ  FOR4
-         LDA  #25        ; DOWN (LEQ)
-FOR4:	JSR  GENNOP
-         JSR  PSHPCODE
-         LDA  #61
-         JSR  GENNJM
-         LDA  COUNT1
-         PHA
-         JSR  SYMWRK
-         JSR  PSHWRK
-         LDA  #$97
-         LDX  #18
-         JSR  CHKTKN
-         JSR  GTOKEN
-         JSR  STMNT
-         JSR  PULWRK
-         JSR  WRKSYM
-         JSR  GET_LEV
-         JSR  GET_DAT
-         JSR  GET_OFF
-         LDA  DATTYP
-         CLC
-         ADC  #44
-         JSR  GENADR
-         PLA
-         STA  COUNT1
-         LDA  #38
-         LDX  COUNT1
-         BEQ  FOR5
-         LDA  #40        ; DEC
-FOR5:	JSR  GENNOP
-         LDA  #50
-         CLC
-         ADC  DATTYP
-         JSR  GENADR
-         JSR  PULWRK
-         JSR  WRK_WRKD
-         JSR  PULWRK
-         JSR  WRK_OPND
-         LDA  #60
-         JSR  GENRJMP
-         JSR  WRKD_WRK
-         JSR  FIXAD
-FOR6:	LDA  #$FF
-         STA  OPND+1
-         LDA  #$FD
-         STA  OPND
-         LDA  #59
-         JMP  GENJMP
+for:	lda  #'I'
+         ldx  #4
+         jsr  getchk
+         jsr  lookup
+for1:	cmp  #'V'
+         beq  for2
+         cmp  #'Y'
+         beq  for2
+         ldx  #12
+         jsr  error
+for2:	jsr  assvar
+         jsr  symwrk
+         lda  #0
+         sta  count1
+         lda  token
+         cmp  #$9b       ; to
+         beq  for3
+         lda  #$9c       ; downto
+         ldx  #28
+         jsr  chktkn
+         dec  count1
+for3:	lda  count1
+         pha
+         jsr  pshwrk
+         jsr  getexpr
+         jsr  pulwrk
+         jsr  wrksym
+         pla
+         sta  count1
+         jsr  pshpcode
+         lda  #42
+         jsr  gennop
+         jsr  get_lev
+         jsr  get_off
+         jsr  get_dat
+         clc
+         adc  #44
+         jsr  genadr
+         lda  #22        ; up (geq)
+         ldx  count1
+         beq  for4
+         lda  #25        ; down (leq)
+for4:	jsr  gennop
+         jsr  pshpcode
+         lda  #61
+         jsr  gennjm
+         lda  count1
+         pha
+         jsr  symwrk
+         jsr  pshwrk
+         lda  #$97
+         ldx  #18
+         jsr  chktkn
+         jsr  gtoken
+         jsr  stmnt
+         jsr  pulwrk
+         jsr  wrksym
+         jsr  get_lev
+         jsr  get_dat
+         jsr  get_off
+         lda  dattyp
+         clc
+         adc  #44
+         jsr  genadr
+         pla
+         sta  count1
+         lda  #38
+         ldx  count1
+         beq  for5
+         lda  #40        ; dec
+for5:	jsr  gennop
+         lda  #50
+         clc
+         adc  dattyp
+         jsr  genadr
+         jsr  pulwrk
+         jsr  wrk_wrkd
+         jsr  pulwrk
+         jsr  wrk_opnd
+         lda  #60
+         jsr  genrjmp
+         jsr  wrkd_wrk
+         jsr  fixad
+for6:	lda  #$ff
+         sta  opnd+1
+         lda  #$fd
+         sta  opnd
+         lda  #59
+         jmp  genjmp
 
-         BRK
+         brk
 
 	.endscope
 
 ;************************************************
-; PASCAL COMPILER
-; for Commodore 64
-; PART 3
-; Authors_ Nick Gammon & Sue Gobbett
-;   SYM $9000
+; pascal compiler
+; for commodore 64
+; part 3
+; authors_ nick gammon & sue gobbett
+;   sym $9000
 ;***********************************************
 
 	.scope
 
 ;***********************************************
-; PART 0 VECTORS
+; part 0 vectors
 ;***********************************************
 
-	TXT2REU	= P0
-        REU2TXT = P0+38
+	txt2reu	= p0
+        reu2txt = p0+38
 
 ;***********************************************
-; PART 1 VECTORS
+; part 1 vectors
 ;***********************************************
 
-	V1	= P1
-	INIT	= V1
-	GETNEXT	= V1+3
-	COMSTL	= V1+6
-	ISITHX	= V1+9
-	ISITAL	= V1+12
-	ISITNM	= V1+15
-	CHAR	= V1+18
-	GEN2_B	= V1+21
-	DISHX	= V1+24
-	ERROR	= V1+27
-	GETCHK	= V1+30
-	CHKTKN	= V1+33
-	GENNOP	= V1+36
-	GENADR	= V1+39
-	GENNJP	= V1+42
-	GENNJM	= V1+45
-	TKNWRK	= V1+48
-	PRBYTE	= V1+51
-	GTOKEN	= V1+54
-	SPARE2	= V1+57
-	FIXAD	= V1+60
-	PSHWRK	= V1+63
-	PULWRK	= V1+66
-	PC	= V1+69
-	PT	= V1+72
-	PL	= V1+75
-	TOKEN1	= V1+78
-	GETANS	= V1+81
-	PUTSP	= V1+84
-	DISPAD	= V1+87
-	CROUT	= V1+90
-	SHLVAL	= V1+93
-	GET_NUM	= V1+96
-	GET_HEX	= V1+99
-	FND_END	= V1+102
-	PAUSE	= V1+105
-	HOME	= V1+108
-	RDKEY	= V1+111
-	GENJMP	= V1+114
-	GENRJMP	= V1+117
-	US	= V1+120
-	V1_NEXT	= V1+23      ; AVAILABLE
+	v1	= p1
+	init	= v1
+	getnext	= v1+3
+	comstl	= v1+6
+	isithx	= v1+9
+	isital	= v1+12
+	isitnm	= v1+15
+	char	= v1+18
+	gen2_b	= v1+21
+	dishx	= v1+24
+	error	= v1+27
+	getchk	= v1+30
+	chktkn	= v1+33
+	gennop	= v1+36
+	genadr	= v1+39
+	gennjp	= v1+42
+	gennjm	= v1+45
+	tknwrk	= v1+48
+	prbyte	= v1+51
+	gtoken	= v1+54
+	spare2	= v1+57
+	fixad	= v1+60
+	pshwrk	= v1+63
+	pulwrk	= v1+66
+	pc	= v1+69
+	pt	= v1+72
+	pl	= v1+75
+	token1	= v1+78
+	getans	= v1+81
+	putsp	= v1+84
+	dispad	= v1+87
+	crout	= v1+90
+	shlval	= v1+93
+	get_num	= v1+96
+	get_hex	= v1+99
+	fnd_end	= v1+102
+	pause	= v1+105
+	home	= v1+108
+	rdkey	= v1+111
+	genjmp	= v1+114
+	genrjmp	= v1+117
+	us	= v1+120
+	v1_next	= v1+23      ; available
 ;***********************************************
-; PART 2 VECTORS
+; part 2 vectors
 ;***********************************************
-	V2	= P2
-	TKNJMP	= V2+60
+	v2	= p2
+	tknjmp	= v2+60
 ;
 ;
 ;***********************************************
-; PART 4 VECTORS
+; part 4 vectors
 ;***********************************************
-	INTERJ	= P4
-	DIS4	= P4+3
-	BREAK	= P4+6
-	CHK_ERR	= P4+9       ; invalid parameter in function call
-	MAIN	= P4+12
-	MAINP	= P4+15
-	CHK_TOP	= P4+18
-	TRUE2	= P4+21
-	PULTOP	= P4+24
-	S_PNT2	= P4+27
-	MASKS	= P4+30      ; 8 bytes
-	XMASKS	= P4+38      ; 8 bytes
+	interj	= p4
+	dis4	= p4+3
+	break	= p4+6
+	chk_err	= p4+9       ; invalid parameter in function call
+	main	= p4+12
+	mainp	= p4+15
+	chk_top	= p4+18
+	true2	= p4+21
+	pultop	= p4+24
+	s_pnt2	= p4+27
+	masks	= p4+30      ; 8 bytes
+	xmasks	= p4+38      ; 8 bytes
 	;
 ;***********************************************
-; PART 5 VECTORS
+; part 5 vectors
 ;***********************************************
-	EDITOR	= P5
-	GETLN	= P5+3
-	GETLNZ	= P5+6
-	GETLN1	= P5+9
+	editor	= p5
+	getln	= p5+3
+	getlnz	= p5+6
+	getln1	= p5+9
 
 ;***********************************************
-; PART 6 VECTORS
+; part 6 vectors
 ;***********************************************
 
-	BLOCK	= P6
+	block	= p6
 
 ;***********************************************
-; PART 3 STARTS HERE
+; part 3 starts here
 ;***********************************************
 
 	.res 1
-        ;.org $992E ; P3
+        ;.org $992e ; p3
 
 ;***********************************************
-; PART 3 VECTORS
+; part 3 vectors
 ;***********************************************
 
-         JMP START
-         JMP RESTART
-         JMP DSP_BIN
-         JMP  ST_CMP
-         JMP  ST_SYN
-         JMP  DEBUG
-         JMP  ST_EDI
-         JMP  ST_FIL
-         JMP  BELL1X
-         JMP  MOV_SPT
-         JMP  SPT_STAT
-         JMP  SPRT_X
-         JMP  SPRT_Y
-         JMP  STOP_SPT
-         JMP  STRT_SPT
-         JMP  ANM_SPT
-         JMP  LOADIT
-         JMP  SAVEIT
-         JMP  FREEZE_S
-         JMP  FR_STAT
-         JMP  X_OPEN
-         JMP  X_CLOSE
-         JMP  X_PUT
-         JMP  X_GET
+         jmp start
+         jmp restart
+         jmp dsp_bin
+         jmp  st_cmp
+         jmp  st_syn
+         jmp  debug
+         jmp  st_edi
+         jmp  st_fil
+         jmp  bell1x
+         jmp  mov_spt
+         jmp  spt_stat
+         jmp  sprt_x
+         jmp  sprt_y
+         jmp  stop_spt
+         jmp  strt_spt
+         jmp  anm_spt
+         jmp  loadit
+         jmp  saveit
+         jmp  freeze_s
+         jmp  fr_stat
+         jmp  x_open
+         jmp  x_close
+         jmp  x_put
+         jmp  x_get
 
 ;***********************************************
-; COMPILER MAINLINE
+; compiler mainline
 ;***********************************************
 
-ENDMSG:	.byte $B0,$C3
-ENDMG2:	.byte $D4
-        .byte " FINISHED: NO",$BD
-        .byte "S",$0D
-FIL_MSG:
-	.byte $0D,$DB
-        .byte "l>OAD,",$DB
-        .byte "a>PPEND, ",$DB
-        .byte "p>RINT, ",$DB
-        .byte "d>OS,",$0D,$DB
-        .byte "s>AVE,",$DB
-        .byte "n>OPRINT,",$DB
-        .byte "v>ERIFY,",$D7
-        .byte ",",$0D,$DA,$DB
-        .byte "c>ATALOG,",$DB
+endmsg:	.byte $b0,$c3
+endmg2:	.byte $d4
+        .byte " FINISHED: NO",$bd
+        .byte "S",$0d
+fil_msg:
+	.byte $0d,$db
+        .byte "l>OAD,",$db
+        .byte "a>PPEND, ",$db
+        .byte "p>RINT, ",$db
+        .byte "d>OS,",$0d,$db
+        .byte "s>AVE,",$db
+        .byte "n>OPRINT,",$db
+        .byte "v>ERIFY,",$d7
+        .byte ",",$0d,$da,$db
+        .byte "c>ATALOG,",$db
         .byte "o>BJECT ? "
-MSG1:	.byte 13,$DA,$D4,",",$DB
-        .byte "d>EBUG,",$DB
-        .byte "f>ILES,",$0D,$DB
-        .byte "r>UN, ",$D5
-        .byte ", ",$DB
-        .byte "t>RACE,",$D7
+msg1:	.byte 13,$da,$d4,",",$db
+        .byte "d>EBUG,",$db
+        .byte "f>ILES,",$0d,$db
+        .byte "r>UN, ",$d5
+        .byte ", ",$db
+        .byte "t>RACE,",$d7
         .byte " ? "
-MSG4:	.byte $C4,$C8,$C3
-MSG6:	.byte "nO VALID",$D4
-        .byte " DONE BEFORE",$0D
+msg4:	.byte $c4,$c8,$c3
+msg6:	.byte "nO VALID",$d4
+        .byte " DONE BEFORE",$0d
 ;
-PRBYTECR:
-         JSR  PRBYTE
-         JMP  CROUT
+prbytecr:
+         jsr  prbyte
+         jmp  crout
 ;
-DOS_COLD:
-         LDX  #0
-         LDY  #$A0
-         CLC
-         JSR  MEMTOP     ; normal Basic top of memory
-         LDA  #47
-         STA  $1         ; MAKE BASIC AVAILABLE
-         JMP  ($A000)
-;
-;
-;
-COMPIL:	LDX  #NEW_STK
-        TXS
-        LDX  #0
-        LDY  #$D0       ; use spare memory
-        CLC
-        JSR  MEMTOP     ; set top of memory
-        LDA  #<ST_EDI
-        STA  ERR_RTN
-        LDA  #>ST_EDI
-        STA  ERR_RTN+1
-        LDA  HIMEM+1
-        SEC
-        SBC  SYM_SIZE
-        STA  SYMTBL+1
-        LDA  HIMEM
-        STA  SYMTBL
-        STA  SYM_USE
-        STA  ENDSYM
+dos_cold:
+         ldx  #0
+         ldy  #$a0
+         clc
+         jsr  memtop     ; normal basic top of memory
+         lda  #47
+         sta  $1         ; make basic available
+         jmp  ($a000)
 ;
 ;
-        JSR  HOME
-        JSR  INIT
-        JSR  GTOKEN
-        LDY  #0
-        STY  VAL_CMP
-        TYA
-        STA  (ENDSYM),Y
-        INY
-        STA  (ENDSYM),Y
-        JSR  BLOCK
-        LDA  #'.'
-        LDX  #9
-        JSR  CHKTKN
-        LDA  #0
-        LDX  #19
-        JSR  GETCHK
-        JSR  CROUT
-        LDA  #<ENDMSG
-        LDX  #>ENDMSG
-        LDY  #2
-        JSR  PT
-        LDA  PCODE+1
-        STA  END_PCD+1
-        JSR  PRBYTE
-        LDA  PCODE
-        STA  END_PCD
-        JSR  PRBYTECR
-        LDA  #<MSG4
-        LDX  #>MSG4
-        LDY  #3
-        JSR  PT
-        LDA  SYM_USE+1
-        JSR  PRBYTE
-        LDA  SYM_USE
-        JSR  PRBYTECR
-        LDA  #<ENDMG2
-        LDX  #>ENDMG2
-        JSR  PL
-        LDX  SYNTAX
-        BNE  END_CMP
-        INX
-        STX  VAL_CMP
-END_CMP:
-        JMP  ST1
 ;
-CHK_VAL:
-        LDA  VAL_CMP
-        BNE  CHK_VAL9
-        LDA  #<MSG6
-        LDX  #>MSG6
-        JSR  PL
-        JMP  ST1
-CHK_VAL9:
-BELL1X:          ; no bell yet
-        RTS
+compil:	ldx  #new_stk
+        txs
+        ldx  #0
+        ldy  #$d0       ; use spare memory
+        clc
+        jsr  memtop     ; set top of memory
+        lda  #<st_edi
+        sta  err_rtn
+        lda  #>st_edi
+        sta  err_rtn+1
+        lda  himem+1
+        sec
+        sbc  sym_size
+        sta  symtbl+1
+        lda  himem
+        sta  symtbl
+        sta  sym_use
+        sta  endsym
 ;
-CHK_RUN:
-        JSR  TXT2REU
-      	JMP  INTERP
+;
+        jsr  home
+        jsr  init
+        jsr  gtoken
+        ldy  #0
+        sty  val_cmp
+        tya
+        sta  (endsym),y
+        iny
+        sta  (endsym),y
+        jsr  block
+        lda  #'.'
+        ldx  #9
+        jsr  chktkn
+        lda  #0
+        ldx  #19
+        jsr  getchk
+        jsr  crout
+        lda  #<endmsg
+        ldx  #>endmsg
+        ldy  #2
+        jsr  pt
+        lda  pcode+1
+        sta  end_pcd+1
+        jsr  prbyte
+        lda  pcode
+        sta  end_pcd
+        jsr  prbytecr
+        lda  #<msg4
+        ldx  #>msg4
+        ldy  #3
+        jsr  pt
+        lda  sym_use+1
+        jsr  prbyte
+        lda  sym_use
+        jsr  prbytecr
+        lda  #<endmg2
+        ldx  #>endmg2
+        jsr  pl
+        ldx  syntax
+        bne  end_cmp
+        inx
+        stx  val_cmp
+end_cmp:
+        jmp  st1
+;
+chk_val:
+        lda  val_cmp
+        bne  chk_val9
+        lda  #<msg6
+        ldx  #>msg6
+        jsr  pl
+        jmp  st1
+chk_val9:
+bell1x:          ; no bell yet
+        rts
+;
+chk_run:
+        jsr  txt2reu
+      	jmp  interp
 
 ;
-; START
+; start
 ;
 
-MAIN_TBL:
+main_tbl:
          .byte 'C'
-         .word   ST_CMP
+         .word   st_cmp
          .byte 'R'
-         .word   ST_RUN
+         .word   st_run
          .byte 'S'
-         .word   ST_SYN
+         .word   st_syn
          .byte 'E'
-         .word   ST_EDI
+         .word   st_edi
          .byte 'Q'
-         .word   ST_QUI
+         .word   st_qui
          .byte 'D'
-         .word   ST_DEB
+         .word   st_deb
          .byte 'T'
-         .word   ST_TRA
+         .word   st_tra
          .byte 'F'
-         .word   ST_FIL
+         .word   st_fil
          .byte  $0
-FIL_TBL:
+fil_tbl:
          .byte 'E'
-         .word   ST_EDI
+         .word   st_edi
          .byte 'Q'
-         .word   ST1
+         .word   st1
          .byte 'A'
-         .word   ST_APP
+         .word   st_app
          .byte 'L'
-         .word   ST_LOA
+         .word   st_loa
          .byte 'S'
-         .word   ST_WRI
+         .word   st_wri
          .byte 'V'
-         .word   ST_VFY
+         .word   st_vfy
          .byte 'P'
-         .word   ST_PRI
+         .word   st_pri
          .byte 'N'
-         .word   ST_NOP
+         .word   st_nop
          .byte 'O'
-         .word   ST_OBJ
+         .word   st_obj
          .byte 'C'
-         .word   ST_CAT
+         .word   st_cat
          .byte 'D'
-         .word   ST_DOS
+         .word   st_dos
          .byte  $0
 ;
 ;
 ;
 ;
-; here for cold start - initialize all C64 routines
+; here for cold start - initialize all c64 routines
 ; do ram test, clear text file to null etc. etc.
 ;
-START:
-         SEI
-         LDX  #0
-         STX  VIC+$16    ; clear reset bit in VIC
-         DEX
-         TXS
-         JSR  IOINIT
-         NOP
-         NOP
-         NOP             ; instead of JSR RAMTAS
-         JSR  RESTOR
-         JSR  CINT
-         JSR  INITIO
-         CLI
-         LDA  TS
-         STA  REG
-         LDA  TS+1
-         STA  REG+1
-         LDA  #0
-         TAY
-         STA  (REG),Y    ; NULL EDIT FILE
-         STY  VAL_CMP
-         TAX
-         LDY  #$D0       ; use spare memory
-         CLC
-         JSR  MEMTOP     ; set top of memory
-         LDA  CINV
-         STA  INT_RTN
-         LDA  CINV+1
-         STA  INT_RTN+1  ; interrupt return address
-         JMP  REST1
+start:
+         sei
+         ldx  #0
+         stx  vic+$16    ; clear reset bit in vic
+         dex
+         txs
+         jsr  ioinit
+         nop
+         nop
+         nop             ; instead of jsr ramtas
+         jsr  restor
+         jsr  cint
+         jsr  initio
+         cli
+         lda  ts
+         sta  reg
+         lda  ts+1
+         sta  reg+1
+         lda  #0
+         tay
+         sta  (reg),y    ; null edit file
+         sty  val_cmp
+         tax
+         ldy  #$d0       ; use spare memory
+         clc
+         jsr  memtop     ; set top of memory
+         lda  cinv
+         sta  int_rtn
+         lda  cinv+1
+         sta  int_rtn+1  ; interrupt return address
+         jmp  rest1
 ;
-RESTART:
-         SEI
-         LDA  INT_RTN
-         STA  CINV
-         LDA  INT_RTN+1
-         STA  CINV+1
-         CLI
-         CLD
-         LDX  #$FF
-         TXS             ; reset stack
-         JSR  CLALL      ; close any files run left open
-         JSR  CINT       ; reset video
-         JSR  REU2TXT
+restart:
+         sei
+         lda  int_rtn
+         sta  cinv
+         lda  int_rtn+1
+         sta  cinv+1
+         cli
+         cld
+         ldx  #$ff
+         txs             ; reset stack
+         jsr  clall      ; close any files run left open
+         jsr  cint       ; reset video
+         jsr  reu2txt
 ;
-REST1:
-         JSR  PROFF
-         LDA  #$C0
-         JSR  SETMSG
-         LDA  #0
-         STA  RUNNING
-         LDA  #6         ; BLUE
-         STA  BORDER
-         STA  BKGND      ; BACKGROUND TO BLUE
-         LDA  #<RESTART
-         STA  WARM_STR
-         STA  CTRLC_RT
-         LDA  #>RESTART
-         STA  WARM_STR+1
-         STA  CTRLC_RT+1
-         JSR  HOME
-         LDA  #<US
-         LDX  #>US
-         LDY  #8
-         JSR  PT
-ST1:	LDA  #<MSG1
-        LDX  #>MSG1
-        LDY  #43
-        JSR  GETANS
-        LDX  #<MAIN_TBL
-        LDY  #>MAIN_TBL
+rest1:
+         jsr  proff
+         lda  #$c0
+         jsr  setmsg
+         lda  #0
+         sta  running
+         lda  #6         ; blue
+         sta  border
+         sta  bkgnd      ; background to blue
+         lda  #<restart
+         sta  warm_str
+         sta  ctrlc_rt
+         lda  #>restart
+         sta  warm_str+1
+         sta  ctrlc_rt+1
+         jsr  home
+         lda  #<us
+         ldx  #>us
+         ldy  #8
+         jsr  pt
+st1:	lda  #<msg1
+        ldx  #>msg1
+        ldy  #43
+        jsr  getans
+        ldx  #<main_tbl
+        ldy  #>main_tbl
 ;
-         JSR  TKNJMP
-ST1_JUMP: JMP  ST1
+         jsr  tknjmp
+st1_jump: jmp  st1
 ;
 ;
-ZERO_SID:
-         LDY  #24
-         LDA  #0
-ZERO_1:	STA  SID,Y
-         DEY
-         BPL  ZERO_1
-         RTS
+zero_sid:
+         ldy  #24
+         lda  #0
+zero_1:	sta  sid,y
+         dey
+         bpl  zero_1
+         rts
 ;
-INITIO:
-         JSR  IOINIT
-         JSR  CLALL
-         JSR  ZERO_SID
-         LDA  #47
-         STA  $0         ; data direction register
-         LDA  #46
-         STA  $1         ; disable Basic
-         LDA  #0
-         STA  $F8        ; de-allocate RS232 buffers
-         STA  $FA
-         STA  ST         ; clear ST flag
-         STA  ENABRS     ; clear RS232 enables
-         LDA  #4
-         STA  HIBASE     ; normal video page
-         RTS
+initio:
+         jsr  ioinit
+         jsr  clall
+         jsr  zero_sid
+         lda  #47
+         sta  $0         ; data direction register
+         lda  #46
+         sta  $1         ; disable basic
+         lda  #0
+         sta  $f8        ; de-allocate rs232 buffers
+         sta  $fa
+         sta  st         ; clear st flag
+         sta  enabrs     ; clear rs232 enables
+         lda  #4
+         sta  hibase     ; normal video page
+         rts
 ;
-ST_CMP:
-         LDA  #0
-         STA  SYNTAX
-         JMP  COMPIL
-ST_SYN:
-         STA  SYNTAX
-         JMP  COMPIL
-ST_RUN:
-         LDA  #0
-         STA  DBGFLG
-         STA  DCODE
-         JMP  CHK_RUN
-ST_EDI:
-         JMP  EDITOR
-ST_FIL:
-         LDX  #$FF
-         TXS             ; reset stack
-         LDA  #<FIL_MSG
-         LDX  #>FIL_MSG
-         LDY  #85
-         JSR  GETANS
-         LDX  #<FIL_TBL
-         LDY  #>FIL_TBL
-         STA  TOKEN      ; in case we want to know
-         JSR  TKNJMP
-ST_FIL9:
-         JMP  ST_FIL
+st_cmp:
+         lda  #0
+         sta  syntax
+         jmp  compil
+st_syn:
+         sta  syntax
+         jmp  compil
+st_run:
+         lda  #0
+         sta  dbgflg
+         sta  dcode
+         jmp  chk_run
+st_edi:
+         jmp  editor
+st_fil:
+         ldx  #$ff
+         txs             ; reset stack
+         lda  #<fil_msg
+         ldx  #>fil_msg
+         ldy  #85
+         jsr  getans
+         ldx  #<fil_tbl
+         ldy  #>fil_tbl
+         sta  token      ; in case we want to know
+         jsr  tknjmp
+st_fil9:
+         jmp  st_fil
 ;
-QUIT_MSG: .byte  $D7,$CB
+quit_msg: .byte  $d7,$cb
 
-ST_QUI:
-         LDA  #<QUIT_MSG
-         LDX  #>QUIT_MSG
-         LDY  #2
-         JSR  GETANS
-         CMP  #'Y'
-         BNE  ST1_JUMP
-         JMP  DOS_COLD   ; COLDSTART DOS
-ST_DEB:
-         STA  DBGFLG
-         STA  DCODE
-         JMP  CHK_RUN
-ST_TRA:
-         ORA  #$80
-         STA  DBGFLG
-         STA  DCODE
-         JMP  CHK_RUN
-ST_PRI:
-         JSR  PRON
-         JMP  ST_FIL
-ST_NOP:
-         JSR  PROFF
-         JMP  ST_FIL
+st_qui:
+         lda  #<quit_msg
+         ldx  #>quit_msg
+         ldy  #2
+         jsr  getans
+         cmp  #'Y'
+         bne  st1_jump
+         jmp  dos_cold   ; coldstart dos
+st_deb:
+         sta  dbgflg
+         sta  dcode
+         jmp  chk_run
+st_tra:
+         ora  #$80
+         sta  dbgflg
+         sta  dcode
+         jmp  chk_run
+st_pri:
+         jsr  pron
+         jmp  st_fil
+st_nop:
+         jsr  proff
+         jmp  st_fil
 
-FILE_MSG: .byte "fILE NAME? "
-FILE_MG2: .byte $DB
-          .byte "c>ASSETTE OR",$DB
+file_msg: .byte "fILE NAME? "
+file_mg2: .byte $db
+          .byte "c>ASSETTE OR",$db
           .byte "d>ISK? "
-FILE_MG3: .byte "cOMMAND? "
+file_mg3: .byte "cOMMAND? "
 
 ;
-GET_FILE:
-         LDA  #<FILE_MG2
-         LDX  #>FILE_MG2
-         LDY  #21
-         JSR  GETANS
-         CMP  #'D'
-         BEQ  GET_FIL1
-         CMP  #'C'
-         BEQ  GET_FIL0
-         JMP  ST_FIL9
-GET_FIL1: LDA  DISK_CHN   ; serial bus disk drive
-         BNE  GET_FIL8
-GET_FIL0: LDA  #1         ; datasette
-GET_FIL8: STA  REG2B
-         LDA  #<FILE_MSG
-         LDX  #>FILE_MSG
-         LDY  #11
-         JSR  PT
-GET_FIL2:
-         JSR  GETLN1
-         STX  TKNLEN
-         CPX  #0
-         BMI  GET_FIL4
-         BNE  GET_FIL3
-         LDA  TOKEN      ; zero length ok on cassette load
-         CMP  #'V'
-         BEQ  GET_FIL9   ; verify
-         CMP  #'A'
-         BEQ  GET_FIL9   ; append
-         CMP  #'L'
-         BNE  GET_FIL4   ; not load
-GET_FIL9: LDA  REG2B
-         CMP  #1         ; cassette?
-         BEQ  GET_FIL7   ; yes - hooray!
-GET_FIL4: JMP  ST_FIL
-GET_FIL3:          ; no check on alpha file name now
-GET_FILA: LDY  #19
-GET_FIL5: LDA  INBUF,Y
-         STA  BPOINT,Y
-         DEY
-         BPL  GET_FIL5
-GET_FIL7:
+get_file:
+         lda  #<file_mg2
+         ldx  #>file_mg2
+         ldy  #21
+         jsr  getans
+         cmp  #'D'
+         beq  get_fil1
+         cmp  #'C'
+         beq  get_fil0
+         jmp  st_fil9
+get_fil1: lda  disk_chn   ; serial bus disk drive
+         bne  get_fil8
+get_fil0: lda  #1         ; datasette
+get_fil8: sta  reg2b
+         lda  #<file_msg
+         ldx  #>file_msg
+         ldy  #11
+         jsr  pt
+get_fil2:
+         jsr  getln1
+         stx  tknlen
+         cpx  #0
+         bmi  get_fil4
+         bne  get_fil3
+         lda  token      ; zero length ok on cassette load
+         cmp  #'V'
+         beq  get_fil9   ; verify
+         cmp  #'A'
+         beq  get_fil9   ; append
+         cmp  #'L'
+         bne  get_fil4   ; not load
+get_fil9: lda  reg2b
+         cmp  #1         ; cassette?
+         beq  get_fil7   ; yes - hooray!
+get_fil4: jmp  st_fil
+get_fil3:          ; no check on alpha file name now
+get_fila: ldy  #19
+get_fil5: lda  inbuf,y
+         sta  bpoint,y
+         dey
+         bpl  get_fil5
+get_fil7:
 ;
 ; if disk load/save etc. open error channel (15)
 ;
-         LDX  REG2B
-         CPX  DISK_CHN   ; disk?
-         BNE  GET_FILB   ; nope
-         LDA  #15
-         TAY             ; error channel
-         JSR  SETLFS
-         LDA  #0         ; no command
-         JSR  SETNAM
-         JSR  OPEN       ; right - it's open
+         ldx  reg2b
+         cpx  disk_chn   ; disk?
+         bne  get_filb   ; nope
+         lda  #15
+         tay             ; error channel
+         jsr  setlfs
+         lda  #0         ; no command
+         jsr  setnam
+         jsr  open       ; right - it's open
 ;
-GET_FILB:
-         LDA  #1         ; logical file number
-         LDX  REG2B      ; 1 = cassette, 8 = disk
-         LDY  #0         ; secondary address
-         JSR  SETLFS
-         LDA  TKNLEN
-         CMP  #20
-         BCC  GET_FIL6
-         LDA  #20
-GET_FIL6:
-         LDX  #<BPOINT
-         LDY  #>BPOINT   ; temporary buffer as INBUF is tape buffer
-         JMP  SETNAM     ; setup file name
+get_filb:
+         lda  #1         ; logical file number
+         ldx  reg2b      ; 1 = cassette, 8 = disk
+         ldy  #0         ; secondary address
+         jsr  setlfs
+         lda  tknlen
+         cmp  #20
+         bcc  get_fil6
+         lda  #20
+get_fil6:
+         ldx  #<bpoint
+         ldy  #>bpoint   ; temporary buffer as inbuf is tape buffer
+         jmp  setnam     ; setup file name
 ;
-CATALOG: .byte "$"
-DISK_MSG: .byte "dISK:"
+catalog: .byte "$"
+disk_msg: .byte "dISK:"
 
 ;
-ST_CAT:
+st_cat:
 ;
 ; here for directory list
 ;
-         LDA  #1
-         LDX  DISK_CHN
-         LDY  #0         ; relocated load
-         STY  REGB
-         JSR  SETLFS
-         LDA  #1         ; $ length
-         LDX  #<CATALOG
-         LDY  #>CATALOG
-         JSR  SETNAM
-         LDA  #0         ; load
-         LDX  #<$C000     ; use symbol table
-         STX  TKNADR
-         LDY  #>$C000    ; for directory
-         STY  TKNADR+1
-         JSR  LOAD
-         BCS  ST_FILJ    ; error on load
-         JSR  CROUT
-         JSR  CROUT
-         LDA  #<DISK_MSG
-         LDX  #>DISK_MSG
-         LDY  #5
-         JSR  PT
-         JMP  CAT_STRT   ; no sector count for first line
-CAT_LOOP:
-         LDY  #1
-         LDA  (TKNADR),Y ; end?
-         BNE  CAT_MORE   ; no
-         INY
-         LDA  (TKNADR),Y
-         BEQ  CAT_END    ; finished
-         DEY
-CAT_MORE:
-         INY
-         INY             ; bypass line number link
-         LDA  (TKNADR),Y ; no_ sectors
-         STA  REG
-         INY
-         LDA  (TKNADR),Y ; no_ sectors
-         STA  REG+1
-         JSR  DSP_BIN    ; display sector count
-         JSR  PUTSP
-CAT_STRT:
-         LDY  #5
-CAT_CNT:
-         LDA  (TKNADR),Y
-         BEQ  CAT_CNTD   ; found end of this line
-         INY
-         BNE  CAT_CNT
-CAT_CNTD:
-         STY  TKNLEN     ; size of this entry
-         TYA
-         SEC
-         SBC  #5         ; forget initial stuff
-         TAY             ; read for PT
-         LDA  TKNADR
-         CLC
-         ADC  #5
-         PHA
-         LDA  TKNADR+1
-         ADC  #0
-         TAX
-         PLA
-         JSR  PT         ; at last! - display the info
-         JSR  CROUT
-         LDA  TKNADR
-         CLC
-         ADC  TKNLEN
-         STA  TKNADR
-         BCC  CAT_LOOP
-         INC  TKNADR+1
-         BNE  CAT_LOOP
-CAT_END:
-ST_FILJ: JMP  ST_FIL
+         lda  #1
+         ldx  disk_chn
+         ldy  #0         ; relocated load
+         sty  regb
+         jsr  setlfs
+         lda  #1         ; $ length
+         ldx  #<catalog
+         ldy  #>catalog
+         jsr  setnam
+         lda  #0         ; load
+         ldx  #<$c000     ; use symbol table
+         stx  tknadr
+         ldy  #>$c000    ; for directory
+         sty  tknadr+1
+         jsr  load
+         bcs  st_filj    ; error on load
+         jsr  crout
+         jsr  crout
+         lda  #<disk_msg
+         ldx  #>disk_msg
+         ldy  #5
+         jsr  pt
+         jmp  cat_strt   ; no sector count for first line
+cat_loop:
+         ldy  #1
+         lda  (tknadr),y ; end?
+         bne  cat_more   ; no
+         iny
+         lda  (tknadr),y
+         beq  cat_end    ; finished
+         dey
+cat_more:
+         iny
+         iny             ; bypass line number link
+         lda  (tknadr),y ; no_ sectors
+         sta  reg
+         iny
+         lda  (tknadr),y ; no_ sectors
+         sta  reg+1
+         jsr  dsp_bin    ; display sector count
+         jsr  putsp
+cat_strt:
+         ldy  #5
+cat_cnt:
+         lda  (tknadr),y
+         beq  cat_cntd   ; found end of this line
+         iny
+         bne  cat_cnt
+cat_cntd:
+         sty  tknlen     ; size of this entry
+         tya
+         sec
+         sbc  #5         ; forget initial stuff
+         tay             ; read for pt
+         lda  tknadr
+         clc
+         adc  #5
+         pha
+         lda  tknadr+1
+         adc  #0
+         tax
+         pla
+         jsr  pt         ; at last! - display the info
+         jsr  crout
+         lda  tknadr
+         clc
+         adc  tknlen
+         sta  tknadr
+         bcc  cat_loop
+         inc  tknadr+1
+         bne  cat_loop
+cat_end:
+st_filj: jmp  st_fil
 ;
-ST_VFY:
-         JSR  GET_FILE
-         LDX  TS
-         LDY  TS+1
-         LDA  #1
-         BNE  ST_LOA1
+st_vfy:
+         jsr  get_file
+         ldx  ts
+         ldy  ts+1
+         lda  #1
+         bne  st_loa1
 ;
-DOS_ERR: .byte 13,$BD
+dos_err: .byte 13,$bd
          .byte ": "
 
 ;
-FIN_DOS:
-         PHP
-         JSR  CROUT
-         JSR  READST     ; check status (verify error etc_)
-         AND  #$BF       ; ignore end-of-file
-         BEQ  FIN_DOS2   ; ok
-         PHA
-         LDA  #<DOS_ERR
-         LDX  #>DOS_ERR
-         LDY  #4
-         JSR  PT
-         PLA
-         JSR  PRBYTECR
-FIN_DOS2:
-         LDA  REG2B
-         CMP  DISK_CHN
-         BNE  FIN_DOS9
-         PLP             ; back to initial carry flag
-         JMP  ST_ERR     ; read error channel if disk
-FIN_DOS9:
-         PLP
-         JMP  ST_FIL
+fin_dos:
+         php
+         jsr  crout
+         jsr  readst     ; check status (verify error etc_)
+         and  #$bf       ; ignore end-of-file
+         beq  fin_dos2   ; ok
+         pha
+         lda  #<dos_err
+         ldx  #>dos_err
+         ldy  #4
+         jsr  pt
+         pla
+         jsr  prbytecr
+fin_dos2:
+         lda  reg2b
+         cmp  disk_chn
+         bne  fin_dos9
+         plp             ; back to initial carry flag
+         jmp  st_err     ; read error channel if disk
+fin_dos9:
+         plp
+         jmp  st_fil
 ;
-ST_LOA:
-         JSR  GET_FILE
-         LDA  #0
-         STA  VAL_CMP
-         LDX  TS
-         LDY  TS+1
-ST_LOA1: JSR  LOAD
-ST_LOA2: JMP  FIN_DOS
-;
-;
-ST_OBJ:
-         JSR  CHK_VAL
-         JSR  GET_FILE
-         LDA  ACT_PCDA
-         STA  TEMP
-         LDA  ACT_PCDA+1
-         STA  TEMP+1
-         LDX  END_PCD
-         LDY  END_PCD+1
-ST_OBJ1: LDA  #TEMP
-         JSR  SAVE
-ST_OBJ2: JMP  FIN_DOS
-;
-ST_WRI:
-         JSR  GET_FILE
-         JSR  FND_END
-         LDA  TS
-         STA  TEMP
-         LDA  TS+1
-         STA  TEMP+1
-         LDX  P
-         LDY  P+1
-         JMP  ST_OBJ1
+st_loa:
+         jsr  get_file
+         lda  #0
+         sta  val_cmp
+         ldx  ts
+         ldy  ts+1
+st_loa1: jsr  load
+st_loa2: jmp  fin_dos
 ;
 ;
-ST_APP:
-         JSR  GET_FILE
-         LDA  #0
-         STA  VAL_CMP
-         JSR  FND_END
-         LDA  P
-         SEC
-         SBC  #1
-         TAX
-         LDA  P+1
-         SBC  #0
-         TAY
-         LDA  #0
-         BEQ  ST_LOA1
+st_obj:
+         jsr  chk_val
+         jsr  get_file
+         lda  act_pcda
+         sta  temp
+         lda  act_pcda+1
+         sta  temp+1
+         ldx  end_pcd
+         ldy  end_pcd+1
+st_obj1: lda  #temp
+         jsr  save
+st_obj2: jmp  fin_dos
 ;
-DOS_MSG: .byte "cODE: "
-;
-; DOS
-;
-ST_DOS:
-         LDA  #<FILE_MG3  ; 'Command?'
-         LDX  #>FILE_MG3
-         LDY  #9
-         JSR  PT
-         JSR  GETLN1     ; get response
-         CPX  #0
-         BEQ  ST_DOS9    ; nosing
-         STX  TKNLEN
-         LDX  DISK_CHN   ; now open disk channel 15
-         LDA  #15
-         TAY             ; command channel
-         JSR  SETLFS
-         LDX  #<INBUF
-         LDY  #>INBUF
-         LDA  TKNLEN
-         JSR  SETNAM     ; send command
-         JSR  OPEN
-         BCS  ST_DOS8
-ST_ERR:
-         LDX  #15
-         JSR  CHKIN      ; read error channel
-         BCS  ST_DOS8
-         JSR  GETLN1     ; read it
-         JSR  CLRCHN     ; back to keyboard
-         LDA  #<DOS_MSG
-         LDX  #>DOS_MSG
-         LDY  #6
-         JSR  PT
-         LDA  #<INBUF
-         LDX  #>INBUF
-         JSR  PL         ; display the message
-ST_DOS8: LDA  #15        ; close command channel
-         JSR  CLOSE
-ST_DOS9: JMP  ST_FIL     ; finito
+st_wri:
+         jsr  get_file
+         jsr  fnd_end
+         lda  ts
+         sta  temp
+         lda  ts+1
+         sta  temp+1
+         ldx  p
+         ldy  p+1
+         jmp  st_obj1
 ;
 ;
-PRON:
-        LDA #4
-        STA PFLAG
-        LDX PR_CHAN    ; printer
-        LDY #0         ; normal mode
-        JSR SETLFS
-        JSR OPEN       ; printer is unit 1
-        BCC XXXRTS        ; open OK
+st_app:
+         jsr  get_file
+         lda  #0
+         sta  val_cmp
+         jsr  fnd_end
+         lda  p
+         sec
+         sbc  #1
+         tax
+         lda  p+1
+         sbc  #0
+         tay
+         lda  #0
+         beq  st_loa1
+;
+dos_msg: .byte "cODE: "
+;
+; dos
+;
+st_dos:
+         lda  #<file_mg3  ; 'Command?'
+         ldx  #>file_mg3
+         ldy  #9
+         jsr  pt
+         jsr  getln1     ; get response
+         cpx  #0
+         beq  st_dos9    ; nosing
+         stx  tknlen
+         ldx  disk_chn   ; now open disk channel 15
+         lda  #15
+         tay             ; command channel
+         jsr  setlfs
+         ldx  #<inbuf
+         ldy  #>inbuf
+         lda  tknlen
+         jsr  setnam     ; send command
+         jsr  open
+         bcs  st_dos8
+st_err:
+         ldx  #15
+         jsr  chkin      ; read error channel
+         bcs  st_dos8
+         jsr  getln1     ; read it
+         jsr  clrchn     ; back to keyboard
+         lda  #<dos_msg
+         ldx  #>dos_msg
+         ldy  #6
+         jsr  pt
+         lda  #<inbuf
+         ldx  #>inbuf
+         jsr  pl         ; display the message
+st_dos8: lda  #15        ; close command channel
+         jsr  close
+st_dos9: jmp  st_fil     ; finito
+;
+;
+pron:
+        lda #4
+        sta pflag
+        ldx pr_chan    ; printer
+        ldy #0         ; normal mode
+        jsr setlfs
+        jsr open       ; printer is unit 1
+        bcc xxxrts        ; open ok
 
 ;
-PROFF:
-        LDA  #0
-        STA  PFLAG
-        JMP  CLALL      ; close all files (incl. printer & screen )
+proff:
+        lda  #0
+        sta  pflag
+        jmp  clall      ; close all files (incl. printer & screen )
 
 ;
-UNPACK:
-        PHA
-        CLC
-        ROR
-        CLC
-        ROR
-        CLC
-        ROR
-        CLC
-        ROR
-        ORA  #$30
-        STA  ASC_WRK,X
-        INX
-        PLA
-        AND  #$0F
-        ORA  #$30
-        STA  ASC_WRK,X
-        INX
-XXXRTS: RTS
+unpack:
+        pha
+        clc
+        ror
+        clc
+        ror
+        clc
+        ror
+        clc
+        ror
+        ora  #$30
+        sta  asc_wrk,x
+        inx
+        pla
+        and  #$0f
+        ora  #$30
+        sta  asc_wrk,x
+        inx
+xxxrts: rts
 
 ;
 ;
-BIN_TBL:
+bin_tbl:
         .byte $76,$85,$04,$01
         .byte $36,$55,$06,$00
         .byte $96,$40,$00,$00
@@ -4552,4993 +4552,4993 @@ BIN_TBL:
         .byte $01,$00,$00,$00
 
 ;
-DSP_BIN:
-         LDA  REG
-         LDX  REG+1
-         LDY  REGB
-         BPL  OUT_PLUS
-         LDA  #'-'
-         JSR  PC
-         SEC
-         LDA  #0
-         SBC  REG
-         PHA
-         LDA  #0
-         SBC  REG+1
-         TAX
-         LDA  #0
-         SBC  REGB
-         TAY
-         PLA
-OUT_PLUS:
-         STA  BIN_WRK
-         STX  BIN_WRK+1
-         STY  BIN_WRK+2
-         LDA  #$F0
-         STA  REG2
-         LDA  #0
-         STA  VALUE
-         STA  VALUE+1
-         STA  TEMP
-         STA  TEMP+1
-         TAX
-         LDY  #2
-OUT4:
-         LDA  BIN_WRK,Y
-         AND  REG2
-         STA  REG2+1
-         BEQ  OUT2
-         LDA  REG2
-         BPL  OUT1
-         LSR  REG2+1
-         LSR  REG2+1
-         LSR  REG2+1
-         LSR  REG2+1
-OUT1:
-         SED
-         LDA  TEMP
-         CLC
-         ADC  BIN_TBL,X
-         STA  TEMP
-         LDA  TEMP+1
-         ADC  BIN_TBL+1,X
-         STA  TEMP+1
-         LDA  VALUE
-         ADC  BIN_TBL+2,X
-         STA  VALUE
-         LDA  VALUE+1
-         ADC  BIN_TBL+3,X
-         STA  VALUE+1
-         CLD
-         DEC  REG2+1
-         BNE  OUT1
-OUT2:
-         INX
-         INX
-         INX
-         INX
-         LDA  REG2
-         EOR  #$FF
-         STA  REG2
-         BPL  OUT4
-         DEY
-         BPL  OUT4
-OUT3:
-         LDX  #0
-         LDA  VALUE+1
-         JSR  UNPACK
-         LDA  VALUE
-         JSR  UNPACK
-         LDA  TEMP+1
-         JSR  UNPACK
-         LDA  TEMP
-         JSR  UNPACK
-         LDX  #7         ; ZERO SUPPRESS
-         LDY  #0
-OUT5:	LDA  ASC_WRK,Y
-         CMP  #'0'
-         BNE  OUT6
-         INY
-         DEX
-         BNE  OUT5
-OUT6:	LDA  ASC_WRK,Y
-         STY  BIN_WRK
-         STX  BIN_WRK+1
-         JSR  PC
-         LDY  BIN_WRK
-         LDX  BIN_WRK+1
-         INY
-         DEX
-         BPL  OUT6
-DB9:	RTS
+dsp_bin:
+         lda  reg
+         ldx  reg+1
+         ldy  regb
+         bpl  out_plus
+         lda  #'-'
+         jsr  pc
+         sec
+         lda  #0
+         sbc  reg
+         pha
+         lda  #0
+         sbc  reg+1
+         tax
+         lda  #0
+         sbc  regb
+         tay
+         pla
+out_plus:
+         sta  bin_wrk
+         stx  bin_wrk+1
+         sty  bin_wrk+2
+         lda  #$f0
+         sta  reg2
+         lda  #0
+         sta  value
+         sta  value+1
+         sta  temp
+         sta  temp+1
+         tax
+         ldy  #2
+out4:
+         lda  bin_wrk,y
+         and  reg2
+         sta  reg2+1
+         beq  out2
+         lda  reg2
+         bpl  out1
+         lsr  reg2+1
+         lsr  reg2+1
+         lsr  reg2+1
+         lsr  reg2+1
+out1:
+         sed
+         lda  temp
+         clc
+         adc  bin_tbl,x
+         sta  temp
+         lda  temp+1
+         adc  bin_tbl+1,x
+         sta  temp+1
+         lda  value
+         adc  bin_tbl+2,x
+         sta  value
+         lda  value+1
+         adc  bin_tbl+3,x
+         sta  value+1
+         cld
+         dec  reg2+1
+         bne  out1
+out2:
+         inx
+         inx
+         inx
+         inx
+         lda  reg2
+         eor  #$ff
+         sta  reg2
+         bpl  out4
+         dey
+         bpl  out4
+out3:
+         ldx  #0
+         lda  value+1
+         jsr  unpack
+         lda  value
+         jsr  unpack
+         lda  temp+1
+         jsr  unpack
+         lda  temp
+         jsr  unpack
+         ldx  #7         ; zero suppress
+         ldy  #0
+out5:	lda  asc_wrk,y
+         cmp  #'0'
+         bne  out6
+         iny
+         dex
+         bne  out5
+out6:	lda  asc_wrk,y
+         sty  bin_wrk
+         stx  bin_wrk+1
+         jsr  pc
+         ldy  bin_wrk
+         ldx  bin_wrk+1
+         iny
+         dex
+         bpl  out6
+db9:	rts
 
 ;
-DM1:	.byte " sTACK: "
-DM2:	.byte " bASE:  "
-DM4:	.byte "rUNNING",$0D
+dm1:	.byte " sTACK: "
+dm2:	.byte " bASE:  "
+dm4:	.byte "rUNNING",$0d
 
 ;
-DEBUG:
-DB11:	JSR  DISPAD
-         LDA  P
-         STA  WORK
-         LDA  P+1
-         STA  WORK+1
-         LDX  #4
-         JSR  DIS4
-         JSR  CROUT
-         LDX  DBGFLG
-         BMI  DB9        ; TRACE ONLY
-         LDA  #<DM1
-         LDX  #>DM1
-         LDY  #8
-         JSR  PT
-         LDA  T+1
-         JSR  PRBYTE
-         LDA  T
-         JSR  DISHX
-         LDA  #'='
-         JSR  PC
-         LDA  T
-         STA  WORK
-         LDA  T+1
-         STA  WORK+1
-         LDX  #8
-         JSR  DIS4
-         JSR  CROUT
-         LDA  #<DM2
-         LDX  #>DM2
-         LDY  #8
-         JSR  PT
-         LDA  BASE+1
-         JSR  PRBYTE
-         LDA  BASE
-         JSR  DISHX
-         LDA  #'='
-         JSR  PC
-         LDA  BASE
-         SEC
-         SBC  #6
-         STA  WORK
-         LDA  BASE+1
-         SBC  #0
-         STA  WORK+1
-         LDX  #6
-         JSR  DIS4
-         JMP  CROUT
+debug:
+db11:	jsr  dispad
+         lda  p
+         sta  work
+         lda  p+1
+         sta  work+1
+         ldx  #4
+         jsr  dis4
+         jsr  crout
+         ldx  dbgflg
+         bmi  db9        ; trace only
+         lda  #<dm1
+         ldx  #>dm1
+         ldy  #8
+         jsr  pt
+         lda  t+1
+         jsr  prbyte
+         lda  t
+         jsr  dishx
+         lda  #'='
+         jsr  pc
+         lda  t
+         sta  work
+         lda  t+1
+         sta  work+1
+         ldx  #8
+         jsr  dis4
+         jsr  crout
+         lda  #<dm2
+         ldx  #>dm2
+         ldy  #8
+         jsr  pt
+         lda  base+1
+         jsr  prbyte
+         lda  base
+         jsr  dishx
+         lda  #'='
+         jsr  pc
+         lda  base
+         sec
+         sbc  #6
+         sta  work
+         lda  base+1
+         sbc  #0
+         sta  work+1
+         ldx  #6
+         jsr  dis4
+         jmp  crout
 ;
 ;
-; INTERPRETER INITIALIZATION
+; interpreter initialization
 ;
-INTERP:
-         PHP
-         PLA
-         STA  CALL_P
-         LDA  ACT_PCDA
-         STA  P
-         LDA  ACT_PCDA+1
-         STA  P+1
-         LDA  #<BREAK
-         STA  ERR_RTN
-         STA  CTRLC_RT
-         LDA  #>BREAK
-         STA  ERR_RTN+1
-         STA  CTRLC_RT+1
-         LDA  #<DM4
-         LDX  #>DM4
-         JSR  PL
-         LDY  #12
-         STY  RUNNING
-         LDA  #<P_STACK
-         STA  T
-         STA  BASE
-         LDA  #>P_STACK
-         STA  T+1
-         STA  BASE+1
-         LDA  #0
-         STA  DOS_FLG
-         STA  COLL_REG
-         STA  MASK
-         LDY  #7
-INTER_LP:
-	STA  S_ACTIVE,Y
-         STA  S_ANIMCT,Y
-         DEY
-         BPL  INTER_LP
+interp:
+         php
+         pla
+         sta  call_p
+         lda  act_pcda
+         sta  p
+         lda  act_pcda+1
+         sta  p+1
+         lda  #<break
+         sta  err_rtn
+         sta  ctrlc_rt
+         lda  #>break
+         sta  err_rtn+1
+         sta  ctrlc_rt+1
+         lda  #<dm4
+         ldx  #>dm4
+         jsr  pl
+         ldy  #12
+         sty  running
+         lda  #<p_stack
+         sta  t
+         sta  base
+         lda  #>p_stack
+         sta  t+1
+         sta  base+1
+         lda  #0
+         sta  dos_flg
+         sta  coll_reg
+         sta  mask
+         ldy  #7
+inter_lp:
+	sta  s_active,y
+         sta  s_animct,y
+         dey
+         bpl  inter_lp
 ;
 ; now process our sprite table on timer interrupts
 ;
-         SEI
-         LDA  #<TIMER_IN
-         STA  CINV
-         LDA  #>TIMER_IN
-         STA  CINV+1
-         CLI
-         JMP  INTERJ
+         sei
+         lda  #<timer_in
+         sta  cinv
+         lda  #>timer_in
+         sta  cinv+1
+         cli
+         jmp  interj
 ;
 ;
-SPT_STAT:
-         JSR  GET_SPT
-         LDA  S_ACTIVE,X
-         JMP  TRUE2
+spt_stat:
+         jsr  get_spt
+         lda  s_active,x
+         jmp  true2
 ;
-MOV_SPT:
-         JSR  PULTOP
-         STA  BPOINT+10
-         STX  BPOINT+11  ; moves
-         JSR  PULTOP
-         STA  BPOINT+12
-         STX  BPOINT+13  ; yinc
-         JSR  PULTOP
-         STA  BPOINT+14
-         STX  BPOINT+15  ; xinc
-         STY  BPOINT+16
-         JSR  PULTOP
-         STA  BPOINT+17  ; y pos
-         JSR  PULTOP
-         STA  BPOINT+18
-         STX  BPOINT+19  ; x pos
-         JSR  GET_SPT
-         SEI
-         LDA  BPOINT+10
-         STA  S_COUNT,X
-         LDA  BPOINT+11
-         STA  S_COUNT+8,X
-         LDA  BPOINT+12
-         STA  S_YINC,X
-         LDA  BPOINT+13
-         STA  S_YINC+8,X
-         LDA  BPOINT+14
-         STA  S_XINC,X
-         LDA  BPOINT+15
-         STA  S_XINC+8,X
-         LDA  BPOINT+16
-         STA  S_XINC+16,X
-         LDA  BPOINT+17
-         STA  S_YPOS+8,X
-         LDA  BPOINT+18
-         STA  S_XPOS+8,X
-         LDA  BPOINT+19
-         STA  S_XPOS+16,X
-         LDA  #0
-         STA  S_YPOS,X
-         STA  S_XPOS,X
-         LDA  #1
-         STA  S_ACTIVE,X
-         JSR  POS_SPRT
-         LDA  MASKS,X
-         ORA  VIC+$15    ; activate it
-         STA  VIC+$15
-         CLI
-         JMP  MAIN
+mov_spt:
+         jsr  pultop
+         sta  bpoint+10
+         stx  bpoint+11  ; moves
+         jsr  pultop
+         sta  bpoint+12
+         stx  bpoint+13  ; yinc
+         jsr  pultop
+         sta  bpoint+14
+         stx  bpoint+15  ; xinc
+         sty  bpoint+16
+         jsr  pultop
+         sta  bpoint+17  ; y pos
+         jsr  pultop
+         sta  bpoint+18
+         stx  bpoint+19  ; x pos
+         jsr  get_spt
+         sei
+         lda  bpoint+10
+         sta  s_count,x
+         lda  bpoint+11
+         sta  s_count+8,x
+         lda  bpoint+12
+         sta  s_yinc,x
+         lda  bpoint+13
+         sta  s_yinc+8,x
+         lda  bpoint+14
+         sta  s_xinc,x
+         lda  bpoint+15
+         sta  s_xinc+8,x
+         lda  bpoint+16
+         sta  s_xinc+16,x
+         lda  bpoint+17
+         sta  s_ypos+8,x
+         lda  bpoint+18
+         sta  s_xpos+8,x
+         lda  bpoint+19
+         sta  s_xpos+16,x
+         lda  #0
+         sta  s_ypos,x
+         sta  s_xpos,x
+         lda  #1
+         sta  s_active,x
+         jsr  pos_sprt
+         lda  masks,x
+         ora  vic+$15    ; activate it
+         sta  vic+$15
+         cli
+         jmp  main
 ;
-ANM_SPT:
-         LDA  #16
-         STA  BPOINT     ; pointer count
-ANM_1:
-         JSR  PULTOP     ; get pointer
-         LDY  BPOINT
-         STA  BPOINT,Y
-         DEC  BPOINT
-         BNE  ANM_1      ; more
-         LDA  #254
-         JSR  CHK_TOP    ; frames per pointer
-         TAY
-         INY             ; back to supplied value
-         STY  BPOINT+18  ; frame change count
-         JSR  GET_SPT
-         STA  BPOINT+19  ; sprite
-         INX
-         TXA             ; next one (so we can work backwards)
-         ASL
-         ASL
-         ASL
-         ASL             ; times 16
-         TAY
-         LDX  #16        ; pointer count
-         SEI
-ANM_3:
-         LDA  BPOINT,X
-         BEQ  ANM_2      ; not used
-         INC  BPOINT     ; count used ones
-ANM_2:
-         DEY
-         STA  S_POINTR,Y
-         DEX
-         BNE  ANM_3      ; more
-         LDY  BPOINT+19  ; sprite
-         LDA  BPOINT     ; used count
-         STA  S_ANIMFM,Y
-         LDA  BPOINT+18  ; frame count
-         STA  S_ANIMCT,Y
-         LDA  #0
-         STA  S_ANIMPS,Y
-         STA  S_ANIMCC,Y
-         CLI
-         STY  SPRITENO
-         LDA  BPOINT+1   ; first pointer
-         STA  FNC_VAL
-         JMP  S_PNT2     ; now point to first
+anm_spt:
+         lda  #16
+         sta  bpoint     ; pointer count
+anm_1:
+         jsr  pultop     ; get pointer
+         ldy  bpoint
+         sta  bpoint,y
+         dec  bpoint
+         bne  anm_1      ; more
+         lda  #254
+         jsr  chk_top    ; frames per pointer
+         tay
+         iny             ; back to supplied value
+         sty  bpoint+18  ; frame change count
+         jsr  get_spt
+         sta  bpoint+19  ; sprite
+         inx
+         txa             ; next one (so we can work backwards)
+         asl
+         asl
+         asl
+         asl             ; times 16
+         tay
+         ldx  #16        ; pointer count
+         sei
+anm_3:
+         lda  bpoint,x
+         beq  anm_2      ; not used
+         inc  bpoint     ; count used ones
+anm_2:
+         dey
+         sta  s_pointr,y
+         dex
+         bne  anm_3      ; more
+         ldy  bpoint+19  ; sprite
+         lda  bpoint     ; used count
+         sta  s_animfm,y
+         lda  bpoint+18  ; frame count
+         sta  s_animct,y
+         lda  #0
+         sta  s_animps,y
+         sta  s_animcc,y
+         cli
+         sty  spriteno
+         lda  bpoint+1   ; first pointer
+         sta  fnc_val
+         jmp  s_pnt2     ; now point to first
 ;
-SPRT_X:
-         JSR  GET_SPT
-         ASL
-         TAY
-         LDA  VIC,Y      ; Low byte
-         STA  REG
-         LDA  VIC+$10
-         AND  MASKS,X    ; high bit
-         BEQ  SPRT_X1    ; off
-         LDA  #1         ; mark on
-SPRT_X1: STA  REG+1
-         JMP  MAINP      ; push result
+sprt_x:
+         jsr  get_spt
+         asl
+         tay
+         lda  vic,y      ; low byte
+         sta  reg
+         lda  vic+$10
+         and  masks,x    ; high bit
+         beq  sprt_x1    ; off
+         lda  #1         ; mark on
+sprt_x1: sta  reg+1
+         jmp  mainp      ; push result
 ;
-SPRT_Y:
-         JSR  GET_SPT
-         ASL
-         TAY
-         LDA  VIC+1,Y
-         JMP  TRUE2      ; result
+sprt_y:
+         jsr  get_spt
+         asl
+         tay
+         lda  vic+1,y
+         jmp  true2      ; result
 ;
-STOP_SPT:
-         LDA  #0
-         PHA
-CHNG_SPT:
-         JSR  GET_SPT
-         PLA             ; get new status
-         STA  S_ACTIVE,X ; mark inactive/active
-         JMP  MAIN
+stop_spt:
+         lda  #0
+         pha
+chng_spt:
+         jsr  get_spt
+         pla             ; get new status
+         sta  s_active,x ; mark inactive/active
+         jmp  main
 ;
-STRT_SPT:
-         LDA  #1
-         PHA
-         BNE  CHNG_SPT
+strt_spt:
+         lda  #1
+         pha
+         bne  chng_spt
 ;
-TIMER_IN:          ; here for timer interrupts
+timer_in:          ; here for timer interrupts
 ;
 ; first look for collisions
 ;
-         LDA  VIC+25     ; interrupt register
-         AND  #$84       ; sprite-sprite collision?
-         CMP  #$84
-         BNE  TIMER2     ; nope - normal interrupt
-         STA  VIC+25     ; re-enable
-         LDA  VIC+30     ; collision register
-         TAX             ; save it
-         AND  MASK
-         BEQ  FORGET     ; wrong sprite - forget interrupt
-         STX  COLL_REG   ; save interrupt register
-         LDX  #1
-         STX  INT_TEMP
-         DEX
-TIM_COL1: LDA  COLL_REG
-         AND  INT_TEMP   ; this sprite involved?
-         BEQ  TIM_COL2   ; no
-         LDA  #0
-         STA  S_ACTIVE,X ; yes - stop it
-TIM_COL2: INX             ; next sprite
-         ASL  INT_TEMP   ; next mask
-         BNE  TIM_COL1   ; more to go
-         STA  MASK       ; stop further tests
-         LDA  VIC+26
-         AND  #$FB       ; stop interrupts
-         STA  VIC+26
-FORGET:	PLA
-        TAY
-        PLA
-        TAX
-        PLA
-        RTI             ; off we go
+         lda  vic+25     ; interrupt register
+         and  #$84       ; sprite-sprite collision?
+         cmp  #$84
+         bne  timer2     ; nope - normal interrupt
+         sta  vic+25     ; re-enable
+         lda  vic+30     ; collision register
+         tax             ; save it
+         and  mask
+         beq  forget     ; wrong sprite - forget interrupt
+         stx  coll_reg   ; save interrupt register
+         ldx  #1
+         stx  int_temp
+         dex
+tim_col1: lda  coll_reg
+         and  int_temp   ; this sprite involved?
+         beq  tim_col2   ; no
+         lda  #0
+         sta  s_active,x ; yes - stop it
+tim_col2: inx             ; next sprite
+         asl  int_temp   ; next mask
+         bne  tim_col1   ; more to go
+         sta  mask       ; stop further tests
+         lda  vic+26
+         and  #$fb       ; stop interrupts
+         sta  vic+26
+forget:	pla
+        tay
+        pla
+        tax
+        pla
+        rti             ; off we go
 
 ;
-TIMER2:          ; here for non-collision interrupts
-         CLD
-         LDX  #0
-TIMER_CK: LDA  S_ACTIVE,X ; sprite active?
-         BNE  TIMER_AC   ; yes
-TIMER_NX: INX
-         CPX  #8
-         BNE  TIMER_CK   ; more to go
-         JMP  (INT_RTN)
+timer2:          ; here for non-collision interrupts
+         cld
+         ldx  #0
+timer_ck: lda  s_active,x ; sprite active?
+         bne  timer_ac   ; yes
+timer_nx: inx
+         cpx  #8
+         bne  timer_ck   ; more to go
+         jmp  (int_rtn)
 ;
-TIMER_AC:          ; here for active one
-         CLC
-         LDA  S_XINC,X
-         ADC  S_XPOS,X
-         STA  S_XPOS,X
-         LDA  S_XINC+8,X
-         ADC  S_XPOS+8,X
-         STA  S_XPOS+8,X
-         LDA  S_XINC+16,X
-         ADC  S_XPOS+16,X
-         STA  S_XPOS+16,X
-         CLC
-         LDA  S_YINC,X
-         ADC  S_YPOS,X
-         STA  S_YPOS,X
-         LDA  S_YINC+8,X
-         ADC  S_YPOS+8,X
-         STA  S_YPOS+8,X
-         SEC
-         LDA  S_COUNT,X
-         SBC  #1
-         STA  S_COUNT,X
-         LDA  S_COUNT+8,X
-         SBC  #0
-         STA  S_COUNT+8,X
-         BPL  TIMER_ON
-         LDA  #0         ; finished with this oe
-         STA  S_ACTIVE,X ; turn it off
-TIMER_ON:
-         JSR  POS_SPRT
-         LDA  S_ANIMCT,X
-         BEQ  NO_ANIM
+timer_ac:          ; here for active one
+         clc
+         lda  s_xinc,x
+         adc  s_xpos,x
+         sta  s_xpos,x
+         lda  s_xinc+8,x
+         adc  s_xpos+8,x
+         sta  s_xpos+8,x
+         lda  s_xinc+16,x
+         adc  s_xpos+16,x
+         sta  s_xpos+16,x
+         clc
+         lda  s_yinc,x
+         adc  s_ypos,x
+         sta  s_ypos,x
+         lda  s_yinc+8,x
+         adc  s_ypos+8,x
+         sta  s_ypos+8,x
+         sec
+         lda  s_count,x
+         sbc  #1
+         sta  s_count,x
+         lda  s_count+8,x
+         sbc  #0
+         sta  s_count+8,x
+         bpl  timer_on
+         lda  #0         ; finished with this oe
+         sta  s_active,x ; turn it off
+timer_on:
+         jsr  pos_sprt
+         lda  s_animct,x
+         beq  no_anim
 ;
 ; now animate the pointers
 ;
-         LDY  S_ANIMCC,X ; current frame count
-         INY
-         TYA
-         CMP  S_ANIMCT,X ; reached limit?
-         BCS  NEW_FRAM   ; yes
-         STA  S_ANIMCC,X ; no - save it
-         BCC  NO_ANIM    ; that's all
-NEW_FRAM:
-         LDA  #0
-         STA  S_ANIMCC,X ; back to start
-         LDY  S_ANIMPS,X ; which position next?
-         INY
-         TYA
-         CMP  S_ANIMFM,X ; limit?
-         BCC  ANIM_OK    ; no
-         LDA  #0         ; YES
-ANIM_OK:
-         STA  S_ANIMPS,X ; save current position
-         TXA             ; sprite
-         ASL
-         ASL
-         ASL
-         ASL             ; times 16
-         ORA  S_ANIMPS,X ; plus frame number
-         TAY
-         LDA  S_POINTR,Y ; get pointer
-         STA  INT_TEMP
+         ldy  s_animcc,x ; current frame count
+         iny
+         tya
+         cmp  s_animct,x ; reached limit?
+         bcs  new_fram   ; yes
+         sta  s_animcc,x ; no - save it
+         bcc  no_anim    ; that's all
+new_fram:
+         lda  #0
+         sta  s_animcc,x ; back to start
+         ldy  s_animps,x ; which position next?
+         iny
+         tya
+         cmp  s_animfm,x ; limit?
+         bcc  anim_ok    ; no
+         lda  #0         ; yes
+anim_ok:
+         sta  s_animps,x ; save current position
+         txa             ; sprite
+         asl
+         asl
+         asl
+         asl             ; times 16
+         ora  s_animps,x ; plus frame number
+         tay
+         lda  s_pointr,y ; get pointer
+         sta  int_temp
 ;
 ; now point the sprite
 ;
-         LDA  CIA2+2
-         PHA
-         AND  #$FC
-         STA  CIA2+2
-         LDA  CIA2
-         AND  #3
-         EOR  #$FF
-         ASL
-         ASL
-         ASL
-         ASL
-         ASL
-         ASL
-         STA  INT_TMP2   ; bank
-         PLA
-         STA  CIA2+2
-         LDA  REG
-         PHA
-         LDA  REG+1
-         PHA
-         LDA  VIC+$18
-         AND  #$F0       ; video base
-         LSR
-         LSR
-         CLC
-         ADC  #3
-         ADC  INT_TMP2   ; add bank
-         STA  REG+1
-         LDA  #$F8
-         STA  REG
-         TXA             ; sprite
-         TAY
-         LDA  INT_TEMP   ; pointer
-         STA  (REG),Y
-         PLA
-         STA  REG+1
-         PLA
-         STA  REG
-NO_ANIM: JMP  TIMER_NX
+         lda  cia2+2
+         pha
+         and  #$fc
+         sta  cia2+2
+         lda  cia2
+         and  #3
+         eor  #$ff
+         asl
+         asl
+         asl
+         asl
+         asl
+         asl
+         sta  int_tmp2   ; bank
+         pla
+         sta  cia2+2
+         lda  reg
+         pha
+         lda  reg+1
+         pha
+         lda  vic+$18
+         and  #$f0       ; video base
+         lsr
+         lsr
+         clc
+         adc  #3
+         adc  int_tmp2   ; add bank
+         sta  reg+1
+         lda  #$f8
+         sta  reg
+         txa             ; sprite
+         tay
+         lda  int_temp   ; pointer
+         sta  (reg),y
+         pla
+         sta  reg+1
+         pla
+         sta  reg
+no_anim: jmp  timer_nx
 ;
-POS_SPRT:
-         LDA  S_XPOS+16,X
-         AND  #1
-         BEQ  POS_1      ; high-order zero
-         LDA  MASKS,X
-POS_1:	STA  INT_TEMP
-         LDA  XMASKS,X
-         AND  VIC+$10
-         ORA  INT_TEMP
-         STA  VIC+$10
-         TXA
-         ASL
-         TAY
-         LDA  S_XPOS+8,X
-         STA  VIC,Y
-         LDA  S_YPOS+8,X
-         STA  VIC+1,Y
-         RTS
+pos_sprt:
+         lda  s_xpos+16,x
+         and  #1
+         beq  pos_1      ; high-order zero
+         lda  masks,x
+pos_1:	sta  int_temp
+         lda  xmasks,x
+         and  vic+$10
+         ora  int_temp
+         sta  vic+$10
+         txa
+         asl
+         tay
+         lda  s_xpos+8,x
+         sta  vic,y
+         lda  s_ypos+8,x
+         sta  vic+1,y
+         rts
 ;
-GET_SPT:
-         LDA  #7
-         JSR  CHK_TOP
-         TAX
-         RTS
+get_spt:
+         lda  #7
+         jsr  chk_top
+         tax
+         rts
 ;
-LOA_SVE:          ; get ready for load/save
-         JSR  PULTOP     ; load/verify flag
-         STA  SCE_LIM
-         STX  SCE_LIM+1
-         JSR  PULTOP
-         STA  TEMP       ; address to load/save
-         STX  TEMP+1
-         JSR  PULTOP     ; device number
-         TAX             ; device
-         LDA  #1         ; file 1
-         LDY  #0
-LOA_SVE1: JSR  SETLFS
-         LDY  #0
-         LDA  (P),Y      ; length of name
-         PHA
-         LDA  P          ; address of name
-         CLC
-         ADC  #1
-         TAX
-         LDA  P+1
-         ADC  #0
-         TAY
-         PLA             ; size of name
-         JSR  SETNAM
-         CLC
-         ADC  #1         ; bypass length
-         ADC  P
-         STA  P
-         BCC  LOADIT1
-         INC  P+1
-LOADIT1:
-         RTS
+loa_sve:          ; get ready for load/save
+         jsr  pultop     ; load/verify flag
+         sta  sce_lim
+         stx  sce_lim+1
+         jsr  pultop
+         sta  temp       ; address to load/save
+         stx  temp+1
+         jsr  pultop     ; device number
+         tax             ; device
+         lda  #1         ; file 1
+         ldy  #0
+loa_sve1: jsr  setlfs
+         ldy  #0
+         lda  (p),y      ; length of name
+         pha
+         lda  p          ; address of name
+         clc
+         adc  #1
+         tax
+         lda  p+1
+         adc  #0
+         tay
+         pla             ; size of name
+         jsr  setnam
+         clc
+         adc  #1         ; bypass length
+         adc  p
+         sta  p
+         bcc  loadit1
+         inc  p+1
+loadit1:
+         rts
 ;
-LOADIT:
-         JSR  LOA_SVE
-         LDA  SCE_LIM    ; load/verify flag
-         LDX  TEMP
-         LDY  TEMP+1     ; address
-         JSR  LOAD
-         STX  CALL_X
-         STY  CALL_Y
-LOADIT2: BCS  LOADIT3    ; error in accumulator
-LOADIT4: JSR  READST     ; otherwise check READST
-LOADIT3:
-         STA  DOS_FLG
-         JMP  MAIN       ; done
+loadit:
+         jsr  loa_sve
+         lda  sce_lim    ; load/verify flag
+         ldx  temp
+         ldy  temp+1     ; address
+         jsr  load
+         stx  call_x
+         sty  call_y
+loadit2: bcs  loadit3    ; error in accumulator
+loadit4: jsr  readst     ; otherwise check readst
+loadit3:
+         sta  dos_flg
+         jmp  main       ; done
 ;
-SAVEIT:
-         JSR  LOA_SVE
-         LDX  SCE_LIM
-         LDY  SCE_LIM+1
-         CPY  TEMP+1     ; end less than start?
-         BCC  SAVE_ERR   ; yes - oops
-         BNE  SAVE_OK    ; not equal - must be greater (OK)
-         CPX  TEMP       ; high order same - is low order less than start?
-         BCC  SAVE_ERR   ; yes - oops
-         BEQ  SAVE_ERR   ; even same is no good
-SAVE_OK:
-         LDA  #TEMP
-         JSR  SAVE
-         JMP  LOADIT2
+saveit:
+         jsr  loa_sve
+         ldx  sce_lim
+         ldy  sce_lim+1
+         cpy  temp+1     ; end less than start?
+         bcc  save_err   ; yes - oops
+         bne  save_ok    ; not equal - must be greater (ok)
+         cpx  temp       ; high order same - is low order less than start?
+         bcc  save_err   ; yes - oops
+         beq  save_err   ; even same is no good
+save_ok:
+         lda  #temp
+         jsr  save
+         jmp  loadit2
 ;
-SAVE_ERR: JMP  CHK_ERR    ; start address >= end address
+save_err: jmp  chk_err    ; start address >= end address
 ;
-X_OPEN:          ; OPEN A FILE
-         JSR  PULTOP     ; secondary address
-         STA  TEMP
-         JSR  PULTOP     ; device
-         STA  TEMP+1
-         JSR  PULTOP     ; unit
-         LDX  TEMP+1     ; device
-         LDY  TEMP       ; secondary address
-         JSR  LOA_SVE1   ; now SETLFS and process file name
-         JSR  OPEN       ; now open the file
-         JMP  LOADIT2    ; and see the result
+x_open:          ; open a file
+         jsr  pultop     ; secondary address
+         sta  temp
+         jsr  pultop     ; device
+         sta  temp+1
+         jsr  pultop     ; unit
+         ldx  temp+1     ; device
+         ldy  temp       ; secondary address
+         jsr  loa_sve1   ; now setlfs and process file name
+         jsr  open       ; now open the file
+         jmp  loadit2    ; and see the result
 ;
-X_CLOSE:          ; CLOSE A FILE
-         JSR  PULTOP     ; file number
-         JSR  CLOSE
-         JMP  LOADIT2    ; and see the result
+x_close:          ; close a file
+         jsr  pultop     ; file number
+         jsr  close
+         jmp  loadit2    ; and see the result
 ;
-X_PUT:
-         JSR  PULTOP     ; file number
-         TAX             ; zero (clear channel?)
-         BEQ  X_PUT0
-         JSR  CHKOUT
-         JMP  LOADIT2    ; result
+x_put:
+         jsr  pultop     ; file number
+         tax             ; zero (clear channel?)
+         beq  x_put0
+         jsr  chkout
+         jmp  loadit2    ; result
 ;
-X_GET:
-         JSR  PULTOP     ; file number
-         TAX             ; zero (clear channel?)
-         BEQ  X_GET0
-         JSR  CHKIN
-         JMP  LOADIT2    ; result
+x_get:
+         jsr  pultop     ; file number
+         tax             ; zero (clear channel?)
+         beq  x_get0
+         jsr  chkin
+         jmp  loadit2    ; result
 ;
-X_GET0:
-X_PUT0:
-         JSR  CLRCHN     ; clear channels
-         JMP  MAIN
-;
-;
-;
-FREEZE_S:
-         SEI
-         STY  COLL_REG   ; no collision yet
-         LDA  VIC+25
-         AND  #$84       ; clear any pending interrupts
-         STA  VIC+25
-         LDA  VIC+30     ; clear any current collisions
-         JSR  PULTOP     ; mask
-         STA  MASK
-         CMP  #0         ; none?
-         BEQ  FREEZE1    ; yes - disable interrupts
-         LDA  VIC+26
-         ORA  #4         ; enable interrupts
-FREEZE2: STA  VIC+26
-         CLI
-         JMP  MAIN
-;
-FREEZE1: LDA  VIC+26
-         AND  #$FB
-         JMP  FREEZE2
-;
-FR_STAT:
-         LDA  COLL_REG
-         JMP  TRUE2
+x_get0:
+x_put0:
+         jsr  clrchn     ; clear channels
+         jmp  main
 ;
 ;
-         ;BRK
+;
+freeze_s:
+         sei
+         sty  coll_reg   ; no collision yet
+         lda  vic+25
+         and  #$84       ; clear any pending interrupts
+         sta  vic+25
+         lda  vic+30     ; clear any current collisions
+         jsr  pultop     ; mask
+         sta  mask
+         cmp  #0         ; none?
+         beq  freeze1    ; yes - disable interrupts
+         lda  vic+26
+         ora  #4         ; enable interrupts
+freeze2: sta  vic+26
+         cli
+         jmp  main
+;
+freeze1: lda  vic+26
+         and  #$fb
+         jmp  freeze2
+;
+fr_stat:
+         lda  coll_reg
+         jmp  true2
+;
+;
+         ;brk
 
 	.endscope
 
 ;***********************************************
-; PASCAL COMPILER
-; for Commodore 64
-; PART 4
-; Authors_ Nick Gammon & Sue Gobbett
-;  HIMEM_$8500  SYM $9500
+; pascal compiler
+; for commodore 64
+; part 4
+; authors_ nick gammon & sue gobbett
+;  himem_$8500  sym $9500
 ;***********************************************
 
 	.scope
 
-	V1	= P1
-	INIT	= V1
-	GETNEXT	= V1+3
-	COMSTL	= V1+6
-	ISITHX	= V1+9
-	ISITAL	= V1+12
-	ISITNM	= V1+15
-	CHAR	= V1+18
-	GEN2_B	= V1+21
-	DISHX	= V1+24
-	ERROR	= V1+27
-	PRBYTE	= V1+51
-	GTOKEN	= V1+54
-	SPARE2	= V1+57
-	FIXAD	= V1+60
-	PSHWRK	= V1+63
-	PULWRK	= V1+66
-	PC	= V1+69
-	PT	= V1+72
-	PL	= V1+75
-	TOKEN1	= V1+78
-	GETANS	= V1+81
-	PUTSP	= V1+84
-	DISPAD	= V1+87
-	CROUT	= V1+90
-	GET_NUM	= V1+96
-	GET_HEX	= V1+99
-	PAUSE	= V1+105
-	HOME	= V1+108
-	RDKEY	= V1+111
+	v1	= p1
+	init	= v1
+	getnext	= v1+3
+	comstl	= v1+6
+	isithx	= v1+9
+	isital	= v1+12
+	isitnm	= v1+15
+	char	= v1+18
+	gen2_b	= v1+21
+	dishx	= v1+24
+	error	= v1+27
+	prbyte	= v1+51
+	gtoken	= v1+54
+	spare2	= v1+57
+	fixad	= v1+60
+	pshwrk	= v1+63
+	pulwrk	= v1+66
+	pc	= v1+69
+	pt	= v1+72
+	pl	= v1+75
+	token1	= v1+78
+	getans	= v1+81
+	putsp	= v1+84
+	dispad	= v1+87
+	crout	= v1+90
+	get_num	= v1+96
+	get_hex	= v1+99
+	pause	= v1+105
+	home	= v1+108
+	rdkey	= v1+111
 
 ;***********************************************
-; PART 3 VECTORS
+; part 3 vectors
 ;***********************************************
 
-	V3	= P3
-	START	= V3
-	RESTART	= V3+3
-	DSP_BIN	= V3+6
-	ST_CMP	= P3+9
-	ST_SYN	= P3+12
-	DEBUG	= P3+15
-	BELL1_AX	= P3+24
-	MOV_SPT	= P3+27
-	SPT_STAT	= P3+30
-	SPRT_X	= P3+33
-	SPRT_Y	= P3+36
-	STOP_SPT	= P3+39
-	STRT_SPT	= P3+42
-	ANM_SPT	= P3+45
-	LOADIT	= P3+48
-	SAVEIT	= P3+51
-	FREEZE_S	= P3+54
-	FR_STAT	= P3+57
-	X_OPEN	= P3+60
-	X_CLOSE	= P3+63
-	X_PUT	= P3+66
-	X_GET	= P3+69
+	v3	= p3
+	start	= v3
+	restart	= v3+3
+	dsp_bin	= v3+6
+	st_cmp	= p3+9
+	st_syn	= p3+12
+	debug	= p3+15
+	bell1_ax	= p3+24
+	mov_spt	= p3+27
+	spt_stat	= p3+30
+	sprt_x	= p3+33
+	sprt_y	= p3+36
+	stop_spt	= p3+39
+	strt_spt	= p3+42
+	anm_spt	= p3+45
+	loadit	= p3+48
+	saveit	= p3+51
+	freeze_s	= p3+54
+	fr_stat	= p3+57
+	x_open	= p3+60
+	x_close	= p3+63
+	x_put	= p3+66
+	x_get	= p3+69
 
 ;***********************************************
-; PART 5 VECTORS
+; part 5 vectors
 ;***********************************************
 
-	EDITOR	= P5
-	GETLN	= P5+3
-	GETLNZ	= P5+6
-	GETLN1	= P5+9
+	editor	= p5
+	getln	= p5+3
+	getlnz	= p5+6
+	getln1	= p5+9
 
 ;***********************************************
-; PART 4 STARTS HERE
+; part 4 starts here
 ;***********************************************
 
-        ;.org $A380 ; P4
+        ;.org $a380 ; p4
 
 ;***********************************************
-; PART 4 VECTORS
+; part 4 vectors
 ;***********************************************
 
-        JMP  INTERJ
-        JMP  DIS4
-        JMP  BREAK
-        JMP  CHK_ERR
-        JMP  MAIN
-        JMP  MAINP
-        JMP  CHK_TOP
-        JMP  TRUE2
-        JMP  PULTOP
-        JMP  S_PNT2
+        jmp  interj
+        jmp  dis4
+        jmp  break
+        jmp  chk_err
+        jmp  main
+        jmp  mainp
+        jmp  chk_top
+        jmp  true2
+        jmp  pultop
+        jmp  s_pnt2
 
-MASKS: 	.byte $01,$02,$04,$08,$10,$20,$40,$80
-XMASKS: ; complement of above
-        .byte $FE,$FD,$FB,$F7,$EF,$DF,$BF,$7F
-
-;
-DM5:	.byte $B6,$C7,$0D
-DM6:	.byte "bREAK ...",$0D
-DM7:	.byte $BD," OCCURRED AT",$B0,32
+masks: 	.byte $01,$02,$04,$08,$10,$20,$40,$80
+xmasks: ; complement of above
+        .byte $fe,$fd,$fb,$f7,$ef,$df,$bf,$7f
 
 ;
-; DISPLAY (X) CHARACTERS FROM (WORK)
-;
-DIS4:	TXA
-        PHA
-        JSR  PUTSP
-        PLA
-        TAX
-DIS5:	LDY  #0
-        LDA  (WORK),Y
-        INC  WORK
-        BNE  DIS5_A
-        INC  WORK+1
-DIS5_A:
-        TAY
-        TXA
-        PHA
-        TYA
-        JSR  DISHX
-        PLA
-        TAX
-        DEX
-        BNE  DIS5
-        RTS
-
-; INTERPRETER INITIALIZATION
-;
-INTERJ:
-        LDA  #$7F
-        STA  CIA2+13
-        JMP  SOUND_CL   ; clear SID, go to MAIN
+dm5:	.byte $b6,$c7,$0d
+dm6:	.byte "bREAK ...",$0d
+dm7:	.byte $bd," OCCURRED AT",$b0,32
 
 ;
+; display (x) characters from (work)
 ;
-BELL1:
-        PHA
-        LDA  #0
-        STA  RUNNING
-        JSR  CROUT
-        PLA
-        RTS
+dis4:	txa
+        pha
+        jsr  putsp
+        pla
+        tax
+dis5:	ldy  #0
+        lda  (work),y
+        inc  work
+        bne  dis5_a
+        inc  work+1
+dis5_a:
+        tay
+        txa
+        pha
+        tya
+        jsr  dishx
+        pla
+        tax
+        dex
+        bne  dis5
+        rts
+
+; interpreter initialization
+;
+interj:
+        lda  #$7f
+        sta  cia2+13
+        jmp  sound_cl   ; clear sid, go to main
 
 ;
-RUNERR:	JSR  BELL1
-        LDA  #<DM7
-        LDX  #>DM7
-        LDY  #15
-        JSR  PT
-        LDA  LASTP+1
-        JSR  PRBYTE
-        LDA  LASTP
-        JSR  DISHX
-FINISHD:
-        LDA  #0
-        STA  QUEUE      ; clear keyboard queue
-        JSR  CROUT
-        LDA  #<FIN_MSG
-        LDX  #>FIN_MSG
-        LDY  #30
-        JSR  PT
-        JSR  RDKEY      ; wait till message seen
-        JMP  RESTART
+;
+bell1:
+        pha
+        lda  #0
+        sta  running
+        jsr  crout
+        pla
+        rts
 
 ;
-FIN_MSG: .byte "RUN FINISHED - PRESS A KEY ..."
+runerr:	jsr  bell1
+        lda  #<dm7
+        ldx  #>dm7
+        ldy  #15
+        jsr  pt
+        lda  lastp+1
+        jsr  prbyte
+        lda  lastp
+        jsr  dishx
+finishd:
+        lda  #0
+        sta  queue      ; clear keyboard queue
+        jsr  crout
+        lda  #<fin_msg
+        ldx  #>fin_msg
+        ldy  #30
+        jsr  pt
+        jsr  rdkey      ; wait till message seen
+        jmp  restart
 
 ;
-CHK_KBD:
-         CMP  #$AA       ; COMMODORE/N
-         BNE  CHK_NOTN
-         JSR  GETIN
-         LDA  #0
-         STA  DBGFLG
-         SEC
-         RTS
-CHK_NOTN:
-	CMP  #$A3       ; COMMODORE/T
-        BNE  CHK_NOTT
-        JSR  GETIN
-        LDA  #$80
-        STA  DBGFLG
-        STA  DCODE
-        SEC
-        RTS
-CHK_NOTT:
-	CMP  #$AC       ; COMMODORE/D
-        BNE  CHK_NOTD
-        JSR  GETIN
-        LDA  #1
-        STA  DBGFLG
-        STA  DCODE
-        SEC
-        RTS
-CHK_NOTD:
-	CLC
-        RTS
+fin_msg: .byte "RUN FINISHED - PRESS A KEY ..."
 
 ;
-OUTCR:
-        JSR  CROUT      ; OUTPUT C/R
-        JMP  MAIN
+chk_kbd:
+         cmp  #$aa       ; commodore/n
+         bne  chk_notn
+         jsr  getin
+         lda  #0
+         sta  dbgflg
+         sec
+         rts
+chk_notn:
+	cmp  #$a3       ; commodore/t
+        bne  chk_nott
+        jsr  getin
+        lda  #$80
+        sta  dbgflg
+        sta  dcode
+        sec
+        rts
+chk_nott:
+	cmp  #$ac       ; commodore/d
+        bne  chk_notd
+        jsr  getin
+        lda  #1
+        sta  dbgflg
+        sta  dcode
+        sec
+        rts
+chk_notd:
+	clc
+        rts
 
 ;
-LOWLIT:	STY  REG+1
-        AND  #$7F
-        STA  REG
-MAINP:	JSR  PSHTOP
-MAIN:	LDA  DBGFLG
-        BEQ  MAIN_2
-        JSR  DEBUG
-MAIN_2:
-        JSR  STOP
-        BNE  MAIN_3
-        JMP  BREAK      ; stop pressed
-MAIN_3:	LDA  QUEUE      ; key in queue?
-        BEQ  MAIN_OK    ; no
-        LDA  KBD_BUF    ; what is it?
-        JSR  CHK_KBD
-MAIN_OK:
-        LDA  P
-        STA  LASTP
-        LDA  P+1
-        STA  LASTP+1
-        LDY  #0
-        STY  REGB
-        LDA  (P),Y
-        BMI  MAIN_5
-        CMP  #$62
-        BCS  INVINS
-MAIN_5:
-        INC  P
-        BNE  MAIN_1
-        INC  P+1
-MAIN_1:
-        TAX
-        BMI  LOWLIT
-        LDA  EXADTBH,X
-        PHA
-        LDA  EXADTBL,X
-        PHA
-        RTS
+outcr:
+        jsr  crout      ; output c/r
+        jmp  main
 
 ;
-NOTIMP:
-INVINS:
-         LDA  #<DM5
-         LDX  #>DM5
-NOTIM1:
-         JSR  BELL1
-         JSR  PL
-         JMP  RUNERR
-;
-BREAK:
-         LDA  #<DM6
-         LDX  #>DM6
-         JMP  NOTIM1
-;
-EXADTBH:
-         .hibytes LIT-1
-         .hibytes DEF_SPRT-1
-         .hibytes NEG-1
-         .hibytes HPLOT-1
-         .hibytes ADD-1
-         .hibytes TOHPLOT-1
-         .hibytes SUB-1
-         .hibytes GETKEY-1
-         .hibytes MUL-1
-         .hibytes CLEAR-1
-         .hibytes DIV-1
-         .hibytes MOD-1
-         .hibytes ADRNN-1
-         .hibytes ADRNC-1
-         .hibytes ADRAN-1
-         .hibytes ADRAC-1
-         .hibytes EQL-1
-         .hibytes FINISHD-1
-         .hibytes NEQ-1
-         .hibytes CUR-1
-         .hibytes LSS-1
-         .hibytes FREEZE_S-1
-         .hibytes GEQ-1
-         .hibytes INH-1
-         .hibytes GTR-1
-         .hibytes LEQ-1
-         .hibytes ORR-1
-         .hibytes XXXAND-1
-         .hibytes INP-1
-         .hibytes INPC-1
-         .hibytes OUT-1
-         .hibytes OUTC-1
-         .hibytes XXXEOR-1
-         .hibytes OUH-1
-         .hibytes SHL-1
-         .hibytes OUS-1
-         .hibytes SHR-1
-         .hibytes INS-1
-         .hibytes XXXINC-1
-         .hibytes CLL-1
-         .hibytes XXXDEC-1
-         .hibytes RTN-1
-         .hibytes MOV-1
-         .hibytes CLA-1
-         .hibytes LOD-1
-         .hibytes LODC-1
-         .hibytes XXXLDA-1
-         .hibytes LDAC-1
-         .hibytes LDI-1
-         .hibytes LDIC-1
-         .hibytes STO-1
-         .hibytes STOC-1
-         .hibytes XXXSTA-1
-         .hibytes STAC-1
-         .hibytes STI-1
-         .hibytes STIC-1
-         .hibytes ABSCLL-1
-         .hibytes WAIT-1
-         .hibytes XOR-1
-         .hibytes INT-1
-         .hibytes XXXJMP-1
-         .hibytes JMZ-1
-         .hibytes JM1-1
-         .hibytes SPRITE-1
-         .hibytes MVE_SPRT-1
-         .hibytes VOICE-1
-         .hibytes GRAPHICS-1
-         .hibytes SOUND-1
-         .hibytes SET_CLK-1
-         .hibytes SCROLL-1
-         .hibytes SP_COLL-1
-         .hibytes BK_COLL-1
-         .hibytes CURSORX-1
-         .hibytes CURSORY-1
-         .hibytes CLOCK-1
-         .hibytes PADDLE-1
-         .hibytes SPRT_X-1
-         .hibytes JOY-1
-         .hibytes SPRT_Y-1
-         .hibytes OSC3-1
-         .hibytes VOICE3-1
-         .hibytes SCROLLX-1
-         .hibytes SCROLLY-1
-         .hibytes SPT_STAT-1
-         .hibytes MOV_SPT-1
-         .hibytes STOP_SPT-1
-         .hibytes STRT_SPT-1
-         .hibytes ANM_SPT-1
-         .hibytes ABS-1
-         .hibytes INVALID-1
-         .hibytes LOADIT-1
-         .hibytes SAVEIT-1
-         .hibytes X_OPEN-1
-         .hibytes FR_STAT-1
-         .hibytes OUTCR-1
-         .hibytes X_CLOSE-1
-         .hibytes X_GET-1
-         .hibytes X_PUT-1
-EXADTBL:
-         .lobytes LIT-1
-         .lobytes DEF_SPRT-1
-         .lobytes NEG-1
-         .lobytes HPLOT-1
-         .lobytes ADD-1
-         .lobytes TOHPLOT-1
-         .lobytes SUB-1
-         .lobytes GETKEY-1
-         .lobytes MUL-1
-         .lobytes CLEAR-1
-         .lobytes DIV-1
-         .lobytes MOD-1
-         .lobytes ADRNN-1
-         .lobytes ADRNC-1
-         .lobytes ADRAN-1
-         .lobytes ADRAC-1
-         .lobytes EQL-1
-         .lobytes FINISHD-1
-         .lobytes NEQ-1
-         .lobytes CUR-1
-         .lobytes LSS-1
-         .lobytes FREEZE_S-1
-         .lobytes GEQ-1
-         .lobytes INH-1
-         .lobytes GTR-1
-         .lobytes LEQ-1
-         .lobytes ORR-1
-         .lobytes XXXAND-1
-         .lobytes INP-1
-         .lobytes INPC-1
-         .lobytes OUT-1
-         .lobytes OUTC-1
-         .lobytes XXXEOR-1
-         .lobytes OUH-1
-         .lobytes SHL-1
-         .lobytes OUS-1
-         .lobytes SHR-1
-         .lobytes INS-1
-         .lobytes XXXINC-1
-         .lobytes CLL-1
-         .lobytes XXXDEC-1
-         .lobytes RTN-1
-         .lobytes MOV-1
-         .lobytes CLA-1
-         .lobytes LOD-1
-         .lobytes LODC-1
-         .lobytes XXXLDA-1
-         .lobytes LDAC-1
-         .lobytes LDI-1
-         .lobytes LDIC-1
-         .lobytes STO-1
-         .lobytes STOC-1
-         .lobytes XXXSTA-1
-         .lobytes STAC-1
-         .lobytes STI-1
-         .lobytes STIC-1
-         .lobytes ABSCLL-1
-         .lobytes WAIT-1
-         .lobytes XOR-1
-         .lobytes INT-1
-         .lobytes XXXJMP-1
-         .lobytes JMZ-1
-         .lobytes JM1-1
-         .lobytes SPRITE-1
-         .lobytes MVE_SPRT-1
-         .lobytes VOICE-1
-         .lobytes GRAPHICS-1
-         .lobytes SOUND-1
-         .lobytes SET_CLK-1
-         .lobytes SCROLL-1
-         .lobytes SP_COLL-1
-         .lobytes BK_COLL-1
-         .lobytes CURSORX-1
-         .lobytes CURSORY-1
-         .lobytes CLOCK-1
-         .lobytes PADDLE-1
-         .lobytes SPRT_X-1
-         .lobytes JOY-1
-         .lobytes SPRT_Y-1
-         .lobytes OSC3-1
-         .lobytes VOICE3-1
-         .lobytes SCROLLX-1
-         .lobytes SCROLLY-1
-         .lobytes SPT_STAT-1
-         .lobytes MOV_SPT-1
-         .lobytes STOP_SPT-1
-         .lobytes STRT_SPT-1
-         .lobytes ANM_SPT-1
-         .lobytes ABS-1
-         .lobytes INVALID-1
-         .lobytes LOADIT-1
-         .lobytes SAVEIT-1
-         .lobytes X_OPEN-1
-         .lobytes FR_STAT-1
-         .lobytes OUTCR-1
-         .lobytes X_CLOSE-1
-         .lobytes X_GET-1
-         .lobytes X_PUT-1
-
-GETADR:	LDY  #0
-        LDA  (P),Y
-        STA  COUNT1
-        LDA  BASE+1
-        LDX  BASE
-GET2:
-        STA  DATA+1
-        STX  DATA
-        TAY
-        LDA  COUNT1
-        BEQ  GET1
-        SEC
-        TXA
-        SBC  #2
-        STA  WORK
-        TYA
-        SBC  #0
-        STA  WORK+1
-        LDY  #0
-        LDA  (WORK),Y
-        INY
-        TAX
-        LDA  (WORK),Y
-        DEC  COUNT1
-        JMP  GET2
-GET1:
-         LDY  #1
-         CLC
-         LDA  (P),Y
-         ADC  DATA
-         STA  DATA
-         INY
-         LDA  (P),Y
-         ADC  DATA+1
-         STA  DATA+1
-         LDA  P
-         CLC
-         ADC  #3
-         STA  P
-         BCC  GET1_A
-         INC  P+1
-GET1_A:
-         RTS
-PULTOP:
-         LDY  #0
-         LDA  (T),Y
-         STA  REG
-         INY
-         LDA  (T),Y
-         STA  REG+1
-         INY
-         LDA  (T),Y
-         STA  REGB
-         LDA  T
-         CLC
-         ADC  #3
-         STA  T
-         BCC  PUL_END
-         INC  T+1
-PUL_END:
-         LDA  REG
-         LDX  REG+1
-         LDY  REGB
-         RTS
-PULBOTH: JSR  PULTOP     ; PULLS BOTH OF THEM
-PULTOP2:
-         LDY  #0
-         LDA  (T),Y
-         STA  REG2
-         INY
-         LDA  (T),Y
-         STA  REG2+1
-         INY
-         LDA  (T),Y
-         STA  REG2B
-         LDA  T
-         CLC
-         ADC  #3
-         STA  T
-         BCC  PUL2_END
-         INC  T+1
-PUL2_END:
-         LDA  REG2
-         LDX  REG2+1
-         LDY  REG2B
-         RTS
-PSHTOP:
-         SEC
-         LDA  T
-         SBC  #3
-         STA  T
-         BCS  PSH1
-         DEC  T+1
-PSH1:
-         LDY  #0
-         LDA  REG
-         STA  (T),Y
-         INY
-         LDA  REG+1
-         STA  (T),Y
-         INY
-         LDA  REGB
-         STA  (T),Y
-         RTS
-GETLIT:
-         LDY  #0
-         LDA  (P),Y
-         STA  REG
-         INY
-         LDA  (P),Y
-         STA  REG+1
-         LDA  P
-         CLC
-         ADC  #2
-         STA  P
-         BCC  GET_END
-         INC  P+1
-GET_END: RTS
-;
-;
-LIT:	JSR  GETLIT
-         DEY
-         LDA  (P),Y
-         STA  REGB
-         INC  P
-         BNE  LIT1
-         INC  P+1
-LIT1:
-         JMP  MAINP
-;
-NEG:	JSR  PULTOP
-         SEC
-         LDA  #0
-         SBC  REG
-         STA  REG
-         LDA  #0
-         SBC  REG+1
-         STA  REG+1
-         LDA  #0
-         SBC  REGB
-         STA  REGB
-         JMP  MAINP
-;
-;
-ADD:	JSR  PULBOTH
-         CLC
-         ADC  REG
-         STA  REG
-         TXA
-         ADC  REG+1
-         STA  REG+1
-         TYA
-         ADC  REGB
-         STA  REGB
-         JMP  MAINP
-;
-SUB:	JSR  SUBSTK
-         JMP  MAINP
-;
-MUL:
-         JSR  FNDSGN
-         LDX  #24
-MUL5:	ASL  RES
-         ROL  RES+1
-         ROL  RES+2
-         ASL  DVDN
-         ROL  DVDN+1
-         ROL  DVDN+2
-         BCC  MUL6
-         CLC
-         LDA  MCAND
-         ADC  RES
-         STA  RES
-         LDA  MCAND+1
-         ADC  RES+1
-         STA  RES+1
-         LDA  MCAND+2
-         ADC  RES+2
-         STA  RES+2
-MUL6:	DEX
-         BNE  MUL5
-         JMP  FIXSGN
-;
-CHK_TOP:
-         PHA             ; limit
-         JSR  PULTOP
-         DEC  REG        ; make zero relative
-         LDA  REG+1
-         ORA  REGB
-         BNE  CHK_ERR
-         PLA
-         CMP  REG
-         BCC  CHK_ERR    ; too big
-         LDA  REG
-         RTS             ; ok
-;
-CHK_ERR:
-         LDA  #<CHK_MG
-         LDX  #>CHK_MG
-         JMP  NOTIM1
-;
-CHK_MG:	.byte $B6,$D9," IN FUNCTION CALL",$0D
+lowlit:	sty  reg+1
+        and  #$7f
+        sta  reg
+mainp:	jsr  pshtop
+main:	lda  dbgflg
+        beq  main_2
+        jsr  debug
+main_2:
+        jsr  stop
+        bne  main_3
+        jmp  break      ; stop pressed
+main_3:	lda  queue      ; key in queue?
+        beq  main_ok    ; no
+        lda  kbd_buf    ; what is it?
+        jsr  chk_kbd
+main_ok:
+        lda  p
+        sta  lastp
+        lda  p+1
+        sta  lastp+1
+        ldy  #0
+        sty  regb
+        lda  (p),y
+        bmi  main_5
+        cmp  #$62
+        bcs  invins
+main_5:
+        inc  p
+        bne  main_1
+        inc  p+1
+main_1:
+        tax
+        bmi  lowlit
+        lda  exadtbh,x
+        pha
+        lda  exadtbl,x
+        pha
+        rts
 
 ;
-MVE_SPRT:
-         JSR  PULTOP
-         STA  YPOS
-         JSR  PULTOP
-         STA  XPOSL
-         TXA
-         AND  #1
-         STA  XPOSH
-         LDA  #7
-         JSR  CHK_TOP
-         TAX             ; sprite number
-         LDA  #0
-         STA  S_ACTIVE,X ; non-active now
-         LDA  XPOSH
-         BEQ  MVE_1
-         LDA  MASKS,X
-MVE_1:	STA  TEMP
-         LDA  XMASKS,X
-         AND  VIC+$10
-         ORA  TEMP       ; set high order x bit on/off
-         STA  VIC+$10
-         TXA
-         ASL
-         TAX
-         LDA  XPOSL
-         STA  VIC,X      ; low order 8 bits of position
-         LDA  YPOS
-         STA  VIC+1,X    ; Y co-ord
-         JMP  MAIN
+notimp:
+invins:
+         lda  #<dm5
+         ldx  #>dm5
+notim1:
+         jsr  bell1
+         jsr  pl
+         jmp  runerr
 ;
-INVALID:
-         LDA  DOS_FLG
-         JMP  TRUE2
+break:
+         lda  #<dm6
+         ldx  #>dm6
+         jmp  notim1
 ;
-SP_COLL:
-         LDA  VIC+30
-         JMP  TRUE2
+exadtbh:
+         .hibytes lit-1
+         .hibytes def_sprt-1
+         .hibytes neg-1
+         .hibytes hplot-1
+         .hibytes add-1
+         .hibytes tohplot-1
+         .hibytes sub-1
+         .hibytes getkey-1
+         .hibytes mul-1
+         .hibytes clear-1
+         .hibytes div-1
+         .hibytes mod-1
+         .hibytes adrnn-1
+         .hibytes adrnc-1
+         .hibytes adran-1
+         .hibytes adrac-1
+         .hibytes eql-1
+         .hibytes finishd-1
+         .hibytes neq-1
+         .hibytes cur-1
+         .hibytes lss-1
+         .hibytes freeze_s-1
+         .hibytes geq-1
+         .hibytes inh-1
+         .hibytes gtr-1
+         .hibytes leq-1
+         .hibytes orr-1
+         .hibytes xxxand-1
+         .hibytes inp-1
+         .hibytes inpc-1
+         .hibytes out-1
+         .hibytes outc-1
+         .hibytes xxxeor-1
+         .hibytes ouh-1
+         .hibytes shl-1
+         .hibytes ous-1
+         .hibytes shr-1
+         .hibytes ins-1
+         .hibytes xxxinc-1
+         .hibytes cll-1
+         .hibytes xxxdec-1
+         .hibytes rtn-1
+         .hibytes mov-1
+         .hibytes cla-1
+         .hibytes lod-1
+         .hibytes lodc-1
+         .hibytes xxxlda-1
+         .hibytes ldac-1
+         .hibytes ldi-1
+         .hibytes ldic-1
+         .hibytes sto-1
+         .hibytes stoc-1
+         .hibytes xxxsta-1
+         .hibytes stac-1
+         .hibytes sti-1
+         .hibytes stic-1
+         .hibytes abscll-1
+         .hibytes wait-1
+         .hibytes xor-1
+         .hibytes int-1
+         .hibytes xxxjmp-1
+         .hibytes jmz-1
+         .hibytes jm1-1
+         .hibytes sprite-1
+         .hibytes mve_sprt-1
+         .hibytes voice-1
+         .hibytes graphics-1
+         .hibytes sound-1
+         .hibytes set_clk-1
+         .hibytes scroll-1
+         .hibytes sp_coll-1
+         .hibytes bk_coll-1
+         .hibytes cursorx-1
+         .hibytes cursory-1
+         .hibytes clock-1
+         .hibytes paddle-1
+         .hibytes sprt_x-1
+         .hibytes joy-1
+         .hibytes sprt_y-1
+         .hibytes osc3-1
+         .hibytes voice3-1
+         .hibytes scrollx-1
+         .hibytes scrolly-1
+         .hibytes spt_stat-1
+         .hibytes mov_spt-1
+         .hibytes stop_spt-1
+         .hibytes strt_spt-1
+         .hibytes anm_spt-1
+         .hibytes abs-1
+         .hibytes invalid-1
+         .hibytes loadit-1
+         .hibytes saveit-1
+         .hibytes x_open-1
+         .hibytes fr_stat-1
+         .hibytes outcr-1
+         .hibytes x_close-1
+         .hibytes x_get-1
+         .hibytes x_put-1
+exadtbl:
+         .lobytes lit-1
+         .lobytes def_sprt-1
+         .lobytes neg-1
+         .lobytes hplot-1
+         .lobytes add-1
+         .lobytes tohplot-1
+         .lobytes sub-1
+         .lobytes getkey-1
+         .lobytes mul-1
+         .lobytes clear-1
+         .lobytes div-1
+         .lobytes mod-1
+         .lobytes adrnn-1
+         .lobytes adrnc-1
+         .lobytes adran-1
+         .lobytes adrac-1
+         .lobytes eql-1
+         .lobytes finishd-1
+         .lobytes neq-1
+         .lobytes cur-1
+         .lobytes lss-1
+         .lobytes freeze_s-1
+         .lobytes geq-1
+         .lobytes inh-1
+         .lobytes gtr-1
+         .lobytes leq-1
+         .lobytes orr-1
+         .lobytes xxxand-1
+         .lobytes inp-1
+         .lobytes inpc-1
+         .lobytes out-1
+         .lobytes outc-1
+         .lobytes xxxeor-1
+         .lobytes ouh-1
+         .lobytes shl-1
+         .lobytes ous-1
+         .lobytes shr-1
+         .lobytes ins-1
+         .lobytes xxxinc-1
+         .lobytes cll-1
+         .lobytes xxxdec-1
+         .lobytes rtn-1
+         .lobytes mov-1
+         .lobytes cla-1
+         .lobytes lod-1
+         .lobytes lodc-1
+         .lobytes xxxlda-1
+         .lobytes ldac-1
+         .lobytes ldi-1
+         .lobytes ldic-1
+         .lobytes sto-1
+         .lobytes stoc-1
+         .lobytes xxxsta-1
+         .lobytes stac-1
+         .lobytes sti-1
+         .lobytes stic-1
+         .lobytes abscll-1
+         .lobytes wait-1
+         .lobytes xor-1
+         .lobytes int-1
+         .lobytes xxxjmp-1
+         .lobytes jmz-1
+         .lobytes jm1-1
+         .lobytes sprite-1
+         .lobytes mve_sprt-1
+         .lobytes voice-1
+         .lobytes graphics-1
+         .lobytes sound-1
+         .lobytes set_clk-1
+         .lobytes scroll-1
+         .lobytes sp_coll-1
+         .lobytes bk_coll-1
+         .lobytes cursorx-1
+         .lobytes cursory-1
+         .lobytes clock-1
+         .lobytes paddle-1
+         .lobytes sprt_x-1
+         .lobytes joy-1
+         .lobytes sprt_y-1
+         .lobytes osc3-1
+         .lobytes voice3-1
+         .lobytes scrollx-1
+         .lobytes scrolly-1
+         .lobytes spt_stat-1
+         .lobytes mov_spt-1
+         .lobytes stop_spt-1
+         .lobytes strt_spt-1
+         .lobytes anm_spt-1
+         .lobytes abs-1
+         .lobytes invalid-1
+         .lobytes loadit-1
+         .lobytes saveit-1
+         .lobytes x_open-1
+         .lobytes fr_stat-1
+         .lobytes outcr-1
+         .lobytes x_close-1
+         .lobytes x_get-1
+         .lobytes x_put-1
+
+getadr:	ldy  #0
+        lda  (p),y
+        sta  count1
+        lda  base+1
+        ldx  base
+get2:
+        sta  data+1
+        stx  data
+        tay
+        lda  count1
+        beq  get1
+        sec
+        txa
+        sbc  #2
+        sta  work
+        tya
+        sbc  #0
+        sta  work+1
+        ldy  #0
+        lda  (work),y
+        iny
+        tax
+        lda  (work),y
+        dec  count1
+        jmp  get2
+get1:
+         ldy  #1
+         clc
+         lda  (p),y
+         adc  data
+         sta  data
+         iny
+         lda  (p),y
+         adc  data+1
+         sta  data+1
+         lda  p
+         clc
+         adc  #3
+         sta  p
+         bcc  get1_a
+         inc  p+1
+get1_a:
+         rts
+pultop:
+         ldy  #0
+         lda  (t),y
+         sta  reg
+         iny
+         lda  (t),y
+         sta  reg+1
+         iny
+         lda  (t),y
+         sta  regb
+         lda  t
+         clc
+         adc  #3
+         sta  t
+         bcc  pul_end
+         inc  t+1
+pul_end:
+         lda  reg
+         ldx  reg+1
+         ldy  regb
+         rts
+pulboth: jsr  pultop     ; pulls both of them
+pultop2:
+         ldy  #0
+         lda  (t),y
+         sta  reg2
+         iny
+         lda  (t),y
+         sta  reg2+1
+         iny
+         lda  (t),y
+         sta  reg2b
+         lda  t
+         clc
+         adc  #3
+         sta  t
+         bcc  pul2_end
+         inc  t+1
+pul2_end:
+         lda  reg2
+         ldx  reg2+1
+         ldy  reg2b
+         rts
+pshtop:
+         sec
+         lda  t
+         sbc  #3
+         sta  t
+         bcs  psh1
+         dec  t+1
+psh1:
+         ldy  #0
+         lda  reg
+         sta  (t),y
+         iny
+         lda  reg+1
+         sta  (t),y
+         iny
+         lda  regb
+         sta  (t),y
+         rts
+getlit:
+         ldy  #0
+         lda  (p),y
+         sta  reg
+         iny
+         lda  (p),y
+         sta  reg+1
+         lda  p
+         clc
+         adc  #2
+         sta  p
+         bcc  get_end
+         inc  p+1
+get_end: rts
 ;
-BK_COLL:
-         LDA  VIC+31
-         JMP  TRUE2
 ;
-CURSORX:
-         SEC
-         JSR  PLOT
-         INY
-         TYA
-         JMP  TRUE2
+lit:	jsr  getlit
+         dey
+         lda  (p),y
+         sta  regb
+         inc  p
+         bne  lit1
+         inc  p+1
+lit1:
+         jmp  mainp
 ;
-CURSORY:
-         SEC
-         JSR  PLOT
-         INX
-         TXA
-         JMP  TRUE2
+neg:	jsr  pultop
+         sec
+         lda  #0
+         sbc  reg
+         sta  reg
+         lda  #0
+         sbc  reg+1
+         sta  reg+1
+         lda  #0
+         sbc  regb
+         sta  regb
+         jmp  mainp
 ;
-CLOCK:
-         LDA  #3
-         JSR  CHK_TOP
-         TAX
-         LDA  CIA2+8,X   ; 1 = 10ths, 2 = secs etc.
-         STA  TEMP+1
-         AND  #$7F
-         PHA
-         LSR
-         LSR
-         LSR
-         LSR
-         ASL
-         STA  TEMP       ; times 2
-         ASL
-         ASL             ; times 8
-         ADC  TEMP       ; times 10
-         STA  TEMP
-         PLA
-         AND  #$0F
-         CLC
-         ADC  TEMP
-         CPX  #3         ; asking for hours, oh newt?
-         BNE  CLOCK_2    ; forget it then
-         CMP  #12        ; 12 o'clock?
-         BNE  CLOCK_3    ; no
-         LDA  #0         ; make 12=0 so output looks right
-CLOCK_3: LDY  TEMP+1     ; PM?
-         BPL  CLOCK_2
-         CLC
-         ADC  #12
-CLOCK_2:
-         JMP  TRUE2      ; answer
 ;
-PADL_RD:
-         SEI
-         LDA  CIA1+2     ; save ddr register
-         PHA
-         LDA  #$C0
-         STA  CIA1+2     ; set porta for read
-         TXA             ; which paddle to read
-         STA  CIA1
-         LDY  #$81       ; wait a while
-PDLRD_2:
-         NOP
-         DEY
-         BNE  PDLRD_2
-         LDA  SID+25     ; x value
-         STA  REG
-         LDA  SID+26
-         STA  REG+1
-         JMP  JOY_RD1
+add:	jsr  pulboth
+         clc
+         adc  reg
+         sta  reg
+         txa
+         adc  reg+1
+         sta  reg+1
+         tya
+         adc  regb
+         sta  regb
+         jmp  mainp
 ;
-WAIT:
-         JSR  PULTOP     ; raster line
-WAIT_DLY: LDA  VIC+$11    ; msb bit of raster
-         AND  #$80
-         CMP  REG+1
-         BCC  WAIT_DLY   ; not yet
-         LDA  VIC+$12    ; other bits
-         CMP  REG
-         BCC  WAIT_DLY   ; too low
-         JMP  MAIN
+sub:	jsr  substk
+         jmp  mainp
 ;
-PADDLE:
-         LDA  #1
-         JSR  CHK_TOP
-         BNE  PADDLE2
+mul:
+         jsr  fndsgn
+         ldx  #24
+mul5:	asl  res
+         rol  res+1
+         rol  res+2
+         asl  dvdn
+         rol  dvdn+1
+         rol  dvdn+2
+         bcc  mul6
+         clc
+         lda  mcand
+         adc  res
+         sta  res
+         lda  mcand+1
+         adc  res+1
+         sta  res+1
+         lda  mcand+2
+         adc  res+2
+         sta  res+2
+mul6:	dex
+         bne  mul5
+         jmp  fixsgn
 ;
-PADDLE1:
-         LDX  #$40
-PADL2_A:
-         JSR  PADL_RD
-         JMP  MAINP
+chk_top:
+         pha             ; limit
+         jsr  pultop
+         dec  reg        ; make zero relative
+         lda  reg+1
+         ora  regb
+         bne  chk_err
+         pla
+         cmp  reg
+         bcc  chk_err    ; too big
+         lda  reg
+         rts             ; ok
 ;
-PADDLE2:
-         LDX  #$80
-         BNE  PADL2_A
+chk_err:
+         lda  #<chk_mg
+         ldx  #>chk_mg
+         jmp  notim1
+;
+chk_mg:	.byte $b6,$d9," IN FUNCTION CALL",$0d
 
 ;
-JOY_RD:	SEI
-        LDA CIA1+2,Y
-        PHA
-        LDA #0
-        STA CIA1+2,Y		; DDR
-        LDA CIA1,Y		; read joystick
-        AND #$1F
-        EOR #$1F		; reverse
-        TAX
-JOY_RD1:
-	PLA
-        STA CIA1+2,Y
-        LDA #$7F		;was $00 in the V3.0 source -cjb
-        STA CIA1
-        TXA
-        CLI
-        RTS
+mve_sprt:
+         jsr  pultop
+         sta  ypos
+         jsr  pultop
+         sta  xposl
+         txa
+         and  #1
+         sta  xposh
+         lda  #7
+         jsr  chk_top
+         tax             ; sprite number
+         lda  #0
+         sta  s_active,x ; non-active now
+         lda  xposh
+         beq  mve_1
+         lda  masks,x
+mve_1:	sta  temp
+         lda  xmasks,x
+         and  vic+$10
+         ora  temp       ; set high order x bit on/off
+         sta  vic+$10
+         txa
+         asl
+         tax
+         lda  xposl
+         sta  vic,x      ; low order 8 bits of position
+         lda  ypos
+         sta  vic+1,x    ; y co-ord
+         jmp  main
+;
+invalid:
+         lda  dos_flg
+         jmp  true2
+;
+sp_coll:
+         lda  vic+30
+         jmp  true2
+;
+bk_coll:
+         lda  vic+31
+         jmp  true2
+;
+cursorx:
+         sec
+         jsr  plot
+         iny
+         tya
+         jmp  true2
+;
+cursory:
+         sec
+         jsr  plot
+         inx
+         txa
+         jmp  true2
+;
+clock:
+         lda  #3
+         jsr  chk_top
+         tax
+         lda  cia2+8,x   ; 1 = 10ths, 2 = secs etc.
+         sta  temp+1
+         and  #$7f
+         pha
+         lsr
+         lsr
+         lsr
+         lsr
+         asl
+         sta  temp       ; times 2
+         asl
+         asl             ; times 8
+         adc  temp       ; times 10
+         sta  temp
+         pla
+         and  #$0f
+         clc
+         adc  temp
+         cpx  #3         ; asking for hours, oh newt?
+         bne  clock_2    ; forget it then
+         cmp  #12        ; 12 o'clock?
+         bne  clock_3    ; no
+         lda  #0         ; make 12=0 so output looks right
+clock_3: ldy  temp+1     ; pm?
+         bpl  clock_2
+         clc
+         adc  #12
+clock_2:
+         jmp  true2      ; answer
+;
+padl_rd:
+         sei
+         lda  cia1+2     ; save ddr register
+         pha
+         lda  #$c0
+         sta  cia1+2     ; set porta for read
+         txa             ; which paddle to read
+         sta  cia1
+         ldy  #$81       ; wait a while
+pdlrd_2:
+         nop
+         dey
+         bne  pdlrd_2
+         lda  sid+25     ; x value
+         sta  reg
+         lda  sid+26
+         sta  reg+1
+         jmp  joy_rd1
+;
+wait:
+         jsr  pultop     ; raster line
+wait_dly: lda  vic+$11    ; msb bit of raster
+         and  #$80
+         cmp  reg+1
+         bcc  wait_dly   ; not yet
+         lda  vic+$12    ; other bits
+         cmp  reg
+         bcc  wait_dly   ; too low
+         jmp  main
+;
+paddle:
+         lda  #1
+         jsr  chk_top
+         bne  paddle2
+;
+paddle1:
+         ldx  #$40
+padl2_a:
+         jsr  padl_rd
+         jmp  mainp
+;
+paddle2:
+         ldx  #$80
+         bne  padl2_a
 
 ;
-JOY: 	LDA #1
-        JSR CHK_TOP
-        BNE JOY2
+joy_rd:	sei
+        lda cia1+2,y
+        pha
+        lda #0
+        sta cia1+2,y		; ddr
+        lda cia1,y		; read joystick
+        and #$1f
+        eor #$1f		; reverse
+        tax
+joy_rd1:
+	pla
+        sta cia1+2,y
+        lda #$7f		;was $00 in the v3.0 source -cjb
+        sta cia1
+        txa
+        cli
+        rts
 
 ;
-JOY1: 	LDY #1
-JOY1_A: JSR JOY_RD
-        JMP TRUE2
+joy: 	lda #1
+        jsr chk_top
+        bne joy2
 
 ;
-JOY2:
-         LDY  #0
-         BEQ  JOY1_A
-;
-OSC3:
-         LDA  SID+27
-         JMP  TRUE2
-;
-VOICE3:
-         LDA  SID+28
-         JMP  TRUE2
-;
-SCROLLX:
-         LDA  VIC+$16
-SCROLLX1: AND  #7
-         JMP  TRUE2
-;
-SCROLLY:
-         LDA  VIC+$11
-         JMP  SCROLLX1
-;
-ADDIT:	TAX
-         BEQ  ADDIT_9
-         LDA  #0
-         CLC
-ADDIT_1: ADC  #1
-         DEX
-         BNE  ADDIT_1
-ADDIT_9: RTS
+joy1: 	ldy #1
+joy1_a: jsr joy_rd
+        jmp true2
 
 ;
-SET_CLK:
-         LDA  CIA2+14
-         ORA  #$80
-         STA  CIA2+14
-         LDA  CIA2+15
-         AND  #$7F
-         STA  CIA2+15
-         JSR  PULTOP
-         PHA
-         JSR  PULTOP
-         PHA
-         JSR  PULTOP
-         PHA
-         JSR  PULTOP
-         LDX  #0
-         CMP  #12
-         BCC  CLK_AM
-         LDX  #$80
-         SEC
-         SBC  #12        ; back to range 0 to 11
-CLK_AM:	STX  CNTR
-         SED
-         JSR  ADDIT
-         ORA  CNTR
-         STA  CIA2+11
-         PLA
-         JSR  ADDIT
-         STA  CIA2+10
-         PLA
-         JSR  ADDIT
-         STA  CIA2+9
-         PLA
-         JSR  ADDIT
-         STA  CIA2+8
-         CLD
-         JMP  MAIN
+joy2:
+         ldy  #0
+         beq  joy1_a
 ;
-SCROLL:
-         JSR  PULTOP
-         AND  #7         ; y co-ord
-         STA  FNC_VAL
-         LDA  VIC+$11
-         AND  #$F8
-         ORA  FNC_VAL
-         STA  VIC+$11
-         JSR  PULTOP
-         AND  #7         ; x co-ord
-         STA  FNC_VAL
-         LDA  VIC+$16
-         AND  #$F8
-         ORA  FNC_VAL
-         STA  VIC+$16
-         JMP  MAIN
+osc3:
+         lda  sid+27
+         jmp  true2
 ;
-GET_BNK:
-         LDA  CIA2+2
-         AND  #$FC
-         STA  CIA2+2     ; set data direction to read
-         LDA  CIA2
-         AND  #3         ; video bank
-         EOR  #$FF       ; make zero relative
-         ASL
-         ASL
-         ASL
-         ASL
-         ASL
-         ASL
-         STA  TEMP+1
-         RTS
+voice3:
+         lda  sid+28
+         jmp  true2
 ;
-CLEAR:
-         JSR  PULTOP
-         AND  #$0F
-         STA  FNC_VAL    ; colour
-         JSR  PULTOP
-         ASL
-         ASL
-         ASL
-         ASL
-         ORA  FNC_VAL
-         STA  FNC_VAL
-         JSR  GET_BNK
-         LDA  VIC+$18    ; character base
-         AND  #$0E
-         ASL
-         ASL
-         ORA  TEMP+1
-         STA  TEMP+1
-         CMP  #$04
-         BCS  CLR_2
-CLR_ERR: JMP  CHK_ERR    ; too low
-CLR_2:	LDA  #0
-         STA  TEMP
-         LDA  VIC+17     ; mode
-         AND  #$20
-         BEQ  CLR_ERR    ; not bit map
-         LDA  #<8000      ; hi-res (bit map)
-         STA  REG
-         LDA  #>8000
-         STA  REG+1
-         LDY  #0
-         TYA
-         JSR  CLR_LOOP   ; clear character memory
-         JSR  GET_BNK
-         LDA  VIC+$18    ; now do screen memory
-         AND  #$F0
-         LSR
-         LSR
-         ORA  TEMP+1
-         STA  TEMP+1
-         CMP  #$04
-         BCS  CLR_3
-         JMP  CHK_ERR    ; too low
-CLR_3:
-         LDA  #0
-         TAY
-         STA  TEMP
-         LDA  #<1000
-         STA  REG
-         LDA  #>1000
-         STA  REG+1
-         LDA  FNC_VAL    ; colour
-         JSR  CLR_LOOP   ; clear screen memory
-         JMP  MAIN
+scrollx:
+         lda  vic+$16
+scrollx1: and  #7
+         jmp  true2
 ;
-CLR_LOOP:
-	STA  (TEMP),Y
-        INC  TEMP
-        BNE  CLR_1
-        INC  TEMP+1
-CLR_1:
-         DEC  REG
-         LDX  REG
-         CPX  #$FF
-         BNE  CLR_LOOP
-         DEC  REG+1
-         BPL  CLR_LOOP
-         RTS
+scrolly:
+         lda  vic+$11
+         jmp  scrollx1
 ;
-GETKEY:
-         JSR  GETIN
-         JMP  TRUE2
-;
-;
-SPRITE:
-         JSR  PULTOP
-         STA  FNC_VAL
-         LDA  #6
-         JSR  CHK_TOP    ; FUNCTION
-         STA  FUNCTION
-         LDA  #7
-         JSR  CHK_TOP
-         STA  SPRITENO
-         LDA  FUNCTION
-         BEQ  SPRT_COL   ; set colour
-         CMP  #1
-         BEQ  SPRT_PNT   ; point sprite
-         ASL
-         TAX             ; offset into table
-         LDA  SPRT_TB-4,X
-         STA  TEMP
-         LDA  SPRT_TB-3,X
-         STA  TEMP+1
-         LDX  SPRITENO
-         LDY  #0
-         LDA  FNC_VAL
-         AND  #1
-         BEQ  SPRT_1
-         LDA  MASKS,X
-SPRT_1:	STA  TEMP1
-         LDA  XMASKS,X
-         AND  (TEMP),Y
-         ORA  TEMP1      ; set bit
-         JMP  GR_4
-;
-SPRT_COL:
-         LDX  SPRITENO
-         LDA  FNC_VAL
-         AND  #15
-         STA  VIC+$27,X  ; set colour
-         JMP  MAIN
-;
-SPRT_PNT:
-         LDA  #0
-         LDY  SPRITENO
-         STA  S_ANIMCT,Y
-S_PNT2:
-         JSR  GET_BNK
-         LDA  VIC+$18
-         AND  #$F0       ; video base
-         LSR
-         LSR
-         CLC
-         ADC  #3
-         ADC  TEMP+1     ; add bank
-         STA  TEMP+1
-         LDA  #$F8
-         STA  TEMP       ; sprite pointers
-         LDY  SPRITENO
-         LDA  FNC_VAL
-         JMP  GR_4       ; point sprite pointer
+addit:	tax
+         beq  addit_9
+         lda  #0
+         clc
+addit_1: adc  #1
+         dex
+         bne  addit_1
+addit_9: rts
 
 ;
-SPRT_TB:
-        .word VIC+$1C
-        .word VIC+$1D
-        .word VIC+$17
-        .word VIC+$1B
-        .word VIC+$15
+set_clk:
+         lda  cia2+14
+         ora  #$80
+         sta  cia2+14
+         lda  cia2+15
+         and  #$7f
+         sta  cia2+15
+         jsr  pultop
+         pha
+         jsr  pultop
+         pha
+         jsr  pultop
+         pha
+         jsr  pultop
+         ldx  #0
+         cmp  #12
+         bcc  clk_am
+         ldx  #$80
+         sec
+         sbc  #12        ; back to range 0 to 11
+clk_am:	stx  cntr
+         sed
+         jsr  addit
+         ora  cntr
+         sta  cia2+11
+         pla
+         jsr  addit
+         sta  cia2+10
+         pla
+         jsr  addit
+         sta  cia2+9
+         pla
+         jsr  addit
+         sta  cia2+8
+         cld
+         jmp  main
+;
+scroll:
+         jsr  pultop
+         and  #7         ; y co-ord
+         sta  fnc_val
+         lda  vic+$11
+         and  #$f8
+         ora  fnc_val
+         sta  vic+$11
+         jsr  pultop
+         and  #7         ; x co-ord
+         sta  fnc_val
+         lda  vic+$16
+         and  #$f8
+         ora  fnc_val
+         sta  vic+$16
+         jmp  main
+;
+get_bnk:
+         lda  cia2+2
+         and  #$fc
+         sta  cia2+2     ; set data direction to read
+         lda  cia2
+         and  #3         ; video bank
+         eor  #$ff       ; make zero relative
+         asl
+         asl
+         asl
+         asl
+         asl
+         asl
+         sta  temp+1
+         rts
+;
+clear:
+         jsr  pultop
+         and  #$0f
+         sta  fnc_val    ; colour
+         jsr  pultop
+         asl
+         asl
+         asl
+         asl
+         ora  fnc_val
+         sta  fnc_val
+         jsr  get_bnk
+         lda  vic+$18    ; character base
+         and  #$0e
+         asl
+         asl
+         ora  temp+1
+         sta  temp+1
+         cmp  #$04
+         bcs  clr_2
+clr_err: jmp  chk_err    ; too low
+clr_2:	lda  #0
+         sta  temp
+         lda  vic+17     ; mode
+         and  #$20
+         beq  clr_err    ; not bit map
+         lda  #<8000      ; hi-res (bit map)
+         sta  reg
+         lda  #>8000
+         sta  reg+1
+         ldy  #0
+         tya
+         jsr  clr_loop   ; clear character memory
+         jsr  get_bnk
+         lda  vic+$18    ; now do screen memory
+         and  #$f0
+         lsr
+         lsr
+         ora  temp+1
+         sta  temp+1
+         cmp  #$04
+         bcs  clr_3
+         jmp  chk_err    ; too low
+clr_3:
+         lda  #0
+         tay
+         sta  temp
+         lda  #<1000
+         sta  reg
+         lda  #>1000
+         sta  reg+1
+         lda  fnc_val    ; colour
+         jsr  clr_loop   ; clear screen memory
+         jmp  main
+;
+clr_loop:
+	sta  (temp),y
+        inc  temp
+        bne  clr_1
+        inc  temp+1
+clr_1:
+         dec  reg
+         ldx  reg
+         cpx  #$ff
+         bne  clr_loop
+         dec  reg+1
+         bpl  clr_loop
+         rts
+;
+getkey:
+         jsr  getin
+         jmp  true2
+;
+;
+sprite:
+         jsr  pultop
+         sta  fnc_val
+         lda  #6
+         jsr  chk_top    ; function
+         sta  function
+         lda  #7
+         jsr  chk_top
+         sta  spriteno
+         lda  function
+         beq  sprt_col   ; set colour
+         cmp  #1
+         beq  sprt_pnt   ; point sprite
+         asl
+         tax             ; offset into table
+         lda  sprt_tb-4,x
+         sta  temp
+         lda  sprt_tb-3,x
+         sta  temp+1
+         ldx  spriteno
+         ldy  #0
+         lda  fnc_val
+         and  #1
+         beq  sprt_1
+         lda  masks,x
+sprt_1:	sta  temp1
+         lda  xmasks,x
+         and  (temp),y
+         ora  temp1      ; set bit
+         jmp  gr_4
+;
+sprt_col:
+         ldx  spriteno
+         lda  fnc_val
+         and  #15
+         sta  vic+$27,x  ; set colour
+         jmp  main
+;
+sprt_pnt:
+         lda  #0
+         ldy  spriteno
+         sta  s_animct,y
+s_pnt2:
+         jsr  get_bnk
+         lda  vic+$18
+         and  #$f0       ; video base
+         lsr
+         lsr
+         clc
+         adc  #3
+         adc  temp+1     ; add bank
+         sta  temp+1
+         lda  #$f8
+         sta  temp       ; sprite pointers
+         ldy  spriteno
+         lda  fnc_val
+         jmp  gr_4       ; point sprite pointer
 
 ;
-W_BASE:
-         JSR  GET_BNK
-         LDA  FNC_VAL
-         AND  #$0F
-         ASL
-         ASL             ; times 4
-         ORA  TEMP+1     ; bank
-         STA  HIBASE
-         JMP  MAIN
-;
-GRAPHICS:
-         JSR  PULTOP
-         STA  FNC_VAL
-         LDA  #17
-         JSR  CHK_TOP
-         STA  FUNCTION
-         CMP  #17
-         BEQ  W_BASE     ; write base
-         CMP  #6
-         BNE  GR_3
-         LDA  CIA2+2
-         ORA  #3         ; set data direction register
-         STA  CIA2+2
-         LDA  FNC_VAL
-         EOR  #$FF
-         STA  FNC_VAL
-         LDA  FUNCTION
-GR_3:	ASL
-         ASL
-         CLC
-         ADC  FUNCTION   ; times 5
-         TAX
-         LDA  G_TABLE,X  ; address to patch
-         STA  TEMP
-         LDA  G_TABLE+1,X
-         STA  TEMP+1
-         LDA  G_TABLE+2,X ; mask
-         AND  FNC_VAL
-         LDY  G_TABLE+3,X ; bit to shift left
-         BEQ  GR_1       ; none
-GR_2:	ASL
-        DEY
-        BNE  GR_2
-GR_1:	STA  FNC_VAL
-        LDA  (TEMP),Y   ; old value of location
-        AND  G_TABLE+4,X ; mask out required bits
-        ORA  FNC_VAL    ; or in new bits
-GR_4:	STA  (TEMP),Y   ; new value
-        JMP  MAIN       ; finished!
+sprt_tb:
+        .word vic+$1c
+        .word vic+$1d
+        .word vic+$17
+        .word vic+$1b
+        .word vic+$15
 
 ;
-G_TABLE:
+w_base:
+         jsr  get_bnk
+         lda  fnc_val
+         and  #$0f
+         asl
+         asl             ; times 4
+         ora  temp+1     ; bank
+         sta  hibase
+         jmp  main
+;
+graphics:
+         jsr  pultop
+         sta  fnc_val
+         lda  #17
+         jsr  chk_top
+         sta  function
+         cmp  #17
+         beq  w_base     ; write base
+         cmp  #6
+         bne  gr_3
+         lda  cia2+2
+         ora  #3         ; set data direction register
+         sta  cia2+2
+         lda  fnc_val
+         eor  #$ff
+         sta  fnc_val
+         lda  function
+gr_3:	asl
+         asl
+         clc
+         adc  function   ; times 5
+         tax
+         lda  g_table,x  ; address to patch
+         sta  temp
+         lda  g_table+1,x
+         sta  temp+1
+         lda  g_table+2,x ; mask
+         and  fnc_val
+         ldy  g_table+3,x ; bit to shift left
+         beq  gr_1       ; none
+gr_2:	asl
+        dey
+        bne  gr_2
+gr_1:	sta  fnc_val
+        lda  (temp),y   ; old value of location
+        and  g_table+4,x ; mask out required bits
+        ora  fnc_val    ; or in new bits
+gr_4:	sta  (temp),y   ; new value
+        jmp  main       ; finished!
+
+;
+g_table:
 ;
 ; graphics controls
 ;
-        .word VIC+$11    ; hires
-        .byte $01,$05,$DF
-        .word VIC+$16    ; multicolour
-        .byte $01,$04,$EF
-        .word VIC+$11    ; ext. bkgnd
-        .byte $01,$06,$BF
-        .word VIC+$16    ; 40 cols
-        .byte $01,$03,$F7
-        .word VIC+$11    ; 25 lines
-        .byte $01,$03,$F7
-        .word VIC+$11    ; blank screen
-        .byte $01,$04,$EF
-        .word CIA2       ; bank select
-        .byte $03,$00,$FC
-        .word VIC+$18    ; char gen base
-        .byte $07,$01,$F1
-        .word VIC+$18    ; video base
-        .byte $0F,$04,$0F
+        .word vic+$11    ; hires
+        .byte $01,$05,$df
+        .word vic+$16    ; multicolour
+        .byte $01,$04,$ef
+        .word vic+$11    ; ext. bkgnd
+        .byte $01,$06,$bf
+        .word vic+$16    ; 40 cols
+        .byte $01,$03,$f7
+        .word vic+$11    ; 25 lines
+        .byte $01,$03,$f7
+        .word vic+$11    ; blank screen
+        .byte $01,$04,$ef
+        .word cia2       ; bank select
+        .byte $03,$00,$fc
+        .word vic+$18    ; char gen base
+        .byte $07,$01,$f1
+        .word vic+$18    ; video base
+        .byte $0f,$04,$0f
         .word $286       ; cursor colour
-        .byte $0F,$00,$F0
-        .word VIC+$20    ; border colour
-        .byte $0F,$00,$F0
-        .word VIC+$21    ; other colours
-        .byte $0F,$00,$F0
-        .word VIC+$22
-        .byte $0F,$00,$F0
-        .word VIC+$23
-        .byte $0F,$00,$F0
-        .word VIC+$24
-        .byte $0F,$00,$F0
-        .word VIC+$25
-        .byte $0F,$00,$F0
-        .word VIC+$26
-        .byte $0F,$00,$F0
+        .byte $0f,$00,$f0
+        .word vic+$20    ; border colour
+        .byte $0f,$00,$f0
+        .word vic+$21    ; other colours
+        .byte $0f,$00,$f0
+        .word vic+$22
+        .byte $0f,$00,$f0
+        .word vic+$23
+        .byte $0f,$00,$f0
+        .word vic+$24
+        .byte $0f,$00,$f0
+        .word vic+$25
+        .byte $0f,$00,$f0
+        .word vic+$26
+        .byte $0f,$00,$f0
 ;
 ; voice controls
 ;
-        .word SID+5      ; attack
-        .byte $0F,$04,$0F
-        .word SID+5      ; decay
-        .byte $0F,$00,$F0
-        .word SID+6      ; sustain
-        .byte $0F,$04,$0F
-        .word SID+6      ; release
-        .byte $0F,$00,$F0
-        .word SID+4      ; play
-        .byte $01,$00,$FE
-        .word SID+4      ; sync
-        .byte $01,$01,$FD
-        .word SID+4      ; ring mod
-        .byte $01,$02,$FB
-        .word SID+4      ; triangle
-        .byte $01,$04,$EF
-        .word SID+4      ; sawtooth
-        .byte $01,$05,$DF
-        .word SID+4      ; pulse
-        .byte $01,$06,$BF
-        .word SID+4      ; noise
-        .byte $01,$07,$7F
-        .word SID+4      ; test
-        .byte $01,$03,$F7
+        .word sid+5      ; attack
+        .byte $0f,$04,$0f
+        .word sid+5      ; decay
+        .byte $0f,$00,$f0
+        .word sid+6      ; sustain
+        .byte $0f,$04,$0f
+        .word sid+6      ; release
+        .byte $0f,$00,$f0
+        .word sid+4      ; play
+        .byte $01,$00,$fe
+        .word sid+4      ; sync
+        .byte $01,$01,$fd
+        .word sid+4      ; ring mod
+        .byte $01,$02,$fb
+        .word sid+4      ; triangle
+        .byte $01,$04,$ef
+        .word sid+4      ; sawtooth
+        .byte $01,$05,$df
+        .word sid+4      ; pulse
+        .byte $01,$06,$bf
+        .word sid+4      ; noise
+        .byte $01,$07,$7f
+        .word sid+4      ; test
+        .byte $01,$03,$f7
 ;
 ; sound controls
 ;
-        .word SID+24     ; volume
-        .byte $0F,$00,$F0
-        .word SID+23     ; resonance
-        .byte $0F,$04,$0F
-        .word SID+24     ; low pass
-        .byte $01,$04,$EF
-        .word SID+24     ; band pass
-        .byte $01,$05,$DF
-        .word SID+24     ; high pass
-        .byte $01,$06,$BF
-        .word SID+24     ; cutoff voice3
-        .byte $01,$07,$7F
+        .word sid+24     ; volume
+        .byte $0f,$00,$f0
+        .word sid+23     ; resonance
+        .byte $0f,$04,$0f
+        .word sid+24     ; low pass
+        .byte $01,$04,$ef
+        .word sid+24     ; band pass
+        .byte $01,$05,$df
+        .word sid+24     ; high pass
+        .byte $01,$06,$bf
+        .word sid+24     ; cutoff voice3
+        .byte $01,$07,$7f
 ;
 ; end of table
 ;
 
 ;
-DEF_SPRT:
-         LDA  #240       ; will become 60
-         STA  TEMP
-         JSR  GET_BNK
-         LDY  #63        ; get pointer off stack first
-         LDA  (T),Y
-         LSR
-         ROR  TEMP
-         LSR
-         ROR  TEMP
-         CLC
-         ADC  TEMP+1     ; add in bank
-         STA  TEMP+1
-         CMP  #$04       ; too low?
-         BCS  DEF_2      ; no
-         JMP  CHK_ERR
-DEF_2:	LDA  #21
-DEF_1:	PHA             ; save counter
-         JSR  PULTOP     ; get row
-         LDY  #2         ; do it in reverse order
-         LDA  REG
-         STA  (TEMP),Y
-         DEY
-         LDA  REG+1
-         STA  (TEMP),Y
-         DEY
-         LDA  REGB
-         STA  (TEMP),Y
-         DEC  TEMP
-         DEC  TEMP
-         DEC  TEMP       ; (will not cross page boundary)
-         PLA
-         TAX             ; counter
-         DEX
-         TXA
-         BNE  DEF_1      ; more to go
-         JSR  PULTOP     ; discard pointer (read earlier)
-         JMP  MAIN
+def_sprt:
+         lda  #240       ; will become 60
+         sta  temp
+         jsr  get_bnk
+         ldy  #63        ; get pointer off stack first
+         lda  (t),y
+         lsr
+         ror  temp
+         lsr
+         ror  temp
+         clc
+         adc  temp+1     ; add in bank
+         sta  temp+1
+         cmp  #$04       ; too low?
+         bcs  def_2      ; no
+         jmp  chk_err
+def_2:	lda  #21
+def_1:	pha             ; save counter
+         jsr  pultop     ; get row
+         ldy  #2         ; do it in reverse order
+         lda  reg
+         sta  (temp),y
+         dey
+         lda  reg+1
+         sta  (temp),y
+         dey
+         lda  regb
+         sta  (temp),y
+         dec  temp
+         dec  temp
+         dec  temp       ; (will not cross page boundary)
+         pla
+         tax             ; counter
+         dex
+         txa
+         bne  def_1      ; more to go
+         jsr  pultop     ; discard pointer (read earlier)
+         jmp  main
 ;
-VOICE:
-         JSR  PULTOP
-         STA  FNC_VAL
-         STX  FNC_VAL+1
-         LDA  #14
-         JSR  CHK_TOP
-         STA  FUNCTION
-         LDA  #2
-         JSR  CHK_TOP
-         STA  VOICENO
-         STA  TEMP1      ; save for filter
-         ASL
-         ASL
-         ASL             ; times 8
-         SEC
-         SBC  VOICENO    ; times 7
-         STA  VOICENO
-         LDA  FUNCTION
-         BEQ  FREQ
-         CMP  #1
-         BEQ  WIDTH
-         CMP  #2
-         BEQ  FILTER
-         CLC
-         ADC  #14        ; bypass 17 graphics entries ( minus 3 not in table )
-VC_3:	STA  FUNCTION
-         ASL
-         ASL
-         CLC
-         ADC  FUNCTION   ; times 5
-         TAX
-         LDA  G_TABLE,X
-         CLC
-         ADC  VOICENO    ; low-order address
-         STA  TEMP
-         LDA  G_TABLE+1,X
-         STA  TEMP+1
-         LDA  G_TABLE+2,X ; mask
-         AND  FNC_VAL
-         LDY  G_TABLE+3,X ; bits to shift
-         BEQ  VC_1
-VC_2:	ASL
-         DEY
-         BNE  VC_2
-VC_1:	STA  FNC_VAL
-         LDY  TEMP       ; offset into SID image
-         LDA  SID_IMG,Y  ; get previous value
-         AND  G_TABLE+4,X ; mask out new bits
-         ORA  FNC_VAL    ; new value
-         STA  SID_IMG,Y  ; new value
-         LDY  #0
-         JMP  GR_4       ; and do SID itself
+voice:
+         jsr  pultop
+         sta  fnc_val
+         stx  fnc_val+1
+         lda  #14
+         jsr  chk_top
+         sta  function
+         lda  #2
+         jsr  chk_top
+         sta  voiceno
+         sta  temp1      ; save for filter
+         asl
+         asl
+         asl             ; times 8
+         sec
+         sbc  voiceno    ; times 7
+         sta  voiceno
+         lda  function
+         beq  freq
+         cmp  #1
+         beq  width
+         cmp  #2
+         beq  filter
+         clc
+         adc  #14        ; bypass 17 graphics entries ( minus 3 not in table )
+vc_3:	sta  function
+         asl
+         asl
+         clc
+         adc  function   ; times 5
+         tax
+         lda  g_table,x
+         clc
+         adc  voiceno    ; low-order address
+         sta  temp
+         lda  g_table+1,x
+         sta  temp+1
+         lda  g_table+2,x ; mask
+         and  fnc_val
+         ldy  g_table+3,x ; bits to shift
+         beq  vc_1
+vc_2:	asl
+         dey
+         bne  vc_2
+vc_1:	sta  fnc_val
+         ldy  temp       ; offset into sid image
+         lda  sid_img,y  ; get previous value
+         and  g_table+4,x ; mask out new bits
+         ora  fnc_val    ; new value
+         sta  sid_img,y  ; new value
+         ldy  #0
+         jmp  gr_4       ; and do sid itself
 ;
-FREQ:
-         LDX  VOICENO
-         LDA  FNC_VAL
-         STA  SID,X
-         LDA  FNC_VAL+1
-         STA  SID+1,X
-         JMP  MAIN
+freq:
+         ldx  voiceno
+         lda  fnc_val
+         sta  sid,x
+         lda  fnc_val+1
+         sta  sid+1,x
+         jmp  main
 ;
-WIDTH:
-         LDX  VOICENO
-         LDA  FNC_VAL
-         STA  SID+2,X
-         LDA  FNC_VAL+1
-         AND  #$F
-         STA  SID+3,X
-         JMP  MAIN
+width:
+         ldx  voiceno
+         lda  fnc_val
+         sta  sid+2,x
+         lda  fnc_val+1
+         and  #$f
+         sta  sid+3,x
+         jmp  main
 ;
-FILTER:
-         LDX  TEMP1      ; un-multiplied voice
-         LDA  FNC_VAL
-         AND  #1
-         BEQ  FILT_1
-         LDA  MASKS,X
-FILT_1:	STA  TEMP
-         LDA  XMASKS,X
-         AND  SID_IMG+23
-         ORA  TEMP
-         STA  SID+23
-         STA  SID_IMG+23
-         JMP  MAIN
+filter:
+         ldx  temp1      ; un-multiplied voice
+         lda  fnc_val
+         and  #1
+         beq  filt_1
+         lda  masks,x
+filt_1:	sta  temp
+         lda  xmasks,x
+         and  sid_img+23
+         ora  temp
+         sta  sid+23
+         sta  sid_img+23
+         jmp  main
 ;
-SOUND:
-         STY  VOICENO    ; not voice relative
-         JSR  PULTOP
-         STA  FNC_VAL
-         STX  FNC_VAL+1
-         STY  FNC_VAL+2
-         LDA  #8
-         JSR  CHK_TOP
-         BEQ  SOUND_CL
-         CMP  #1
-         BEQ  SOUND_F
-         CMP  #2
-         BEQ  DELAY
-         CLC
-         ADC  #26        ; bypass 17 graphics + 12 voice - 3 not in table
-         JMP  VC_3       ; handle with table
+sound:
+         sty  voiceno    ; not voice relative
+         jsr  pultop
+         sta  fnc_val
+         stx  fnc_val+1
+         sty  fnc_val+2
+         lda  #8
+         jsr  chk_top
+         beq  sound_cl
+         cmp  #1
+         beq  sound_f
+         cmp  #2
+         beq  delay
+         clc
+         adc  #26        ; bypass 17 graphics + 12 voice - 3 not in table
+         jmp  vc_3       ; handle with table
 ;
-SOUND_CL: LDY  #24
-         LDA  #0
-SOUND_C1: STA  SID,Y
-         STA  SID_IMG,Y
-         DEY
-         BPL  SOUND_C1
-         JMP  MAIN
+sound_cl: ldy  #24
+         lda  #0
+sound_c1: sta  sid,y
+         sta  sid_img,y
+         dey
+         bpl  sound_c1
+         jmp  main
 ;
-SOUND_F: LDA  FNC_VAL
-         AND  #7
-         STA  SID+21
-         LDA  FNC_VAL
-         LSR  FNC_VAL+1
-         ROR
-         LSR  FNC_VAL+1
-         ROR
-         LSR  FNC_VAL+1
-         ROR
-         STA  SID+22
-         JMP  MAIN
+sound_f: lda  fnc_val
+         and  #7
+         sta  sid+21
+         lda  fnc_val
+         lsr  fnc_val+1
+         ror
+         lsr  fnc_val+1
+         ror
+         lsr  fnc_val+1
+         ror
+         sta  sid+22
+         jmp  main
 ;
-DELAY:
-         LDA  CIA2+14
-         AND  #$C0
-         STA  CIA2+14
-         LDA  #0
-         STA  CIA2+15
-         LDA  FNC_VAL
-         STA  CIA2+6
-         LDA  FNC_VAL+1
-         STA  CIA2+7
-         LDA  #$66       ; calibrated to give 100'ths of a second
-         STA  CIA2+4
-         LDA  #$26
-         STA  CIA2+5
-         LDA  #$59       ; one shot/ count TA
-         STA  CIA2+15    ; start TB
-         LDA  CIA2+14
-         ORA  #$11
-         STA  CIA2+14    ; start TA
-DEL_WAIT: LDA  CIA2+15    ; finished?
-         AND  #1
-         BNE  DEL_WAIT   ; nope
-         JMP  MAIN
+delay:
+         lda  cia2+14
+         and  #$c0
+         sta  cia2+14
+         lda  #0
+         sta  cia2+15
+         lda  fnc_val
+         sta  cia2+6
+         lda  fnc_val+1
+         sta  cia2+7
+         lda  #$66       ; calibrated to give 100'ths of a second
+         sta  cia2+4
+         lda  #$26
+         sta  cia2+5
+         lda  #$59       ; one shot/ count ta
+         sta  cia2+15    ; start tb
+         lda  cia2+14
+         ora  #$11
+         sta  cia2+14    ; start ta
+del_wait: lda  cia2+15    ; finished?
+         and  #1
+         bne  del_wait   ; nope
+         jmp  main
 ;
 ;
-CUR:	LDA  #40
-        JSR  CHK_TOP
-CUR1: 	PHA
-        LDA  #25
-        JSR  CHK_TOP
-CUR2: 	TAX
-        PLA
-        TAY
-        CLC
-        JSR  PLOT       ; SET CURSOR POSITION
-        JMP  MAIN
+cur:	lda  #40
+        jsr  chk_top
+cur1: 	pha
+        lda  #25
+        jsr  chk_top
+cur2: 	tax
+        pla
+        tay
+        clc
+        jsr  plot       ; set cursor position
+        jmp  main
 
 ;
-MOD:	JSR  FNDSGN
-        JSR  DIVIDE
-        LDA  REMAIN
-        STA  RES
-        LDA  REMAIN+1
-        STA  RES+1
-        LDA  REMAIN+2
-        STA  RES+2
-        JMP  DIV14
+mod:	jsr  fndsgn
+        jsr  divide
+        lda  remain
+        sta  res
+        lda  remain+1
+        sta  res+1
+        lda  remain+2
+        sta  res+2
+        jmp  div14
 
 ;
-DIVBY0:	.byte "dIVIDE BY",$BE,$0D
+divby0:	.byte "dIVIDE BY",$be,$0d
 
 ;
-DIV:	JSR  FNDSGN
-        JSR  DIVIDE
-DIV14:	JMP  FIXSGN
+div:	jsr  fndsgn
+        jsr  divide
+div14:	jmp  fixsgn
 
 ;
-DIVIDE:	LDA  DIVISOR
-        ORA  DIVISOR+1
-        ORA  DIVISOR+2
-        BNE  DIV1
-        LDA  #<DIVBY0
-        LDX  #>DIVBY0
-        JMP  NOTIM1
+divide:	lda  divisor
+        ora  divisor+1
+        ora  divisor+2
+        bne  div1
+        lda  #<divby0
+        ldx  #>divby0
+        jmp  notim1
 
 ;
-DIV1:	JSR  ZERRES     ; zero result
-        STA  REMAIN
-        STA  REMAIN+1
-        STA  REMAIN+2
-        LDA  #24
-L_5:	STA  CNTR
-L_10:
-        ASL  DVDN
-        ROL  DVDN+1
-        ROL  DVDN+2
-        ROL  REMAIN
-        ROL  REMAIN+1
-        ROL  REMAIN+2
-        SEC
-        LDA  REMAIN
-        SBC  DIVISOR
-        TAX
-        LDA  REMAIN+1
-        SBC  DIVISOR+1
-        TAY
-        LDA  REMAIN+2
-        SBC  DIVISOR+2
-        BMI  L_20
-        STA  REMAIN+2
-        TYA
-        STA  REMAIN+1
-        TXA
-        STA  REMAIN
-        SEC
-        BCS  L_30
-L_20:
-         CLC
-L_30:
-        ROL  RES
-        ROL  RES+1
-        ROL  RES+2
-        DEC  CNTR
-        BNE  L_10
-        RTS
+div1:	jsr  zerres     ; zero result
+        sta  remain
+        sta  remain+1
+        sta  remain+2
+        lda  #24
+l_5:	sta  cntr
+l_10:
+        asl  dvdn
+        rol  dvdn+1
+        rol  dvdn+2
+        rol  remain
+        rol  remain+1
+        rol  remain+2
+        sec
+        lda  remain
+        sbc  divisor
+        tax
+        lda  remain+1
+        sbc  divisor+1
+        tay
+        lda  remain+2
+        sbc  divisor+2
+        bmi  l_20
+        sta  remain+2
+        tya
+        sta  remain+1
+        txa
+        sta  remain
+        sec
+        bcs  l_30
+l_20:
+         clc
+l_30:
+        rol  res
+        rol  res+1
+        rol  res+2
+        dec  cntr
+        bne  l_10
+        rts
 
 ;
-ABS:	JSR  PULTOP
-        JSR  ABSREG
-        JMP  INP3
+abs:	jsr  pultop
+        jsr  absreg
+        jmp  inp3
 
 ;
-ZERRES:	LDA  #0
-        STA  RES
-        STA  RES+1
-        STA  RES+2
-        RTS
+zerres:	lda  #0
+        sta  res
+        sta  res+1
+        sta  res+2
+        rts
 
 ;
-ABSREG:	LDA  REGB
-        BPL  ABS1
-        SEC
-        LDA  #0
-        SBC  REG
-        TAX
-        LDA  #0
-        SBC  REG+1
-        TAY
-        LDA  #0
-        SBC  REGB
-        JMP  ABS2
-ABS1:	LDX  REG
-        LDY  REG+1
-        LDA  REGB
-ABS2:	RTS
+absreg:	lda  regb
+        bpl  abs1
+        sec
+        lda  #0
+        sbc  reg
+        tax
+        lda  #0
+        sbc  reg+1
+        tay
+        lda  #0
+        sbc  regb
+        jmp  abs2
+abs1:	ldx  reg
+        ldy  reg+1
+        lda  regb
+abs2:	rts
 
 ;
-FNDSGN:	JSR  ZERRES     ; zero result
-        JSR  PULTOP
-        JSR  PULTOP2
-        LDA  REGB
-        AND  #$80
-        STA  RMNDR
-        LDA  REG2B
-        AND  #$80
-        EOR  RMNDR
-        STA  RMNDR
-        JSR  ABSREG
-        STA  DIVISOR+2
-        STY  DIVISOR+1
-        STX  DIVISOR
-        LDA  REG2B
-        BPL  MUL3
-        SEC
-        LDA  #0
-        SBC  REG2
-        TAX
-        LDA  #0
-        SBC  REG2+1
-        TAY
-        LDA  #0
-        SBC  REG2B
-        JMP  MUL4
-MUL3:	LDX  REG2
-        LDY  REG2+1
-        LDA  REG2B
-MUL4:	STX  DVDN
-        STY  DVDN+1
-        STA  DVDN+2
-        RTS
+fndsgn:	jsr  zerres     ; zero result
+        jsr  pultop
+        jsr  pultop2
+        lda  regb
+        and  #$80
+        sta  rmndr
+        lda  reg2b
+        and  #$80
+        eor  rmndr
+        sta  rmndr
+        jsr  absreg
+        sta  divisor+2
+        sty  divisor+1
+        stx  divisor
+        lda  reg2b
+        bpl  mul3
+        sec
+        lda  #0
+        sbc  reg2
+        tax
+        lda  #0
+        sbc  reg2+1
+        tay
+        lda  #0
+        sbc  reg2b
+        jmp  mul4
+mul3:	ldx  reg2
+        ldy  reg2+1
+        lda  reg2b
+mul4:	stx  dvdn
+        sty  dvdn+1
+        sta  dvdn+2
+        rts
 
 ;
-FIXSGN:	LDA  RMNDR
-         BPL  MUL7
-         SEC
-         LDA  #0
-         SBC  RES
-         TAX
-         LDA  #0
-         SBC  RES+1
-         TAY
-         LDA  #0
-         SBC  RES+2
-         JMP  MUL8
-MUL7:	LDX  RES
-         LDY  RES+1
-         LDA  RES+2
-MUL8:	JMP  INP3
+fixsgn:	lda  rmndr
+         bpl  mul7
+         sec
+         lda  #0
+         sbc  res
+         tax
+         lda  #0
+         sbc  res+1
+         tay
+         lda  #0
+         sbc  res+2
+         jmp  mul8
+mul7:	ldx  res
+         ldy  res+1
+         lda  res+2
+mul8:	jmp  inp3
 
 ;
-EQL:	JSR  PULBOTH
-         CMP  REG
-         BNE  FALSE
-         TXA
-         CMP  REG+1
-         BNE  FALSE
-         TYA
-         CMP  REGB
-         BNE  FALSE
+eql:	jsr  pulboth
+         cmp  reg
+         bne  false
+         txa
+         cmp  reg+1
+         bne  false
+         tya
+         cmp  regb
+         bne  false
 ;
-TRUE:	LDA  #1
-TRUE2:	STA  REG
-         LDA  #0
-         STA  REG+1
-TRUE1:	STA  REGB
-         JMP  MAINP
+true:	lda  #1
+true2:	sta  reg
+         lda  #0
+         sta  reg+1
+true1:	sta  regb
+         jmp  mainp
 ;
-FALSE:	LDA  #0
-         STA  REG
-         STA  REG+1
-         BEQ  TRUE1
+false:	lda  #0
+         sta  reg
+         sta  reg+1
+         beq  true1
 ;
 ;
-SUBSTK:	JSR  PULBOTH
-         SEC
-         SBC  REG
-         STA  REG
-         TAY
-         TXA
-         SBC  REG+1
-         STA  REG+1
-         TAX
-         LDA  REG2B
-         SBC  REGB
-         STA  REGB
-         RTS
+substk:	jsr  pulboth
+         sec
+         sbc  reg
+         sta  reg
+         tay
+         txa
+         sbc  reg+1
+         sta  reg+1
+         tax
+         lda  reg2b
+         sbc  regb
+         sta  regb
+         rts
 ;
-NEQ:	JSR  SUBSTK
-         BNE  TRUE
-         TYA
-         BNE  TRUE
-         TXA
-         BNE  TRUE
-         BEQ  FALSE
+neq:	jsr  substk
+         bne  true
+         tya
+         bne  true
+         txa
+         bne  true
+         beq  false
 ;
-LSS:	JSR  SUBSTK
-         BMI  TRUE
-         BPL  FALSE
+lss:	jsr  substk
+         bmi  true
+         bpl  false
 ;
-GTR:	JSR  SUBSTK
-         BMI  FALSE
-         BNE  TRUE
-         TYA
-         BNE  TRUE
-         TXA
-         BNE  TRUE
-         BEQ  FALSE
+gtr:	jsr  substk
+         bmi  false
+         bne  true
+         tya
+         bne  true
+         txa
+         bne  true
+         beq  false
 ;
-GEQ:	JSR  SUBSTK
-         BMI  FALSE
-         BPL  TRUE
+geq:	jsr  substk
+         bmi  false
+         bpl  true
 ;
-LEQ:	JSR  SUBSTK
-         BMI  TRUE
-         BNE  FALSE
-         TYA
-         BNE  FALSE
-         TXA
-         BNE  FALSE
-         BEQ  TRUE
+leq:	jsr  substk
+         bmi  true
+         bne  false
+         tya
+         bne  false
+         txa
+         bne  false
+         beq  true
 ;
-XOR:	JSR  PULBOTH
-         EOR  REG
-         STA  REG
-         TXA
-         EOR  REG+1
-         STA  REG+1
-         TYA
-         EOR  REGB
-         JMP  TRUE1
+xor:	jsr  pulboth
+         eor  reg
+         sta  reg
+         txa
+         eor  reg+1
+         sta  reg+1
+         tya
+         eor  regb
+         jmp  true1
 ;
-ORR:	JSR  PULBOTH
-         ORA  REG
-         STA  REG
-         TXA
-         ORA  REG+1
-         STA  REG+1
-         TYA
-         ORA  REGB
-         JMP  TRUE1
+orr:	jsr  pulboth
+         ora  reg
+         sta  reg
+         txa
+         ora  reg+1
+         sta  reg+1
+         tya
+         ora  regb
+         jmp  true1
 ;
-XXXAND:	JSR  PULBOTH
-         AND  REG
-         STA  REG
-         TXA
-         AND  REG+1
-         STA  REG+1
-         TYA
-         AND  REGB
-         JMP  TRUE1
+xxxand:	jsr  pulboth
+         and  reg
+         sta  reg
+         txa
+         and  reg+1
+         sta  reg+1
+         tya
+         and  regb
+         jmp  true1
 ;
-XXXEOR:	JSR  PULTOP
-         LDA  REG
-         BNE  EOR1
-         LDA  REG+1
-         BNE  EOR1
-         LDA  REGB
-         BNE  EOR1
-         JMP  TRUE
-EOR1:	JMP  FALSE
+xxxeor:	jsr  pultop
+         lda  reg
+         bne  eor1
+         lda  reg+1
+         bne  eor1
+         lda  regb
+         bne  eor1
+         jmp  true
+eor1:	jmp  false
 
 ;
-SHL:	JSR  PULTOP2
-        AND  #$1F
-        PHA
-        JSR  PULTOP
-        PLA
-        STA  REG2
-        BEQ  INC1
-SHL1:	ASL  REG
-        ROL  REG+1
-        ROL  REGB
-        DEC  REG2
-        BNE  SHL1
-        BEQ  INC1
+shl:	jsr  pultop2
+        and  #$1f
+        pha
+        jsr  pultop
+        pla
+        sta  reg2
+        beq  inc1
+shl1:	asl  reg
+        rol  reg+1
+        rol  regb
+        dec  reg2
+        bne  shl1
+        beq  inc1
 ;
-SHR:	JSR  PULTOP2
-         AND  #$1F
-         PHA
-         JSR  PULTOP
-         PLA
-         STA  REG2
-         BEQ  INC1
-SHR1:	LSR  REGB
-         ROR  REG+1
-         ROR  REG
-         DEC  REG2
-         BNE  SHR1
-INC1:	JMP  MAINP
+shr:	jsr  pultop2
+         and  #$1f
+         pha
+         jsr  pultop
+         pla
+         sta  reg2
+         beq  inc1
+shr1:	lsr  regb
+         ror  reg+1
+         ror  reg
+         dec  reg2
+         bne  shr1
+inc1:	jmp  mainp
 ;
 ;
-XXXINC:	CLC
-         LDA  (T),Y
-         ADC  #1
-         STA  (T),Y
-         INY
-         LDA  (T),Y
-         ADC  #0
-         STA  (T),Y
-         INY
-         LDA  (T),Y
-         ADC  #0
-INC2:	STA  (T),Y
-         JMP  MAIN
+xxxinc:	clc
+         lda  (t),y
+         adc  #1
+         sta  (t),y
+         iny
+         lda  (t),y
+         adc  #0
+         sta  (t),y
+         iny
+         lda  (t),y
+         adc  #0
+inc2:	sta  (t),y
+         jmp  main
 ;
-XXXDEC:	SEC
-         LDA  (T),Y
-         SBC  #1
-         STA  (T),Y
-         INY
-         LDA  (T),Y
-         SBC  #0
-         STA  (T),Y
-         INY
-         LDA  (T),Y
-         SBC  #0
-         JMP  INC2
+xxxdec:	sec
+         lda  (t),y
+         sbc  #1
+         sta  (t),y
+         iny
+         lda  (t),y
+         sbc  #0
+         sta  (t),y
+         iny
+         lda  (t),y
+         sbc  #0
+         jmp  inc2
 ;
-MOV:	LDA  (T),Y
-         PHA
-         INY
-         LDA  (T),Y
-         PHA
-         INY
-         LDA  (T),Y
-         PHA
-         LDA  T
-         SEC
-         SBC  #3
-         STA  T
-         BCS  MOV1
-         DEC  T+1
-MOV1:	PLA
-         STA  (T),Y
-         DEY
-         PLA
-         STA  (T),Y
-         DEY
-         PLA
-         STA  (T),Y
-         JMP  MAIN
+mov:	lda  (t),y
+         pha
+         iny
+         lda  (t),y
+         pha
+         iny
+         lda  (t),y
+         pha
+         lda  t
+         sec
+         sbc  #3
+         sta  t
+         bcs  mov1
+         dec  t+1
+mov1:	pla
+         sta  (t),y
+         dey
+         pla
+         sta  (t),y
+         dey
+         pla
+         sta  (t),y
+         jmp  main
 ;
-LODC:	JSR  GETADR
-LOD3:	LDY  #2
-LOD3_A:	LDA  #0
-         STA  REG+1
-         STA  REGB
-         LDA  (DATA),Y
-         STA  REG
-         JMP  MAINP
+lodc:	jsr  getadr
+lod3:	ldy  #2
+lod3_a:	lda  #0
+         sta  reg+1
+         sta  regb
+         lda  (data),y
+         sta  reg
+         jmp  mainp
 ;
-LOD:	JSR  GETADR
-LOD2:	LDY  #0
-         LDA  (DATA),Y
-         STA  REG
-         INY
-         LDA  (DATA),Y
-         STA  REG+1
-         INY
-         LDA  (DATA),Y
-         JMP  TRUE1
+lod:	jsr  getadr
+lod2:	ldy  #0
+         lda  (data),y
+         sta  reg
+         iny
+         lda  (data),y
+         sta  reg+1
+         iny
+         lda  (data),y
+         jmp  true1
 ;
-LDAC:	JSR  PULTOP
-        STA  DATA
-        STX  DATA+1
-        LDY  #0
-        BEQ  LOD3_A
+ldac:	jsr  pultop
+        sta  data
+        stx  data+1
+        ldy  #0
+        beq  lod3_a
 ;
-XXXLDA:	JSR  PULTOP
-         STA  DATA
-         STX  DATA+1
-         JMP  LOD2
+xxxlda:	jsr  pultop
+         sta  data
+         stx  data+1
+         jmp  lod2
 ;
-GETIDC:
-         JSR  PULTOP2
-         JSR  GETADR
-         JMP  GETID2
+getidc:
+         jsr  pultop2
+         jsr  getadr
+         jmp  getid2
 ;
-GETIDX:
-         JSR  PULTOP2
-         ASL  REG2
-         ROL  REG2+1
-         CLC
-         ADC  REG2
-         STA  REG2
-         TXA
-         ADC  REG2+1
-         STA  REG2+1     ; TIMES 3
-         JSR  GETADR
+getidx:
+         jsr  pultop2
+         asl  reg2
+         rol  reg2+1
+         clc
+         adc  reg2
+         sta  reg2
+         txa
+         adc  reg2+1
+         sta  reg2+1     ; times 3
+         jsr  getadr
 ;
-GETID2:	LDA  DATA
-         SEC
-         SBC  REG2
-         STA  DATA
-         LDA  DATA+1
-         SBC  REG2+1
-         STA  DATA+1
-         RTS
+getid2:	lda  data
+         sec
+         sbc  reg2
+         sta  data
+         lda  data+1
+         sbc  reg2+1
+         sta  data+1
+         rts
 ;
-LDIC:	JSR  GETIDC
-         JMP  LOD3
+ldic:	jsr  getidc
+         jmp  lod3
 ;
-LDI:	JSR  GETIDX
-         JMP  LOD2
+ldi:	jsr  getidx
+         jmp  lod2
 ;
-STOC:	JSR  GETADR
-         JSR  PULTOP
-         LDY  #2
-STO5:	STA  (DATA),Y
-         JMP  MAIN
+stoc:	jsr  getadr
+         jsr  pultop
+         ldy  #2
+sto5:	sta  (data),y
+         jmp  main
 ;
-STO:	JSR  GETADR
-         JSR  PULTOP
-STO2:	LDY  #0
-         STA  (DATA),Y
-         INY
-         TXA
-         STA  (DATA),Y
-         LDA  REGB
-         INY
-         BNE  STO5
+sto:	jsr  getadr
+         jsr  pultop
+sto2:	ldy  #0
+         sta  (data),y
+         iny
+         txa
+         sta  (data),y
+         lda  regb
+         iny
+         bne  sto5
 ;
-XXXSTA:	JSR  PULBOTH
-        LDY  #0
-        LDA  REG
-        STA  (REG2),Y
-        INY
-        LDA  REG+1
-        STA  (REG2),Y
-        INY
-        LDA  REGB
-STA5:	STA  (REG2),Y
-        JMP  MAIN
+xxxsta:	jsr  pulboth
+        ldy  #0
+        lda  reg
+        sta  (reg2),y
+        iny
+        lda  reg+1
+        sta  (reg2),y
+        iny
+        lda  regb
+sta5:	sta  (reg2),y
+        jmp  main
 
 ;
-STAC:	JSR  PULTOP
-        JSR  PULTOP2
-        LDA  REG
-        LDY  #0
-        BEQ  STA5
+stac:	jsr  pultop
+        jsr  pultop2
+        lda  reg
+        ldy  #0
+        beq  sta5
 
 ;
-STIC:	JSR  PULTOP
-         STA  TEMP
-         JSR  GETIDC
-         LDA  TEMP
-         LDY  #2
-         BNE  STO5
+stic:	jsr  pultop
+         sta  temp
+         jsr  getidc
+         lda  temp
+         ldy  #2
+         bne  sto5
 ;
-STI:	JSR  PULTOP
-         STA  TEMP
-         STX  TEMP+1
-         TYA
-         PHA
-         JSR  GETIDX
-         LDY  #0
-         LDA  TEMP
-         STA  (DATA),Y
-         LDA  TEMP+1
-         INY
-         STA  (DATA),Y
-         PLA
-         INY
-         BNE  STO5
+sti:	jsr  pultop
+         sta  temp
+         stx  temp+1
+         tya
+         pha
+         jsr  getidx
+         ldy  #0
+         lda  temp
+         sta  (data),y
+         lda  temp+1
+         iny
+         sta  (data),y
+         pla
+         iny
+         bne  sto5
 ;
-RTN:	LDA  BASE
-         SEC
-         SBC  #6
-         STA  WORK
-         LDA  BASE+1
-         SBC  #0
-         STA  WORK+1
-         LDY  #0
-         LDA  (WORK),Y
-         STA  P
-         INY
-         LDA  (WORK),Y
-         STA  P+1
-         LDA  BASE+1
-         STA  T+1
-         LDA  BASE
-         STA  T
-         SEC
-         SBC  #4
-         STA  WORK
-         LDA  BASE+1
-         SBC  #0
-         STA  WORK+1
-         LDY  #0
-         LDA  (WORK),Y
-         STA  BASE
-         INY
-         LDA  (WORK),Y
-         STA  BASE+1
-         JMP  MAIN
+rtn:	lda  base
+         sec
+         sbc  #6
+         sta  work
+         lda  base+1
+         sbc  #0
+         sta  work+1
+         ldy  #0
+         lda  (work),y
+         sta  p
+         iny
+         lda  (work),y
+         sta  p+1
+         lda  base+1
+         sta  t+1
+         lda  base
+         sta  t
+         sec
+         sbc  #4
+         sta  work
+         lda  base+1
+         sbc  #0
+         sta  work+1
+         ldy  #0
+         lda  (work),y
+         sta  base
+         iny
+         lda  (work),y
+         sta  base+1
+         jmp  main
 ;
 ;
 ;
-INP:
-         STY  SIGN
-         STY  DOS_FLG
-         DEY
-         STY  RUNNING
-         LDY  #8
-         JSR  GETLN1
-         LDA  #<INBUF
-         STA  NXTCHR
-         LDA  #>INBUF
-         STA  NXTCHR+1
-         LDA  INBUF
-         JSR  CHK_KBD
-         BCS  INP
-         CMP  #'-'
-         BNE  INP1
-         STA  SIGN
-         INC  NXTCHR
-         LDA  INBUF+1
-INP1:
-         JSR  ISITNM
-         BCS  BAD_INP
-INP_OK:
-         JSR  GET_NUM
-INP4:	BCS  BAD_INP
-         JSR  GETNEXT    ; followed by c/r?
-         AND  #$7F
-         CMP  #$0D
-         BNE  BAD_INP    ; no
-         LDX  VALUE
-         LDY  VALUE+1
-         LDA  VALUE+2
-INP3:	STY  REG+1
-         STX  REG
-         LDX  #12
-         STX  RUNNING
-         JMP  TRUE1
+inp:
+         sty  sign
+         sty  dos_flg
+         dey
+         sty  running
+         ldy  #8
+         jsr  getln1
+         lda  #<inbuf
+         sta  nxtchr
+         lda  #>inbuf
+         sta  nxtchr+1
+         lda  inbuf
+         jsr  chk_kbd
+         bcs  inp
+         cmp  #'-'
+         bne  inp1
+         sta  sign
+         inc  nxtchr
+         lda  inbuf+1
+inp1:
+         jsr  isitnm
+         bcs  bad_inp
+inp_ok:
+         jsr  get_num
+inp4:	bcs  bad_inp
+         jsr  getnext    ; followed by c/r?
+         and  #$7f
+         cmp  #$0d
+         bne  bad_inp    ; no
+         ldx  value
+         ldy  value+1
+         lda  value+2
+inp3:	sty  reg+1
+         stx  reg
+         ldx  #12
+         stx  running
+         jmp  true1
 ;
-BAD_INP: LDA  #1
-        STA  DOS_FLG
-        LDA  #0
-        TAX
-        TAY
-        BEQ  INP3
+bad_inp: lda  #1
+        sta  dos_flg
+        lda  #0
+        tax
+        tay
+        beq  inp3
 
 ;
-OUT:	JSR  PULTOP
-        JSR  DSP_BIN
-        JMP  MAIN
+out:	jsr  pultop
+        jsr  dsp_bin
+        jmp  main
 ;
-OUH:	JSR  PULTOP
-        LDA  REGB
-        JSR  PRBYTE
-        LDA  REG+1
-        JSR  PRBYTE
-        LDA  REG
-        JSR  PRBYTE
-        JMP  MAIN
+ouh:	jsr  pultop
+        lda  regb
+        jsr  prbyte
+        lda  reg+1
+        jsr  prbyte
+        lda  reg
+        jsr  prbyte
+        jmp  main
 
 ;
-OUS: 	LDA  P
-        CLC
-        ADC  #1
-        STA  WORK
-        LDA  P+1
-        ADC  #0
-        STA  WORK+1
-        LDA  (P),Y
-        STA  COUNT1     ; NO. OF CHARS
-        CLC
-        ADC  #1
-        ADC  P
-        STA  P
-        BCC  OUS1
-        INC  P+1
-OUS1:	LDA  WORK
-        LDX  WORK+1
-        LDY  COUNT1
-        JSR  PT
-        JMP  MAIN
+ous: 	lda  p
+        clc
+        adc  #1
+        sta  work
+        lda  p+1
+        adc  #0
+        sta  work+1
+        lda  (p),y
+        sta  count1     ; no. of chars
+        clc
+        adc  #1
+        adc  p
+        sta  p
+        bcc  ous1
+        inc  p+1
+ous1:	lda  work
+        ldx  work+1
+        ldy  count1
+        jsr  pt
+        jmp  main
 
 ;
-INH:
-         STY  SIGN
-         STY  DOS_FLG
-         DEY
-         STY  RUNNING
-         LDY  #6
-         JSR  GETLN1
-         LDA  #>(INBUF-1)
-         STA  NXTCHR+1
-         LDA  #<(INBUF-1)
-         STA  NXTCHR
-         LDA  INBUF
-         JSR  CHK_KBD
-         BCS  INH
-         JSR  ISITHX
-         BCC  INH_OK
-BAD_INP2: JMP  BAD_INP
-INH_OK:
-         JSR  GET_HEX
-         JMP  INP4
+inh:
+         sty  sign
+         sty  dos_flg
+         dey
+         sty  running
+         ldy  #6
+         jsr  getln1
+         lda  #>(inbuf-1)
+         sta  nxtchr+1
+         lda  #<(inbuf-1)
+         sta  nxtchr
+         lda  inbuf
+         jsr  chk_kbd
+         bcs  inh
+         jsr  isithx
+         bcc  inh_ok
+bad_inp2: jmp  bad_inp
+inh_ok:
+         jsr  get_hex
+         jmp  inp4
 ;
-ABSCLL:
-         STY  CALL
-         STY  CALL+1
-         JMP  CLL_A
+abscll:
+         sty  call
+         sty  call+1
+         jmp  cll_a
 ;
-CLL:
-         LDA  LASTP
-         STA  CALL
-         LDA  LASTP+1
-         STA  CALL+1
-CLL_A:
-         LDA  (P),Y
-         STA  COUNT1
-         INY
-         CLC
-         LDA  (P),Y
-         ADC  CALL
-         STA  CALL
-         INY
-         LDA  (P),Y
-         ADC  CALL+1
-         STA  CALL+1
-         LDA  P
-         CLC
-         ADC  #3
-         STA  P
-         BCC  CLL4
-         INC  P+1
-CLL4:
-         LDA  BASE+1
-         LDX  BASE
-CLL2:
-         STA  DATA+1
-         STX  DATA
-         TAY
-         LDA  COUNT1
-         BEQ  CLL3
-         SEC
-         TXA
-         SBC  #2
-         STA  WORK
-         TYA
-         SBC  #0
-         STA  WORK+1
-         LDY  #0
-         LDA  (WORK),Y
-         INY
-         TAX
-         LDA  (WORK),Y
-         DEC  COUNT1
-         JMP  CLL2
-CLL3:
-         LDA  T
-         STA  TEMP
-         LDA  T+1
-         STA  TEMP+1
-         LDA  DATA
-         STA  REG+1
-         LDA  DATA+1
-         STA  REGB
-         LDA  BASE+1
-         STA  REG
-         JSR  PSHTOP
-         LDA  BASE
-         STA  REGB
-         LDA  TEMP
-         STA  BASE
-         LDA  TEMP+1
-         STA  BASE+1
-         LDA  P
-         STA  REG
-         LDA  P+1
-         STA  REG+1
-         JSR  PSHTOP
-         LDA  CALL
-         STA  P
-         LDA  CALL+1
-         STA  P+1
-         CLC
-         LDA  T
-         ADC  #6
-         STA  T
-         BCC  CLL5
-         INC  T+1
-CLL5:
-         JMP  MAIN
+cll:
+         lda  lastp
+         sta  call
+         lda  lastp+1
+         sta  call+1
+cll_a:
+         lda  (p),y
+         sta  count1
+         iny
+         clc
+         lda  (p),y
+         adc  call
+         sta  call
+         iny
+         lda  (p),y
+         adc  call+1
+         sta  call+1
+         lda  p
+         clc
+         adc  #3
+         sta  p
+         bcc  cll4
+         inc  p+1
+cll4:
+         lda  base+1
+         ldx  base
+cll2:
+         sta  data+1
+         stx  data
+         tay
+         lda  count1
+         beq  cll3
+         sec
+         txa
+         sbc  #2
+         sta  work
+         tya
+         sbc  #0
+         sta  work+1
+         ldy  #0
+         lda  (work),y
+         iny
+         tax
+         lda  (work),y
+         dec  count1
+         jmp  cll2
+cll3:
+         lda  t
+         sta  temp
+         lda  t+1
+         sta  temp+1
+         lda  data
+         sta  reg+1
+         lda  data+1
+         sta  regb
+         lda  base+1
+         sta  reg
+         jsr  pshtop
+         lda  base
+         sta  regb
+         lda  temp
+         sta  base
+         lda  temp+1
+         sta  base+1
+         lda  p
+         sta  reg
+         lda  p+1
+         sta  reg+1
+         jsr  pshtop
+         lda  call
+         sta  p
+         lda  call+1
+         sta  p+1
+         clc
+         lda  t
+         adc  #6
+         sta  t
+         bcc  cll5
+         inc  t+1
+cll5:
+         jmp  main
 ;
-CLA:	JSR  PULTOP
-        LDA  CALL_P
-        PHA
-        LDA  CALL_A
-        LDX  CALL_X
-        LDY  CALL_Y
-        PLP
-        JSR  CLL_JMP
-        PHP
-        STA  CALL_A
-        STX  CALL_X
-        STY  CALL_Y
-        PLA
-        STA  CALL_P
-        JMP  MAIN
-CLL_JMP: JMP  (REG)
+cla:	jsr  pultop
+        lda  call_p
+        pha
+        lda  call_a
+        ldx  call_x
+        ldy  call_y
+        plp
+        jsr  cll_jmp
+        php
+        sta  call_a
+        stx  call_x
+        sty  call_y
+        pla
+        sta  call_p
+        jmp  main
+cll_jmp: jmp  (reg)
 
 ;
-INT:	JSR  GETLIT
-         SEC
-         LDA  T
-         SBC  REG
-         STA  T
-         LDA  T+1
-         SBC  REG+1
-         STA  T+1
-         CMP  #$C0
-         BCC  INT_ERR
-         JMP  MAIN
+int:	jsr  getlit
+         sec
+         lda  t
+         sbc  reg
+         sta  t
+         lda  t+1
+         sbc  reg+1
+         sta  t+1
+         cmp  #$c0
+         bcc  int_err
+         jmp  main
 ;
-INT_ERR:
-         LDA  #<INT_ERRM
-         LDX  #>INT_ERRM
-         JMP  NOTIM1
+int_err:
+         lda  #<int_errm
+         ldx  #>int_errm
+         jmp  notim1
 
 ;
-INT_ERRM: .byte $C6,$B1,$0D	; stack full
+int_errm: .byte $c6,$b1,$0d	; stack full
 
 ;
-XXXJMP:	JSR  GETLIT
-        CLC
-        LDA  REG
-        ADC  LASTP
-        STA  P
-        LDA  REG+1
-        ADC  LASTP+1
-        STA  P+1
-        JMP  MAIN
+xxxjmp:	jsr  getlit
+        clc
+        lda  reg
+        adc  lastp
+        sta  p
+        lda  reg+1
+        adc  lastp+1
+        sta  p+1
+        jmp  main
 ;
-JMZ:	JSR PULTOP
-        LDA REG
-        ORA REG+1
-        BNE NOJUMP
-        BEQ XXXJMP
+jmz:	jsr pultop
+        lda reg
+        ora reg+1
+        bne nojump
+        beq xxxjmp
 
 ;
-NOJUMP:	JSR  GETLIT
-        JMP  MAIN
+nojump:	jsr  getlit
+        jmp  main
 
 ;
-JM1:	JSR PULTOP
-        ORA REG+1
-        BNE XXXJMP
-        BEQ NOJUMP
+jm1:	jsr pultop
+        ora reg+1
+        bne xxxjmp
+        beq nojump
 
 ;
-INPC:	JSR  RDKEY
-        JSR  CHK_KBD
-        BCS  INPC
-INPC1:  STA  REG
-        LDA  #0
-        STA  REG+1
-        JMP  MAINP
+inpc:	jsr  rdkey
+        jsr  chk_kbd
+        bcs  inpc
+inpc1:  sta  reg
+        lda  #0
+        sta  reg+1
+        jmp  mainp
 
 ;
-OUTC:	JSR  PULTOP
-        LDA  REG
-        JSR  PC
-        JMP  MAIN
+outc:	jsr  pultop
+        lda  reg
+        jsr  pc
+        jmp  main
 
 ;
-INS:
-         LDA  (P),Y
-         STA  TEMP
-         INC  P
-         BNE  INS3
-         INC  P+1
-INS3:
-         LDY  TEMP
-         JSR  GETLN1
-         LDA  INBUF
-         JSR  CHK_KBD
-         BCS  INS3
-         TXA
-         CLC
-         ADC  #1
-         CMP  TEMP
-         BCC  INS1
-         LDA  TEMP
-INS1:
-         STA  TEMP+1
-         JSR  GETADR
-         LDY  #3
-         LDX  #0
-INS2:
-         DEC  DATA
-         LDA  DATA
-         CMP  #$FF
-         BNE  INS4
-         DEC  DATA+1
-INS4:
-         LDA  INBUF,X
-         STA  (DATA),Y
-         INX
-         DEC  TEMP+1
-         BNE  INS2
-         JMP  MAIN
+ins:
+         lda  (p),y
+         sta  temp
+         inc  p
+         bne  ins3
+         inc  p+1
+ins3:
+         ldy  temp
+         jsr  getln1
+         lda  inbuf
+         jsr  chk_kbd
+         bcs  ins3
+         txa
+         clc
+         adc  #1
+         cmp  temp
+         bcc  ins1
+         lda  temp
+ins1:
+         sta  temp+1
+         jsr  getadr
+         ldy  #3
+         ldx  #0
+ins2:
+         dec  data
+         lda  data
+         cmp  #$ff
+         bne  ins4
+         dec  data+1
+ins4:
+         lda  inbuf,x
+         sta  (data),y
+         inx
+         dec  temp+1
+         bne  ins2
+         jmp  main
 ;
-HPLOT:
-         JSR  PULTOP
-         LDA  REGB
-         BNE  HPL_ERR
-         LDA  REG
-         CMP  #200
-         BCC  HPLOT_1
-HPL_ERR: JMP  CHK_ERR    ; too big
-HPLOT_1: STA  YPOS
-         JSR  PULTOP
-         LDA  VIC+$16
-         AND  #$10
-         STA  VOICENO    ; multi-colour flag
-         BEQ  HPLOT_SI
-         ASL  REG
-         ROL  REG+1      ; double x co-ord
-HPLOT_SI:
-         LDA  REG
-         STA  XPOSL
-         TAX
-         LDA  REG+1
-         TAY
-         CPX  #$40
-         SBC  #1
-         BCC  HPLOT_2
-         JMP  CHK_ERR    ; too big
-HPLOT_2: STY  XPOSH
-         JSR  PULTOP
-         LDA  REG
-         AND  #3
-         STA  TEMP1+1    ; colour
-         LDA  YPOS
-         AND  #$F8
-         STA  ROWL
-         LDA  #0
-         ASL  ROWL
-         ROL             ; X 2
-         ASL  ROWL
-         ROL             ; X 4
-         ASL  ROWL
-         ROL             ; X 8
-         STA  TEMP+1
-         LDY  ROWL
-         STY  TEMP       ; save it
-         ASL  ROWL
-         ROL             ; X 16
-         ASL  ROWL
-         ROL             ; X 32
-         CLC
-         STA  ROWH
-         LDA  ROWL
-         ADC  TEMP       ; now add 8 giving 40
-         STA  ROWL
-         LDA  ROWH
-         ADC  TEMP+1
-         STA  ROWH
+hplot:
+         jsr  pultop
+         lda  regb
+         bne  hpl_err
+         lda  reg
+         cmp  #200
+         bcc  hplot_1
+hpl_err: jmp  chk_err    ; too big
+hplot_1: sta  ypos
+         jsr  pultop
+         lda  vic+$16
+         and  #$10
+         sta  voiceno    ; multi-colour flag
+         beq  hplot_si
+         asl  reg
+         rol  reg+1      ; double x co-ord
+hplot_si:
+         lda  reg
+         sta  xposl
+         tax
+         lda  reg+1
+         tay
+         cpx  #$40
+         sbc  #1
+         bcc  hplot_2
+         jmp  chk_err    ; too big
+hplot_2: sty  xposh
+         jsr  pultop
+         lda  reg
+         and  #3
+         sta  temp1+1    ; colour
+         lda  ypos
+         and  #$f8
+         sta  rowl
+         lda  #0
+         asl  rowl
+         rol             ; x 2
+         asl  rowl
+         rol             ; x 4
+         asl  rowl
+         rol             ; x 8
+         sta  temp+1
+         ldy  rowl
+         sty  temp       ; save it
+         asl  rowl
+         rol             ; x 16
+         asl  rowl
+         rol             ; x 32
+         clc
+         sta  rowh
+         lda  rowl
+         adc  temp       ; now add 8 giving 40
+         sta  rowl
+         lda  rowh
+         adc  temp+1
+         sta  rowh
 ;
-         JSR  GET_BNK
-         LDA  VIC+$18
-         AND  #$0E
-         ASL
-         ASL
-         ORA  TEMP+1     ; character base
-         STA  TEMP+1
-         LDA  XPOSL
-         AND  #$F8
-         CLC
-         ADC  ROWL
-         STA  ROWL
-         LDA  XPOSH
-         ORA  TEMP+1     ; bank
-         ADC  ROWH
-         STA  TEMP+1
-         LDA  YPOS
-         AND  #7
-         ORA  ROWL
-         STA  TEMP
-         LDA  XPOSL
-         AND  #7
-         TAX
-         LDA  VOICENO    ; multi-colour?
-         BEQ  POS_2      ; no
-         LDA  TEMP1+1    ; colour
-         LDY  HSHIFT,X   ; bits to shift
-         BEQ  POS_3      ; none
-POS_4:	ASL
-         DEY
-         BNE  POS_4
-POS_3:	STA  TEMP1
-         LDA  H2MASKS,X  ; bits to mask out
-         BNE  POS_5
+         jsr  get_bnk
+         lda  vic+$18
+         and  #$0e
+         asl
+         asl
+         ora  temp+1     ; character base
+         sta  temp+1
+         lda  xposl
+         and  #$f8
+         clc
+         adc  rowl
+         sta  rowl
+         lda  xposh
+         ora  temp+1     ; bank
+         adc  rowh
+         sta  temp+1
+         lda  ypos
+         and  #7
+         ora  rowl
+         sta  temp
+         lda  xposl
+         and  #7
+         tax
+         lda  voiceno    ; multi-colour?
+         beq  pos_2      ; no
+         lda  temp1+1    ; colour
+         ldy  hshift,x   ; bits to shift
+         beq  pos_3      ; none
+pos_4:	asl
+         dey
+         bne  pos_4
+pos_3:	sta  temp1
+         lda  h2masks,x  ; bits to mask out
+         bne  pos_5
 ;
-POS_2:
-         LDA  TEMP1+1    ; colour
-         BEQ  POS_1
-         LDA  HMASKS,X
-POS_1:	STA  TEMP1
-         LDY  #0
-         LDA  XHMASKS,X
-POS_5:
-         AND  (TEMP),Y
-         ORA  TEMP1
-         STA  (TEMP),Y
-         JMP  MAIN
+pos_2:
+         lda  temp1+1    ; colour
+         beq  pos_1
+         lda  hmasks,x
+pos_1:	sta  temp1
+         ldy  #0
+         lda  xhmasks,x
+pos_5:
+         and  (temp),y
+         ora  temp1
+         sta  (temp),y
+         jmp  main
 ;
-HMASKS:  .byte $80,$40,$20,$10,$08,$04,$02,$01
-XHMASKS: .byte $7F,$BF,$DF,$EF,$F7,$FB,$FD,$FE
-HSHIFT:  .byte $06,$06,$04,$04,$02,$02,$00,$00
-H2MASKS: .byte $3F,$3F,$CF,$CF,$F3,$F3,$FC,$FC
+hmasks:  .byte $80,$40,$20,$10,$08,$04,$02,$01
+xhmasks: .byte $7f,$bf,$df,$ef,$f7,$fb,$fd,$fe
+hshift:  .byte $06,$06,$04,$04,$02,$02,$00,$00
+h2masks: .byte $3f,$3f,$cf,$cf,$f3,$f3,$fc,$fc
 
 ;
-TOHPLOT: JMP  HPLOT
+tohplot: jmp  hplot
 
 ;
-ADRNC:
-         JSR  GETADR
-ADRNC2:
-         LDA  DATA
-         CLC
-         ADC  #2
-         STA  DATA
-         BCC  ADRN2
-         INC  DATA+1
-         BCS  ADRN2
-ADRNN:
-         JSR  GETADR
-ADRN2:
-         LDA  DATA
-         STA  REG
-         LDA  DATA+1
-         STA  REG+1
-         JMP  MAINP
+adrnc:
+         jsr  getadr
+adrnc2:
+         lda  data
+         clc
+         adc  #2
+         sta  data
+         bcc  adrn2
+         inc  data+1
+         bcs  adrn2
+adrnn:
+         jsr  getadr
+adrn2:
+         lda  data
+         sta  reg
+         lda  data+1
+         sta  reg+1
+         jmp  mainp
 ;
-ADRAN:
-         JSR  GETIDX
-         JMP  ADRN2
+adran:
+         jsr  getidx
+         jmp  adrn2
 ;
-ADRAC:
-        JSR  GETIDC
-        JMP  ADRNC2
+adrac:
+        jsr  getidc
+        jmp  adrnc2
 
 ;
-        BRK
+        brk
 
 	.endscope
 
 ;***********************************************
-; PASCAL COMPILER
-; for Commodore 64
-; PART 5
-; Authors_ Nick Gammon & Sue Gobbett
-;  SYM $9000
+; pascal compiler
+; for commodore 64
+; part 5
+; authors_ nick gammon & sue gobbett
+;  sym $9000
 ;***********************************************
 
 	.scope
 
 ;***********************************************
-; PART 1 VECTORS
+; part 1 vectors
 ;***********************************************
 
-	V1	= P1
-	INIT	= V1
-	GETNEXT	= V1+3
-	COMSTL	= V1+6
-	ISITHX	= V1+9
-	ISITAL	= V1+12
-	ISITNM	= V1+15
-	CHAR	= V1+18
-	GEN2_B	= V1+21
-	DISHX	= V1+24
-	ERROR	= V1+27
-	GETCHK	= V1+30
-	CHKTKN	= V1+33
-	GENNOP	= V1+36
-	GENADR	= V1+39
-	GENNJP	= V1+42
-	GENNJM	= V1+45
-	TKNWRK	= V1+48
-	SEARCH	= V1+51
-	ADDSYM	= V1+54
-	SPARE2	= V1+57
-	FIXAD	= V1+60
-	PSHWRK	= V1+63
-	PULWRK	= V1+66
-	PC	= V1+69
-	PT	= V1+72
-	PL	= V1+75
-	TOKEN1	= V1+78
-	GETANS	= V1+81
-	PUTSP	= V1+84
-	DISPAD	= V1+87
-	CROUT	= V1+90
-	SHLVAL	= V1+93
-	GET_NUM	= V1+96
-	GET_HEX	= V1+99
-	FND_ENQ	= V1+102
-	PAUSE	= V1+105
-	HOME	= V1+108
-	RDKEY	= V1+111
+	v1	= p1
+	init	= v1
+	getnext	= v1+3
+	comstl	= v1+6
+	isithx	= v1+9
+	isital	= v1+12
+	isitnm	= v1+15
+	char	= v1+18
+	gen2_b	= v1+21
+	dishx	= v1+24
+	error	= v1+27
+	getchk	= v1+30
+	chktkn	= v1+33
+	gennop	= v1+36
+	genadr	= v1+39
+	gennjp	= v1+42
+	gennjm	= v1+45
+	tknwrk	= v1+48
+	search	= v1+51
+	addsym	= v1+54
+	spare2	= v1+57
+	fixad	= v1+60
+	pshwrk	= v1+63
+	pulwrk	= v1+66
+	pc	= v1+69
+	pt	= v1+72
+	pl	= v1+75
+	token1	= v1+78
+	getans	= v1+81
+	putsp	= v1+84
+	dispad	= v1+87
+	crout	= v1+90
+	shlval	= v1+93
+	get_num	= v1+96
+	get_hex	= v1+99
+	fnd_enq	= v1+102
+	pause	= v1+105
+	home	= v1+108
+	rdkey	= v1+111
 
 ;***********************************************
-; PART 2 VECTORS
+; part 2 vectors
 ;***********************************************
-	V2	= P2
-	TKNJMP	= V2+60
+	v2	= p2
+	tknjmp	= v2+60
 
 ;***********************************************
-; PART 3 VECTORS
+; part 3 vectors
 ;***********************************************
 
-	V3	= P3
-	START	= V3
-	RESTART	= V3+3
-	DSP_BIN	= V3+6
-	ST_CMP	= V3+9
-	ST_SYN	= V3+12
-	DEBUG	= V3+15
-	ST_EDI	= V3+18
-	ST_FIL	= V3+21
-	BELL1X	= V3+24
+	v3	= p3
+	start	= v3
+	restart	= v3+3
+	dsp_bin	= v3+6
+	st_cmp	= v3+9
+	st_syn	= v3+12
+	debug	= v3+15
+	st_edi	= v3+18
+	st_fil	= v3+21
+	bell1x	= v3+24
 
 ;***********************************************
-; PART 4 VECTORS
+; part 4 vectors
 ;***********************************************
 
-	INTERJ	= P4
+	interj	= p4
 
 ;***********************************************
-; PART 5 STARTS HERE
+; part 5 starts here
 ;***********************************************
 
 	.res 6
-        ;.org $B384 ; P5
+        ;.org $b384 ; p5
 
 ;***********************************************
-; TEXT EDITOR
+; text editor
 ;***********************************************
 
-        JMP  EDITOR
-        JMP  GETLN
-        JMP  GETLNZ
-        JMP  GETLN1
-        JMP  PUT_LINE
+        jmp  editor
+        jmp  getln
+        jmp  getlnz
+        jmp  getln1
+        jmp  put_line
 
-GT_NO_EM: .byte $B6,$CC,$0D
-GET_ERR1: .byte "pARDON? (",$C9
-          .byte " h FOR HELP )",$0D
-DEL_ERR1: .byte $B6,$D8,$0D
-FULL_ERR: .byte $BF,$B1,$0D
-MOD_QN1:  .byte " MODIFY "
-DEL_QN1:  .byte " DELETE "
-DEL_QN2:  .byte " LINES",$CB
-DEL:	  .byte " dELETED",$0D
-HELP_1:	  .byte 13
-HELP_2:	  .byte "tHE COMMANDS ARE :",$0D
-HELP_3:	  .byte 13
-HELP_4:	  .byte $D4,$0D
-HELP_5:	  .byte $DB
-          .byte "d>ELETE",$CD,$CC,$D8,$0D
-HELP_5A:  .byte $DB
-          .byte "f>IND  ",$CD,$CC,$D8
-          .byte " .",$B8
-          .byte " .",$0D
-HELP_6:	  .byte $DB
-          .byte "i>NSERT",$CD,$CC,$0D
-HELP_7:	  .byte $DB
-          .byte "l>IST  ",$CD,$CC,$D8,$0D
-HELP_8:	  .byte $DB
-          .byte "m>ODIFY",$CD,$CC,$D8,$0D
-HELP_9:	  .byte $D7,$0D
-HELP_9A:  .byte $DB
-          .byte "r>EPLACE",$CD,$CC,$D8
-          .byte " .OLD.NEW.",$0D
-HELP_10:  .byte $D5,$0D
-FND_ERR1: .byte $B7,$B8,$0D
+gt_no_em: .byte $b6,$cc,$0d
+get_err1: .byte "pARDON? (",$c9
+          .byte " h FOR HELP )",$0d
+del_err1: .byte $b6,$d8,$0d
+full_err: .byte $bf,$b1,$0d
+mod_qn1:  .byte " MODIFY "
+del_qn1:  .byte " DELETE "
+del_qn2:  .byte " LINES",$cb
+del:	  .byte " dELETED",$0d
+help_1:	  .byte 13
+help_2:	  .byte "tHE COMMANDS ARE :",$0d
+help_3:	  .byte 13
+help_4:	  .byte $d4,$0d
+help_5:	  .byte $db
+          .byte "d>ELETE",$cd,$cc,$d8,$0d
+help_5a:  .byte $db
+          .byte "f>IND  ",$cd,$cc,$d8
+          .byte " .",$b8
+          .byte " .",$0d
+help_6:	  .byte $db
+          .byte "i>NSERT",$cd,$cc,$0d
+help_7:	  .byte $db
+          .byte "l>IST  ",$cd,$cc,$d8,$0d
+help_8:	  .byte $db
+          .byte "m>ODIFY",$cd,$cc,$d8,$0d
+help_9:	  .byte $d7,$0d
+help_9a:  .byte $db
+          .byte "r>EPLACE",$cd,$cc,$d8
+          .byte " .OLD.NEW.",$0d
+help_10:  .byte $d5,$0d
+fnd_err1: .byte $b7,$b8,$0d
 
 ;
-; Editor jump table
+; editor jump table
 ;
-ED_TBL:
+ed_tbl:
          .byte  'Q'
-         .word  WRAP
+         .word  wrap
          .byte  'I'
-         .word  INSERT
+         .word  insert
          .byte  'H'
-         .word  HELP
+         .word  help
          .byte  'M'
-         .word  MODIFY
+         .word  modify
          .byte  'D'
-         .word  DELETE
+         .word  delete
          .byte  'L'
-         .word  LISTLNS
+         .word  listlns
          .byte  'F'
-         .word  LISTLNS
+         .word  listlns
          .byte  'R'
-         .word  LISTLNS
+         .word  listlns
          .byte  'N'
-         .word  NLIST
+         .word  nlist
          .byte  'C'
-         .word  ST_CMP
+         .word  st_cmp
          .byte  'S'
-         .word  ST_SYN
+         .word  st_syn
          .byte  0
 ;
-EDITOR:
-         LDA  #<ST_EDI
-         STA  CTRLC_RT
-         LDA  #>ST_EDI
-         STA  CTRLC_RT+1
+editor:
+         lda  #<st_edi
+         sta  ctrlc_rt
+         lda  #>st_edi
+         sta  ctrlc_rt+1
 ;
-GET_COM:
-         LDX  #$FF
-         TXS
-         JSR  CROUT
-         JSR  GET_C1
-         JMP  GET_COM    ; back for next command
+get_com:
+         ldx  #$ff
+         txs
+         jsr  crout
+         jsr  get_c1
+         jmp  get_com    ; back for next command
 ;***********************************************
-GET_C1:
-         LDA  #$80
-         STA  RUNNING
-         LDA  #0
-         STA  NLN_FLAG
-         LDA  #58		;colon
-         JSR  COUT       ; editor prompt
-         JSR  GET_LINE
-         CPX  #0
-         BEQ  GET_C1
-         LDA  INBUF
-         AND  #$7F
-         STA  ED_COM
-         LDX  #<ED_TBL
-         LDY  #>ED_TBL
-         JSR  TKNJMP
-         LDA  #<GET_ERR1
-         LDX  #>GET_ERR1
-         JMP  PL
+get_c1:
+         lda  #$80
+         sta  running
+         lda  #0
+         sta  nln_flag
+         lda  #58		;colon
+         jsr  cout       ; editor prompt
+         jsr  get_line
+         cpx  #0
+         beq  get_c1
+         lda  inbuf
+         and  #$7f
+         sta  ed_com
+         ldx  #<ed_tbl
+         ldy  #>ed_tbl
+         jsr  tknjmp
+         lda  #<get_err1
+         ldx  #>get_err1
+         jmp  pl
 ;
-NLIST:
-         LDA  #1
-         STA  NLN_FLAG
-         JMP  LISTLNS
+nlist:
+         lda  #1
+         sta  nln_flag
+         jmp  listlns
 ;
 ;
-HELP:
+help:
 ;***********************************************
-         LDA  #12
-         STA  ECNTR
-         LDA  #<HELP_1
-         LDX  #>HELP_1
-PRT_HELP:
-         JSR  PL
-         TYA
-         CLC
-         ADC  REG2
-         TAY
-         LDA  REG2+1
-         ADC  #0
-         TAX
-         TYA
-         DEC  ECNTR
-         BNE  PRT_HELP
-         RTS
+         lda  #12
+         sta  ecntr
+         lda  #<help_1
+         ldx  #>help_1
+prt_help:
+         jsr  pl
+         tya
+         clc
+         adc  reg2
+         tay
+         lda  reg2+1
+         adc  #0
+         tax
+         tya
+         dec  ecntr
+         bne  prt_help
+         rts
 ;
 ; read input line - tokenize - count chars to c/r
 ;
-GET_LINE:
-         JSR  GETLN1
-         LDA  INBUF
-         CMP  #160    ; if first char on line shift/space remember it
-         PHP	      ; save processor flags
+get_line:
+         jsr  getln1
+         lda  inbuf
+         cmp  #160    ; if first char on line shift/space remember it
+         php	      ; save processor flags
 ;
 ; now tidy input line for automatic tokenisation
 ;
-         LDA  #<INBUF
-         LDX  #>INBUF
-         JSR  TIDY_ENT   ; off we go
-         LDX  #0
-GET_LIN9: LDA  INBUF,X    ; count up to c/r
-         CMP  #$0D
-         BEQ  GET_LIN8   ; found it
-         INX
-         BNE  GET_LIN9   ; try again
-GET_LIN8: STX  IN_LGTH    ; save length
-         PLP             ; back to result of earlier comparison
-         RTS
+         lda  #<inbuf
+         ldx  #>inbuf
+         jsr  tidy_ent   ; off we go
+         ldx  #0
+get_lin9: lda  inbuf,x    ; count up to c/r
+         cmp  #$0d
+         beq  get_lin8   ; found it
+         inx
+         bne  get_lin9   ; try again
+get_lin8: stx  in_lgth    ; save length
+         plp             ; back to result of earlier comparison
+         rts
 ;
 ;
-INSERT:
+insert:
 ;***********************************************
-IN_2:
-         LDY  #0
-         JSR  GET_NO
-         BCC  IN_5
-         RTS
-IN_5:
-         JSR  FIND_LN
-IN_10:
-         JSR  PT_LN_NO
-         JSR  GET_LINE
-         BEQ  IN_11      ; stay in input mode if shift/space
-         CPX  #0
-         BNE  IN_11
-         RTS
-IN_11:
-         JSR  INST_TXT
-; MOVE LINE FROM INPUT
-; BUFFER INTO TEXT
-         LDA  #<INBUF
-         STA  TO
-         LDA  #>INBUF
-         STA  TO+1
-         LDA  #0
-         STA  LENGTH+1
-         LDA  IN_LGTH
-         STA  LENGTH
-         BEQ  IN_22      ; zero length - no move
-         JSR  MV_TXT_L
-IN_22:
-         LDA  PNTR
-         CLC
-         ADC  LENGTH
-         STA  PNTR
-         LDA  PNTR+1
-         ADC  LENGTH+1
-         STA  PNTR+1
-         LDA  #CR
-         LDY  #0
-         STA  (PNTR),Y
-         JSR  INC_PNTR
-         JMP  IN_10
+in_2:
+         ldy  #0
+         jsr  get_no
+         bcc  in_5
+         rts
+in_5:
+         jsr  find_ln
+in_10:
+         jsr  pt_ln_no
+         jsr  get_line
+         beq  in_11      ; stay in input mode if shift/space
+         cpx  #0
+         bne  in_11
+         rts
+in_11:
+         jsr  inst_txt
+; move line from input
+; buffer into text
+         lda  #<inbuf
+         sta  to
+         lda  #>inbuf
+         sta  to+1
+         lda  #0
+         sta  length+1
+         lda  in_lgth
+         sta  length
+         beq  in_22      ; zero length - no move
+         jsr  mv_txt_l
+in_22:
+         lda  pntr
+         clc
+         adc  length
+         sta  pntr
+         lda  pntr+1
+         adc  length+1
+         sta  pntr+1
+         lda  #cr
+         ldy  #0
+         sta  (pntr),y
+         jsr  inc_pntr
+         jmp  in_10
 ;
 ;
-INST_TXT:
-; MAKE ROOM IN TEXT
-         LDA  PNTR
-         STA  FROM
-         STA  FROM_ST
-         STA  EPNTR
-         LDA  PNTR+1
-         STA  FROM+1
-         STA  FROM_ST+1
-         STA  EPNTR+1
-         JSR  FIND_END
-         LDA  FROM
-         CLC
-         ADC  IN_LGTH
-         STA  TO
-         LDA  FROM+1
-         ADC  #0
-         STA  TO+1
-; SOURCE TOO BIG ?
-         CLC
-         LDA  TO
-         ADC  LENGTH
-         STA  EPNTR
-         LDA  TO+1
-         ADC  LENGTH+1
-         STA  EPNTR
-         CMP  #>(P1-$18)   ; start of G-Pascal
-         BCC  IN_13
-         LDA  #<FULL_ERR
-         LDX  #>FULL_ERR
-         JSR  PL
-         JMP  GET_COM
-IN_13:
-         JSR  INC_TO
-         JSR  MV_TXT_R
-         LDA  FROM_ST
-         STA  FROM
-         LDA  FROM_ST+1
-         STA  FROM+1
-         RTS
+inst_txt:
+; make room in text
+         lda  pntr
+         sta  from
+         sta  from_st
+         sta  epntr
+         lda  pntr+1
+         sta  from+1
+         sta  from_st+1
+         sta  epntr+1
+         jsr  find_end
+         lda  from
+         clc
+         adc  in_lgth
+         sta  to
+         lda  from+1
+         adc  #0
+         sta  to+1
+; source too big ?
+         clc
+         lda  to
+         adc  length
+         sta  epntr
+         lda  to+1
+         adc  length+1
+         sta  epntr
+         cmp  #>(p1-$18)   ; start of g-pascal
+         bcc  in_13
+         lda  #<full_err
+         ldx  #>full_err
+         jsr  pl
+         jmp  get_com
+in_13:
+         jsr  inc_to
+         jsr  mv_txt_r
+         lda  from_st
+         sta  from
+         lda  from_st+1
+         sta  from+1
+         rts
 
 ;
-GET_NO:
+get_no:
 ;***********************************************
-; RETURNS THE
-; NUMBER IN VALUE
-         INY
-         CPY  IN_LGTH
-         BNE  GET_NO_2
-         LDY  #0
-         STY  VALUE
-         STY  VALUE+1
-         CLC
-         RTS
-GET_NO_2:
-         LDA  INBUF,Y
-         CMP  #32
-         BEQ  GET_NO
-         JSR  ISITNM
-         BCC  GET_NO_5
-GT_NO_ER:
-         LDA  #<GT_NO_EM
-         LDX  #>GT_NO_EM
-         JSR  PL
-         SEC
-         RTS
-GET_NO_5:
-         STY  PNTR
-         PHA
-         TYA
-         CLC
-         ADC  #<INBUF
-         STA  NXTCHR
-         LDA  #0
-         STA  SIGN
-         ADC  #>INBUF
-         STA  NXTCHR+1
-         PLA
-         JSR  GET_NUM
-         BCS  GT_NO_ER
-         LDA  VALUE+2
-         BNE  GT_NO_ER
-         RTS
+; returns the
+; number in value
+         iny
+         cpy  in_lgth
+         bne  get_no_2
+         ldy  #0
+         sty  value
+         sty  value+1
+         clc
+         rts
+get_no_2:
+         lda  inbuf,y
+         cmp  #32
+         beq  get_no
+         jsr  isitnm
+         bcc  get_no_5
+gt_no_er:
+         lda  #<gt_no_em
+         ldx  #>gt_no_em
+         jsr  pl
+         sec
+         rts
+get_no_5:
+         sty  pntr
+         pha
+         tya
+         clc
+         adc  #<inbuf
+         sta  nxtchr
+         lda  #0
+         sta  sign
+         adc  #>inbuf
+         sta  nxtchr+1
+         pla
+         jsr  get_num
+         bcs  gt_no_er
+         lda  value+2
+         bne  gt_no_er
+         rts
 ;
-FIND_LN:
+find_ln:
 ;***********************************************
-         LDA  TS
-         STA  PNTR
-         LDA  TS+1
-         STA  PNTR+1
-         LDY  #0
-         LDX  #0
-         STY  LINE_NO
-         STY  LINE_NO+1
-         LDA  VALUE
-         BNE  FL_5
-         LDA  VALUE+1
-         BNE  FL_5
-         RTS
-FL_LOOP:
-         JSR  INC_PNTR
-FL_5:
-         LDA  (PNTR),Y
-         BNE  FL_10
-         STX  LINE_NO
-         RTS
-FL_10:
-         CMP  #CR
-         BNE  FL_LOOP
-         INX
-         BNE  FL_15
-         INC  LINE_NO+1
-FL_15:
-         CPX  VALUE
-         BNE  FL_LOOP
-         LDA  LINE_NO+1
-         CMP  VALUE+1
-         BNE  FL_LOOP
-         STX  LINE_NO
-         JMP  INC_PNTR
+         lda  ts
+         sta  pntr
+         lda  ts+1
+         sta  pntr+1
+         ldy  #0
+         ldx  #0
+         sty  line_no
+         sty  line_no+1
+         lda  value
+         bne  fl_5
+         lda  value+1
+         bne  fl_5
+         rts
+fl_loop:
+         jsr  inc_pntr
+fl_5:
+         lda  (pntr),y
+         bne  fl_10
+         stx  line_no
+         rts
+fl_10:
+         cmp  #cr
+         bne  fl_loop
+         inx
+         bne  fl_15
+         inc  line_no+1
+fl_15:
+         cpx  value
+         bne  fl_loop
+         lda  line_no+1
+         cmp  value+1
+         bne  fl_loop
+         stx  line_no
+         jmp  inc_pntr
 ;
-FIND_END:
-; RETURNS LENGTH OF TEXT
-; FROM 'POINTER' TO END
-; OF FILE IN 'LENGTH'
-         LDX  #1
-         STX  ECNTR
-         LDY  #0
-         STY  ECNTR+1
-FE_5:	LDA  (EPNTR),Y
-         BNE  FE_10
-         STX  LENGTH
-         LDX  ECNTR+1
-         STX  LENGTH+1
-         RTS
-FE_10:	INX
-         BNE  FE_15
-         INC  ECNTR+1
-FE_15:
-         INC  EPNTR
-         BNE  FE_5
-         INC  EPNTR+1
-         JMP  FE_5
+find_end:
+; returns length of text
+; from 'pointer' to end
+; of file in 'length'
+         ldx  #1
+         stx  ecntr
+         ldy  #0
+         sty  ecntr+1
+fe_5:	lda  (epntr),y
+         bne  fe_10
+         stx  length
+         ldx  ecntr+1
+         stx  length+1
+         rts
+fe_10:	inx
+         bne  fe_15
+         inc  ecntr+1
+fe_15:
+         inc  epntr
+         bne  fe_5
+         inc  epntr+1
+         jmp  fe_5
 ;
-MV_TXT_L:
-; NOTE_ MOVING TEXT
-; FROM 'TO' TO 'FROM'
-; POSITIONS
-         JSR  ZRO_CNTR
-MV_5:	LDA  (TO),Y
-         STA  (FROM),Y
-         JSR  INC_ECNTR
-         LDA  ECNTR
-         CMP  LENGTH
-         BNE  MV_10
-         LDA  ECNTR+1
-         CMP  LENGTH+1
-         BNE  MV_10
-         RTS
-MV_10:
-         INY
-         BNE  MV_5
-         INC  FROM+1
-         INC  TO+1
-         JMP  MV_5
-MV_TXT_R:
-; NOTE TO > FROM
-; Y ZEROED IN ZRO_CNTR
-         JSR  ZRO_CNTR
-         LDA  FROM
-         CLC
-         ADC  LENGTH
-         STA  FROM
-         LDA  FROM+1
-         ADC  LENGTH+1
-         STA  FROM+1
-         LDA  TO
-         CLC
-         ADC  LENGTH
-         STA  TO
-         LDA  TO+1
-         ADC  LENGTH+1
-         STA  TO+1
-         JMP  MVR_10
-MVR_5:	LDA  (FROM),Y
-         STA  (TO),Y
-         JSR  INC_ECNTR
-         LDA  ECNTR
-         CMP  LENGTH
-         BNE  MVR_10
-         LDA  ECNTR+1
-         CMP  LENGTH+1
-         BNE  MVR_10
-         RTS
-MVR_10:
-         DEY
-         CPY  #$FF
-         BNE  MVR_5
-         DEC  FROM+1
-         DEC  TO+1
-         JMP  MVR_5
+mv_txt_l:
+; note_ moving text
+; from 'to' to 'from'
+; positions
+         jsr  zro_cntr
+mv_5:	lda  (to),y
+         sta  (from),y
+         jsr  inc_ecntr
+         lda  ecntr
+         cmp  length
+         bne  mv_10
+         lda  ecntr+1
+         cmp  length+1
+         bne  mv_10
+         rts
+mv_10:
+         iny
+         bne  mv_5
+         inc  from+1
+         inc  to+1
+         jmp  mv_5
+mv_txt_r:
+; note to > from
+; y zeroed in zro_cntr
+         jsr  zro_cntr
+         lda  from
+         clc
+         adc  length
+         sta  from
+         lda  from+1
+         adc  length+1
+         sta  from+1
+         lda  to
+         clc
+         adc  length
+         sta  to
+         lda  to+1
+         adc  length+1
+         sta  to+1
+         jmp  mvr_10
+mvr_5:	lda  (from),y
+         sta  (to),y
+         jsr  inc_ecntr
+         lda  ecntr
+         cmp  length
+         bne  mvr_10
+         lda  ecntr+1
+         cmp  length+1
+         bne  mvr_10
+         rts
+mvr_10:
+         dey
+         cpy  #$ff
+         bne  mvr_5
+         dec  from+1
+         dec  to+1
+         jmp  mvr_5
 ;
-ZRO_CNTR:
+zro_cntr:
 ;***********************************************
-         LDY  #0
-         STY  ECNTR
-         STY  ECNTR+1
-         STY  VAL_CMP
-         RTS
+         ldy  #0
+         sty  ecntr
+         sty  ecntr+1
+         sty  val_cmp
+         rts
 ;
-INC_ECNTR:
+inc_ecntr:
 ;***********************************************
-         INC  ECNTR
-         BNE  INC_C_5
-         INC  ECNTR+1
-INC_C_5:
-         RTS
+         inc  ecntr
+         bne  inc_c_5
+         inc  ecntr+1
+inc_c_5:
+         rts
 ;
-INC_PNTR:
+inc_pntr:
 ;***********************************************
-         INC  PNTR
-         BNE  INC_5
-         INC  PNTR+1
-INC_5:	RTS
+         inc  pntr
+         bne  inc_5
+         inc  pntr+1
+inc_5:	rts
 ;
-MODIFY:
+modify:
 ;***********************************************
-         JSR  LISTLNS
-         BCC  MOD_10
-         RTS
-MOD_10:
-         JSR  DELETE
-         LDY  #0
-         JSR  GET_NO
-         DEC  VALUE
-         LDA  VALUE
-         CMP  #$FF
-         BNE  MOD_20
-         DEC  VALUE+1
-MOD_20:
-         LDA  #'I'       ; FOOL INSERT
-         STA  ED_COM
-         JMP  IN_5
+         jsr  listlns
+         bcc  mod_10
+         rts
+mod_10:
+         jsr  delete
+         ldy  #0
+         jsr  get_no
+         dec  value
+         lda  value
+         cmp  #$ff
+         bne  mod_20
+         dec  value+1
+mod_20:
+         lda  #'I'       ; fool insert
+         sta  ed_com
+         jmp  in_5
 ;
-DELETE:
+delete:
 ;***********************************************
-         JSR  GETRANGE
-         BCC  DEL_20
-         RTS
-DEL_20:
-         JSR  DEC_FROM
-         JSR  FRM_ADDR
-         LDA  LINE_NO
-         STA  TEMP
-         LDA  LINE_NO+1
-         STA  TEMP+1
-         JSR  TO_ADDR
-         LDA  PNTR
-         STA  EPNTR
-         LDA  PNTR+1
-         STA  EPNTR+1
-         JSR  FIND_END
-         LDA  LINE_NO
-         SEC
-         SBC  TEMP
-         STA  NUM_LINS
-         LDA  LINE_NO+1
-         SBC  TEMP+1
-         STA  NUM_LINS+1
-         LDA  NUM_LINS
-         CMP  #5
-         BCS  DEL_45
-         LDA  NUM_LINS+1
-         BEQ  DEL_55
-DEL_45:
-         LDA  #$B9
-         JSR  PC
-         LDA  #$C2
-         JSR  PC
-         LDA  ED_COM
-         CMP  #'M'
-         BEQ  DEL_50
-         LDA  #<DEL_QN1
-         LDX  #>DEL_QN1
-         BNE  DEL_52
-DEL_50:
-         LDA  #<MOD_QN1
-         LDX  #>MOD_QN1
-DEL_52:
-         LDY  #$8
-         JSR  PT
-         JSR  PUT_NO
-         LDA  #<DEL_QN2
-         LDX  #>DEL_QN2
-         LDY  #7
-         JSR  GETANS
-         CMP  #'Y'
-         BEQ  DEL_55
-         JMP  GET_COM
-DEL_55:
-         JSR  MV_TXT_L
-         LDA  ED_COM
-         CMP  #'M'
-         BNE  DEL_60
-         RTS
-DEL_60:
-         JSR  CROUT
-         JSR  PUT_NO
-         LDA  #<DEL
-         LDX  #>DEL
-         JMP  PL
+         jsr  getrange
+         bcc  del_20
+         rts
+del_20:
+         jsr  dec_from
+         jsr  frm_addr
+         lda  line_no
+         sta  temp
+         lda  line_no+1
+         sta  temp+1
+         jsr  to_addr
+         lda  pntr
+         sta  epntr
+         lda  pntr+1
+         sta  epntr+1
+         jsr  find_end
+         lda  line_no
+         sec
+         sbc  temp
+         sta  num_lins
+         lda  line_no+1
+         sbc  temp+1
+         sta  num_lins+1
+         lda  num_lins
+         cmp  #5
+         bcs  del_45
+         lda  num_lins+1
+         beq  del_55
+del_45:
+         lda  #$b9
+         jsr  pc
+         lda  #$c2
+         jsr  pc
+         lda  ed_com
+         cmp  #'M'
+         beq  del_50
+         lda  #<del_qn1
+         ldx  #>del_qn1
+         bne  del_52
+del_50:
+         lda  #<mod_qn1
+         ldx  #>mod_qn1
+del_52:
+         ldy  #$8
+         jsr  pt
+         jsr  put_no
+         lda  #<del_qn2
+         ldx  #>del_qn2
+         ldy  #7
+         jsr  getans
+         cmp  #'Y'
+         beq  del_55
+         jmp  get_com
+del_55:
+         jsr  mv_txt_l
+         lda  ed_com
+         cmp  #'M'
+         bne  del_60
+         rts
+del_60:
+         jsr  crout
+         jsr  put_no
+         lda  #<del
+         ldx  #>del
+         jmp  pl
 ;
-PUT_NO:
+put_no:
 ;***********************************************
-         LDA  NUM_LINS
-         STA  REG
-         LDA  NUM_LINS+1
-         STA  REG+1
-         LDA  #0
-         STA  REGB
-         JMP  DSP_BIN
+         lda  num_lins
+         sta  reg
+         lda  num_lins+1
+         sta  reg+1
+         lda  #0
+         sta  regb
+         jmp  dsp_bin
 ;
-LISTLNS:
+listlns:
 ;***********************************************
-         LDA  INBUF+1
-         CMP  DELIMIT
-         BEQ  LIS_5
-         LDA  IN_LGTH
-         CMP  #1
-         BNE  LIS_10
-; PRINT ALL
-LIS_5:	LDA  #0
-         TAY
-         STA  LINE_NO
-         STA  LINE_NO+1
-         LDA  TS
-         STA  FROM
-         LDA  TS+1
-         STA  FROM+1
-         LDA  #$FF
-         STA  TO_LINE
-         STA  TO_LINE+1
-         BNE  LIS_33
-LIS_10:
-         JSR  GETRANGE
-         BCC  LIS_20
-         RTS
-LIS_20:
-         LDA  TO
-         STA  TO_LINE
-         LDA  TO+1
-         STA  TO_LINE+1
-         INC  LINE_NO
-         BNE  LIS_31
-         INC  LINE_NO+1
-LIS_31:
-         JSR  DEC_FROM
-         JSR  FRM_ADDR
-LIS_33:	LDA  ED_COM
-         CMP  #'R'       ; REPLACE?
-         BEQ  LIS_33A    ; YES
-         CMP  #'F'       ; FIND ?
-         BEQ  LIS_33A    ; YES
-         JMP  LIS_55
-LIS_33A:
-         LDY  #0
-         STY  QT_SIZE
-         STY  NUM_LINS
-         STY  NUM_LINS+1
-         STY  TRN_FLAG
-         STY  GLB_FLAG
-         STY  Q_FLAG
-LIS_34:	LDA  INBUF,Y
-         CMP  DELIMIT
-         BEQ  LIS_35     ; FOUND OPENER
-         INY
-         CPY  IN_LGTH
-         BNE  LIS_34
-LIS_34A: LDA  #<FND_ERR1
-         LDX  #>FND_ERR1
-         JMP  GETR_31
+         lda  inbuf+1
+         cmp  delimit
+         beq  lis_5
+         lda  in_lgth
+         cmp  #1
+         bne  lis_10
+; print all
+lis_5:	lda  #0
+         tay
+         sta  line_no
+         sta  line_no+1
+         lda  ts
+         sta  from
+         lda  ts+1
+         sta  from+1
+         lda  #$ff
+         sta  to_line
+         sta  to_line+1
+         bne  lis_33
+lis_10:
+         jsr  getrange
+         bcc  lis_20
+         rts
+lis_20:
+         lda  to
+         sta  to_line
+         lda  to+1
+         sta  to_line+1
+         inc  line_no
+         bne  lis_31
+         inc  line_no+1
+lis_31:
+         jsr  dec_from
+         jsr  frm_addr
+lis_33:	lda  ed_com
+         cmp  #'R'       ; replace?
+         beq  lis_33a    ; yes
+         cmp  #'F'       ; find ?
+         beq  lis_33a    ; yes
+         jmp  lis_55
+lis_33a:
+         ldy  #0
+         sty  qt_size
+         sty  num_lins
+         sty  num_lins+1
+         sty  trn_flag
+         sty  glb_flag
+         sty  q_flag
+lis_34:	lda  inbuf,y
+         cmp  delimit
+         beq  lis_35     ; found opener
+         iny
+         cpy  in_lgth
+         bne  lis_34
+lis_34a: lda  #<fnd_err1
+         ldx  #>fnd_err1
+         jmp  getr_31
 ;
-LIS_35:
-         INY
-         STY  FND_FROM
-LIS_36:	CPY  IN_LGTH
-         BEQ  LIS_34A
-         LDA  INBUF,Y
-         CMP  DELIMIT
-         BEQ  LIS_37     ; FOUND CLOSER
-         INY
-         BNE  LIS_36
+lis_35:
+         iny
+         sty  fnd_from
+lis_36:	cpy  in_lgth
+         beq  lis_34a
+         lda  inbuf,y
+         cmp  delimit
+         beq  lis_37     ; found closer
+         iny
+         bne  lis_36
 ;
-LIS_37:
-         STY  FND_TO
-         SEC
-         LDA  FND_TO
-         SBC  FND_FROM
-         STA  REP_SIZE
-         STA  FND_LEN
+lis_37:
+         sty  fnd_to
+         sec
+         lda  fnd_to
+         sbc  fnd_from
+         sta  rep_size
+         sta  fnd_len
 ;
-         LDA  ED_COM
-         CMP  #'R'       ; REPLACE?
-         BNE  LIS_45     ; NOPE
-         INY
-         STY  REP_FROM   ; START OF NEW STRING
-LIS_38:
-         CPY  IN_LGTH
-         BEQ  LIS_34A    ; NO DELIMITER
-         LDA  INBUF,Y
-         CMP  DELIMIT
-         BEQ  LIS_39     ; END
+         lda  ed_com
+         cmp  #'R'       ; replace?
+         bne  lis_45     ; nope
+         iny
+         sty  rep_from   ; start of new string
+lis_38:
+         cpy  in_lgth
+         beq  lis_34a    ; no delimiter
+         lda  inbuf,y
+         cmp  delimit
+         beq  lis_39     ; end
 ;
-; now see if new string contains spaces or DLE's -
+; now see if new string contains spaces or dle's -
 ; if so we need to flag a tidy for later (to amalgamate
-; multiple spaces/DLE's etc.
+; multiple spaces/dle's etc.
 ;
-         CMP  #$10       ; DLE?
-         BEQ  LIS_38A    ; yes
-         CMP  #32	 ; space?
-         BNE  LIS_38B    ; no - forget it
-LIS_38A: INC  QT_SIZE    ; flag it
-LIS_38B:
-         INY
-         BNE  LIS_38
+         cmp  #$10       ; dle?
+         beq  lis_38a    ; yes
+         cmp  #32	 ; space?
+         bne  lis_38b    ; no - forget it
+lis_38a: inc  qt_size    ; flag it
+lis_38b:
+         iny
+         bne  lis_38
 ;
-LIS_39:
-         STY  REP_TO
-         SEC
-         LDA  FND_TO
-         SBC  FND_FROM
-         STA  FND_LEN
-         SEC
-         LDA  REP_TO
-         SBC  REP_FROM
-         STA  REP_SIZE
-         SBC  FND_LEN
-         STA  REP_LEN    ; DIFFERENCE IN STRING LENGTHS
-;
-;
-; NOW LOOK FOR FLAG
-;
-LIS_45:	INY
-LIS_46:	CPY  IN_LGTH    ; MORE ON LINE?
-         BEQ  LIS_50     ; NO
-         LDA  INBUF,Y
-         CMP  #32
-         BEQ  LIS_45     ; IGNORE SPACES
-         AND  #$7F       ; make sure in lower (upper?) case ...
-LIS_47:	CMP  #'G'       ; GLOBAL?
-         BNE  LIS_48     ; NO
-         STA  GLB_FLAG   ; FLAG IT
-         LDA  FND_LEN
-         BEQ  LIS_ERR
-         BNE  LIS_45
+lis_39:
+         sty  rep_to
+         sec
+         lda  fnd_to
+         sbc  fnd_from
+         sta  fnd_len
+         sec
+         lda  rep_to
+         sbc  rep_from
+         sta  rep_size
+         sbc  fnd_len
+         sta  rep_len    ; difference in string lengths
 ;
 ;
-LIS_48:	CMP  #'T'       ; TRANSLATE?
-         BNE  LIS_49     ; NO -
-         STA  TRN_FLAG
-         BEQ  LIS_45
-LIS_49:	CMP  #'Q'       ;QUIET?
-         BNE  LIS_ERR
-         STA  Q_FLAG
-         BEQ  LIS_45
-LIS_ERR: JMP  LIS_34A    ; NONE - ERROR
+; now look for flag
+;
+lis_45:	iny
+lis_46:	cpy  in_lgth    ; more on line?
+         beq  lis_50     ; no
+         lda  inbuf,y
+         cmp  #32
+         beq  lis_45     ; ignore spaces
+         and  #$7f       ; make sure in lower (upper?) case ...
+lis_47:	cmp  #'G'       ; global?
+         bne  lis_48     ; no
+         sta  glb_flag   ; flag it
+         lda  fnd_len
+         beq  lis_err
+         bne  lis_45
+;
+;
+lis_48:	cmp  #'T'       ; translate?
+         bne  lis_49     ; no -
+         sta  trn_flag
+         beq  lis_45
+lis_49:	cmp  #'Q'       ;quiet?
+         bne  lis_err
+         sta  q_flag
+         beq  lis_45
+lis_err: jmp  lis_34a    ; none - error
 
 ;
-LIS_50:	LDA  REP_LEN
-         STA  IN_LGTH
-         DEC  IN_LGTH
-LIS_55:	JSR  DISPLAY
-         CLC
-         RTS
+lis_50:	lda  rep_len
+         sta  in_lgth
+         dec  in_lgth
+lis_55:	jsr  display
+         clc
+         rts
 ;
-DISPLAY:
-; PRINT LINE
-         LDY  #0
-DIS_5:
+display:
+; print line
+         ldy  #0
+dis_5:
 ;
-         JSR  STOP
-         BEQ  DIS_RTS
-DIS_5_OK:
-         LDA  (FROM),Y
-         BEQ  DIS_WRAP
-         LDA  LINE_NO+1
-         CMP  TO_LINE+1
-         BCC  DIS_15
-         LDA  LINE_NO
-         CMP  TO_LINE
-         BCC  DIS_15
-DIS_WRAP:
-         LDA  ED_COM
-         CMP  #'R'
-         BEQ  DIS_WR1
-         CMP  #'F'
-         BNE  DIS_RTS
-DIS_WR1: JMP  FND_END
-DIS_RTS:
-         RTS
-;
-;
-DIS_15:
-         LDA  ED_COM
-         CMP  #'R'
-         BEQ  DIS_0      ; REPLACE
-         CMP  #'F'
-         BEQ  DIS_0      ; YES
-         JMP  DIS_4      ; NOT FIND
-DIS_0:
-         LDY  #0
-         STY  FND_FLG    ; NOTHING FOUND YET ON THIS LINE
-DIS_0A:	STY  FND_POS
-DIS_1:          ; HERE FOR EACH CHAR
-         LDY  FND_POS
-         LDX  FND_FROM
-DIS_2:          ; INNER LOOP
-         CPX  FND_TO
-         BEQ  DIS_35     ; END OF STRING - FOUND IT !!!
-         LDA  (FROM),Y   ; CHAR FROM FILE
-         CMP  #CR        ; END OF LINE?
-         BNE  DIS_2A     ; NO
-         LDA  ED_COM
-         CMP  #'F'
-         BEQ  DIS_2C
-         CMP  #'R'
-         BNE  DIS_16J
-DIS_2C:	LDA  FND_FLG
-         BEQ  DIS_16J    ; NOTHING REPLACED ON THIS LINE
-         JMP  DIS_80     ; DISPLAY IT
-DIS_16J:
-         JMP  DIS_16     ; YES - DON'T DISPLAY
-DIS_2A:
-;
-; TRANSLATE TO UPPER CASE IF REQUESTED
-;
-         BIT  TRN_FLAG
-         BVC  DIS_2AB    ; nope
-         CMP  #$C1
-         BCC  DIS_2AB
-         CMP  #$DB
-         BCS  DIS_2AB
-         AND  #$7F
-DIS_2AB:
-         CMP  INBUF,X
-         BNE  DIS_3      ; NO MATCH
-         INY
-         INX
-         BNE  DIS_2      ; MORE IN STRING
-DIS_3:	INC  FND_POS
-         CMP  #$10       ; DLE?
-         BNE  DIS_1      ; no - OK to process next char
-         INC  FND_POS    ; bypass space count
-; confused with CONST )
-         BNE  DIS_1      ; process next char in line
-;
-DIS_35:          ; COUNT FOUND
-         INC  NUM_LINS
-         BNE  DIS_35A
-         INC  NUM_LINS+1
-DIS_35A: LDA  ED_COM
-         STA  FND_FLG    ; MARK FOUND
-         CMP  #'R'       ; REPLACE?
-         BNE  DIS_70     ; NO
-         LDA  REP_LEN    ; NEW STRING SAME LENGTH?
-         BNE  DIS_40     ; NOPE - HARD ONE
-DIS_36A: LDY  FND_POS
-         LDX  REP_FROM   ; MOVE FROM HERE
-         LDA  #0
-         STA  VAL_CMP    ; COMPILE NO LONGER VALID
-DIS_36:
-         CPX  REP_TO     ; END OF NEW STRING?
-         BEQ  DIS_70     ; YES
-         LDA  INBUF,X
-         STA  (FROM),Y
-         INY
-         INX
-         BNE  DIS_36     ; BACK FOR MORE
-;
-DIS_70:
-         LDA  GLB_FLAG   ; DO ALL ON LINE?
-         BEQ  DIS_80     ; NO - FINISHED THEN
-         LDA  FND_POS    ; POINT TO END OF NEW STRING
-         CLC
-         ADC  REP_SIZE
-         TAY
-         JMP  DIS_0A     ; BACK FOR ANOTHER GO
+         jsr  stop
+         beq  dis_rts
+dis_5_ok:
+         lda  (from),y
+         beq  dis_wrap
+         lda  line_no+1
+         cmp  to_line+1
+         bcc  dis_15
+         lda  line_no
+         cmp  to_line
+         bcc  dis_15
+dis_wrap:
+         lda  ed_com
+         cmp  #'R'
+         beq  dis_wr1
+         cmp  #'F'
+         bne  dis_rts
+dis_wr1: jmp  fnd_end
+dis_rts:
+         rts
 ;
 ;
-DIS_40:          ; NEW STRING DIFFERENT LENGTH
-         BMI  DIS_60     ; NEW SMALLER THAN OLD
+dis_15:
+         lda  ed_com
+         cmp  #'R'
+         beq  dis_0      ; replace
+         cmp  #'F'
+         beq  dis_0      ; yes
+         jmp  dis_4      ; not find
+dis_0:
+         ldy  #0
+         sty  fnd_flg    ; nothing found yet on this line
+dis_0a:	sty  fnd_pos
+dis_1:          ; here for each char
+         ldy  fnd_pos
+         ldx  fnd_from
+dis_2:          ; inner loop
+         cpx  fnd_to
+         beq  dis_35     ; end of string - found it !!!
+         lda  (from),y   ; char from file
+         cmp  #cr        ; end of line?
+         bne  dis_2a     ; no
+         lda  ed_com
+         cmp  #'F'
+         beq  dis_2c
+         cmp  #'R'
+         bne  dis_16j
+dis_2c:	lda  fnd_flg
+         beq  dis_16j    ; nothing replaced on this line
+         jmp  dis_80     ; display it
+dis_16j:
+         jmp  dis_16     ; yes - don't display
+dis_2a:
 ;
-; HERE IF NEW BIGGER THAN OLD
+; translate to upper case if requested
 ;
-         CLC
-         LDA  FROM       ; CALC_ ADDRESS OF NEW TEXT
-         PHA
-         ADC  FND_POS
-         STA  PNTR
-         LDA  FROM+1
-         PHA
-         ADC  #0
-         STA  PNTR+1
-         JSR  INST_TXT   ; MAKE ROOM
-DIS_45:
-         PLA
-         STA  FROM+1
-         PLA
-         STA  FROM
-         JMP  DIS_36A    ; NOW MOVE IN NEW STRING
+         bit  trn_flag
+         bvc  dis_2ab    ; nope
+         cmp  #$c1
+         bcc  dis_2ab
+         cmp  #$db
+         bcs  dis_2ab
+         and  #$7f
+dis_2ab:
+         cmp  inbuf,x
+         bne  dis_3      ; no match
+         iny
+         inx
+         bne  dis_2      ; more in string
+dis_3:	inc  fnd_pos
+         cmp  #$10       ; dle?
+         bne  dis_1      ; no - ok to process next char
+         inc  fnd_pos    ; bypass space count
+; confused with const )
+         bne  dis_1      ; process next char in line
 ;
-DIS_60:          ; NEW SMALLER THAN OLD
-         LDA  FROM
-         PHA
-         CLC
-         LDA  FND_POS
-         ADC  FND_LEN
-         ADC  FROM
-         STA  TO
-         STA  EPNTR      ; (FOR FIND LENGTH)
-         LDA  FROM+1
-         PHA
-         ADC  #0
-         STA  TO+1
-         STA  EPNTR+1
-         JSR  FIND_END   ; FIND LENGTH OF FILE
-         CLC
-         LDA  TO
-         ADC  REP_LEN    ; (WHICH IS NEGATIVE)
-         STA  FROM
-         LDA  TO+1
-         ADC  #$FF
-         STA  FROM+1
-         JSR  MV_TXT_L   ; SHIFT TEXT LEFT
-         JMP  DIS_45     ; NOW TO MOVE IN NEW TEXT
+dis_35:          ; count found
+         inc  num_lins
+         bne  dis_35a
+         inc  num_lins+1
+dis_35a: lda  ed_com
+         sta  fnd_flg    ; mark found
+         cmp  #'R'       ; replace?
+         bne  dis_70     ; no
+         lda  rep_len    ; new string same length?
+         bne  dis_40     ; nope - hard one
+dis_36a: ldy  fnd_pos
+         ldx  rep_from   ; move from here
+         lda  #0
+         sta  val_cmp    ; compile no longer valid
+dis_36:
+         cpx  rep_to     ; end of new string?
+         beq  dis_70     ; yes
+         lda  inbuf,x
+         sta  (from),y
+         iny
+         inx
+         bne  dis_36     ; back for more
 ;
-;
-DIS_80:
-         LDA  Q_FLAG
-         BEQ  DIS_4
-         JMP  DIS_16     ; NO DISPLAY - 'QUIET' MODE
-;
-;
-DIS_4:
-         JSR  PT_LN_NO
-         LDA  #$40       ; Expand reserved words but not others (not upper case)
-         STA  RUNNING
-         LDA  FROM
-         LDX  FROM+1
-         JSR  PL
-         LDA  #$80
-         STA  RUNNING    ; back to normal
-         JMP  DIS_17
-DIS_16:	INC  LINE_NO
-         BNE  DIS_17
-         INC  LINE_NO+1
-;
-; GET POSN NEXT LINE
-DIS_17:	LDY  #0
-DIS_20:
-         LDA  (FROM),Y
-         JSR  INC_FROM
-         CMP  #CR
-         BNE  DIS_20
-         JMP  DISPLAY
+dis_70:
+         lda  glb_flag   ; do all on line?
+         beq  dis_80     ; no - finished then
+         lda  fnd_pos    ; point to end of new string
+         clc
+         adc  rep_size
+         tay
+         jmp  dis_0a     ; back for another go
 ;
 ;
-FND_END:
-         JSR  CROUT
-         JSR  PUT_NO
-         LDA  ED_COM
-         CMP  #'F'
-         BEQ  FND_END2
-         LDA  #<RPLCD
-         LDX  #>RPLCD
-         JSR  PL
-         LDA  NUM_LINS
-         ORA  NUM_LINS+1
-         BEQ  FND_RTS    ; no need if nothing done
-         LDA  QT_SIZE    ; new string contain spaces?
-         BEQ  FND_RTS    ; no - no Tidy needed
-         JSR  TIDY       ; clean up what we've done
-FND_RTS: RTS
+dis_40:          ; new string different length
+         bmi  dis_60     ; new smaller than old
 ;
-FND_END2:
-         LDA  #<FND
-         LDX  #>FND
-         JMP  PL
+; here if new bigger than old
 ;
-RPLCD:	.byte " REPLACED",$0D
-FND:	.byte " FOUND",$0D
+         clc
+         lda  from       ; calc_ address of new text
+         pha
+         adc  fnd_pos
+         sta  pntr
+         lda  from+1
+         pha
+         adc  #0
+         sta  pntr+1
+         jsr  inst_txt   ; make room
+dis_45:
+         pla
+         sta  from+1
+         pla
+         sta  from
+         jmp  dis_36a    ; now move in new string
+;
+dis_60:          ; new smaller than old
+         lda  from
+         pha
+         clc
+         lda  fnd_pos
+         adc  fnd_len
+         adc  from
+         sta  to
+         sta  epntr      ; (for find length)
+         lda  from+1
+         pha
+         adc  #0
+         sta  to+1
+         sta  epntr+1
+         jsr  find_end   ; find length of file
+         clc
+         lda  to
+         adc  rep_len    ; (which is negative)
+         sta  from
+         lda  to+1
+         adc  #$ff
+         sta  from+1
+         jsr  mv_txt_l   ; shift text left
+         jmp  dis_45     ; now to move in new text
+;
+;
+dis_80:
+         lda  q_flag
+         beq  dis_4
+         jmp  dis_16     ; no display - 'quiet' mode
+;
+;
+dis_4:
+         jsr  pt_ln_no
+         lda  #$40       ; expand reserved words but not others (not upper case)
+         sta  running
+         lda  from
+         ldx  from+1
+         jsr  pl
+         lda  #$80
+         sta  running    ; back to normal
+         jmp  dis_17
+dis_16:	inc  line_no
+         bne  dis_17
+         inc  line_no+1
+;
+; get posn next line
+dis_17:	ldy  #0
+dis_20:
+         lda  (from),y
+         jsr  inc_from
+         cmp  #cr
+         bne  dis_20
+         jmp  display
+;
+;
+fnd_end:
+         jsr  crout
+         jsr  put_no
+         lda  ed_com
+         cmp  #'F'
+         beq  fnd_end2
+         lda  #<rplcd
+         ldx  #>rplcd
+         jsr  pl
+         lda  num_lins
+         ora  num_lins+1
+         beq  fnd_rts    ; no need if nothing done
+         lda  qt_size    ; new string contain spaces?
+         beq  fnd_rts    ; no - no tidy needed
+         jsr  tidy       ; clean up what we've done
+fnd_rts: rts
+;
+fnd_end2:
+         lda  #<fnd
+         ldx  #>fnd
+         jmp  pl
+;
+rplcd:	.byte " REPLACED",$0d
+fnd:	.byte " FOUND",$0d
 
 ;
-PT_LN_NO:
-        INC  LINE_NO
-        BNE  PT_LN_10
-        INC  LINE_NO+1
-PT_LN_10:
-         LDA  NLN_FLAG   ; LINE NUMBERS?
-         BNE  DIS_4A     ; NOPE
-PUT_LINE:
-	LDA  LINE_NO    ; entry here from compiler
-        STA  REG
-        LDX  LINE_NO+1
-        STX  REG+1
-        LDY  #0
-        STY  REGB
-        CPX  #>1000
-        BCC  LT_1000
-        BNE  PT_GO
-        CMP  #<1000
-        BCS  PT_GO
-LT_1000: INY
-        CPX  #0
-        BNE  PT_GO
-        CMP  #100
-        BCS  PT_GO
-        INY
-        CMP  #10
-        BCS  PT_GO
-        INY
-PT_GO:	TYA
-        BEQ  PT_FIN
-        PHA
-        JSR  PUTSP
-        PLA
-        TAY
-        DEY
-        BNE  PT_GO
-PT_FIN:
-        JSR  DSP_BIN
-        JMP  PUTSP
+pt_ln_no:
+        inc  line_no
+        bne  pt_ln_10
+        inc  line_no+1
+pt_ln_10:
+         lda  nln_flag   ; line numbers?
+         bne  dis_4a     ; nope
+put_line:
+	lda  line_no    ; entry here from compiler
+        sta  reg
+        ldx  line_no+1
+        stx  reg+1
+        ldy  #0
+        sty  regb
+        cpx  #>1000
+        bcc  lt_1000
+        bne  pt_go
+        cmp  #<1000
+        bcs  pt_go
+lt_1000: iny
+        cpx  #0
+        bne  pt_go
+        cmp  #100
+        bcs  pt_go
+        iny
+        cmp  #10
+        bcs  pt_go
+        iny
+pt_go:	tya
+        beq  pt_fin
+        pha
+        jsr  putsp
+        pla
+        tay
+        dey
+        bne  pt_go
+pt_fin:
+        jsr  dsp_bin
+        jmp  putsp
 
 ;
-GETRANGE:
+getrange:
 ;***********************************************
-; GET 1ST NO
-         LDY  #0
-         JSR  GET_NO
-         BCC  GETR_5
-DIS_4A:	RTS
-GETR_5:
-         LDA  VALUE
-         STA  FROM
-         BNE  GETR_10
-         LDA  VALUE+1
-         BEQ  GETR_30
-GETR_10:
-         LDA  VALUE+1
-         STA  FROM+1
-; GET 2ND NO
-         LDY  PNTR
-GETR_15:
-         INY
-         CPY  IN_LGTH
-         BEQ  GETR_16
-         LDA  INBUF,Y
-         CMP  DELIMIT
-         BNE  GETR_20
-GETR_16: LDA  FROM
-         STA  TO
-         LDA  FROM+1
-         STA  TO+1
-         CLC
-         RTS
-GETR_20:
-         LDA  INBUF,Y
-         CMP  #'0'
-         BCC  GETR_22
-         CMP  #'9'+1
-         BCS  GETR_22
-         JMP  GETR_15
-GETR_22:
-         JSR  GET_NO
-         BCC  GETR_25
-         RTS
-GETR_25:
-         LDA  VALUE
-         STA  TO
-         LDA  VALUE+1
-         STA  TO+1
-; CHECK RANGE
-         LDA  TO
-         SEC
-         SBC  FROM
-         LDA  TO+1
-         SBC  FROM+1
-         BMI  GETR_30
-         CLC
-         RTS
-GETR_30:
-         LDA  #<DEL_ERR1
-         LDX  #>DEL_ERR1
-GETR_31: JSR  PL
-         SEC
-         RTS
+; get 1st no
+         ldy  #0
+         jsr  get_no
+         bcc  getr_5
+dis_4a:	rts
+getr_5:
+         lda  value
+         sta  from
+         bne  getr_10
+         lda  value+1
+         beq  getr_30
+getr_10:
+         lda  value+1
+         sta  from+1
+; get 2nd no
+         ldy  pntr
+getr_15:
+         iny
+         cpy  in_lgth
+         beq  getr_16
+         lda  inbuf,y
+         cmp  delimit
+         bne  getr_20
+getr_16: lda  from
+         sta  to
+         lda  from+1
+         sta  to+1
+         clc
+         rts
+getr_20:
+         lda  inbuf,y
+         cmp  #'0'
+         bcc  getr_22
+         cmp  #'9'+1
+         bcs  getr_22
+         jmp  getr_15
+getr_22:
+         jsr  get_no
+         bcc  getr_25
+         rts
+getr_25:
+         lda  value
+         sta  to
+         lda  value+1
+         sta  to+1
+; check range
+         lda  to
+         sec
+         sbc  from
+         lda  to+1
+         sbc  from+1
+         bmi  getr_30
+         clc
+         rts
+getr_30:
+         lda  #<del_err1
+         ldx  #>del_err1
+getr_31: jsr  pl
+         sec
+         rts
 ;
-TO_ADDR:
-        LDA  TO
-        STA  VALUE
-        LDA  TO+1
-        STA  VALUE+1
-        JSR  FIND_LN
-        LDA  PNTR
-        STA  TO
-        LDA  PNTR+1
-        STA  TO+1
-        RTS
+to_addr:
+        lda  to
+        sta  value
+        lda  to+1
+        sta  value+1
+        jsr  find_ln
+        lda  pntr
+        sta  to
+        lda  pntr+1
+        sta  to+1
+        rts
 
 ;
-FRM_ADDR:
-        LDA  FROM
-        STA  VALUE
-        LDA  FROM+1
-        STA  VALUE+1
-        JSR  FIND_LN
-        LDA  PNTR
-        STA  FROM
-        LDA  PNTR+1
-        STA  FROM+1
-        RTS
+frm_addr:
+        lda  from
+        sta  value
+        lda  from+1
+        sta  value+1
+        jsr  find_ln
+        lda  pntr
+        sta  from
+        lda  pntr+1
+        sta  from+1
+        rts
 
 ;
-; TIDY UP SOURCE FILE
+; tidy up source file
 ;
 ; here to convert alphas to reserved words if possible
 ;
-TIDY_AL:
-         LDX  EPNTR      ; in quotes?
-         BNE  TIDY_CH    ; yes - ignore
-         LDX  FROM
-         STX  NXTCHR     ; start of word
-         LDX  FROM+1
-         STX  NXTCHR+1
-         JSR  TOKEN1
-         DEC  TKNLEN
-         LDY  #0
-         CMP  #'I'       ; identifier?
-         BNE  TIDY_RS    ; no - must be reserved
+tidy_al:
+         ldx  epntr      ; in quotes?
+         bne  tidy_ch    ; yes - ignore
+         ldx  from
+         stx  nxtchr     ; start of word
+         ldx  from+1
+         stx  nxtchr+1
+         jsr  token1
+         dec  tknlen
+         ldy  #0
+         cmp  #'I'       ; identifier?
+         bne  tidy_rs    ; no - must be reserved
 ;
 ; get original letter back
 ;
-         LDX  TKNLEN
-         STX  QT_SIZE    ; ignore next (n - 1) letters
-         LDA  (FROM),Y
-         BNE  TIDY_CH    ; just copy it
+         ldx  tknlen
+         stx  qt_size    ; ignore next (n - 1) letters
+         lda  (from),y
+         bne  tidy_ch    ; just copy it
 ;
-TIDY_RS:          ; reserved word
-         LDA  TKNLEN
-         CLC
-         ADC  FROM
-         STA  FROM       ; add length of (token - 1)
-         BCC  TIDY_RS1
-         INC  FROM+1
-TIDY_RS1:          ; bypass whole word in source
-         INY
-         LDA  (FROM),Y   ; followed by space?
-         AND  #$7F
-         CMP  #32
-         BNE  TIDY_RS2   ; no
-         JSR  INC_FROM   ; yes - ignore space
-TIDY_RS2:
-         LDA  TOKEN
-         DEY             ; y is now zero again
-         BEQ  TIDY_CH    ; use our new token
+tidy_rs:          ; reserved word
+         lda  tknlen
+         clc
+         adc  from
+         sta  from       ; add length of (token - 1)
+         bcc  tidy_rs1
+         inc  from+1
+tidy_rs1:          ; bypass whole word in source
+         iny
+         lda  (from),y   ; followed by space?
+         and  #$7f
+         cmp  #32
+         bne  tidy_rs2   ; no
+         jsr  inc_from   ; yes - ignore space
+tidy_rs2:
+         lda  token
+         dey             ; y is now zero again
+         beq  tidy_ch    ; use our new token
 ;
 ;
-TIDY:
-         LDA  TS
-         LDX  TS+1
+tidy:
+         lda  ts
+         ldx  ts+1
 ;
-TIDY_ENT:
-         STA  FROM
-         STA  TO
-         STA  REG2
-         STX  FROM+1
-         STX  TO+1
-         STX  REG2+1
-         LDA  #0
-         STA  QT_SIZE    ; ALPHA BYPASS SIZE
-         STA  EPNTR      ; QUOTE FLAG
+tidy_ent:
+         sta  from
+         sta  to
+         sta  reg2
+         stx  from+1
+         stx  to+1
+         stx  reg2+1
+         lda  #0
+         sta  qt_size    ; alpha bypass size
+         sta  epntr      ; quote flag
 ;
-TIDY_NXT:
-         LDY  #0
-         LDA  (FROM),Y
-         BEQ  TIDY_END
-         LDX  QT_SIZE    ; bypassing a non-reserved word?
-         BEQ  TIDY_NX1   ; no
-         DEX             ; one less to worry about
-         STX  QT_SIZE
-         BPL  TIDY_CH    ; still in middle - just copy character
-TIDY_NX1:
-         CMP  #13		; CARRIAGE RETURN
-         BEQ  TIDY_CR
-         CMP  QUOT_SYM
-         BEQ  TIDY_QT
-         CMP  #32		; SPACE?
-         BEQ  TIDY_SPJ		; YES
-         CMP  #160		; SHIFT/SPACE
-         BEQ  TIDY_SPJ
-         CMP  #$10       ; DLE?
-         BEQ  TIDY_DLE
-         JSR  ISITAL     ; alpha?
-         BCC  TIDY_AL    ; yes
+tidy_nxt:
+         ldy  #0
+         lda  (from),y
+         beq  tidy_end
+         ldx  qt_size    ; bypassing a non-reserved word?
+         beq  tidy_nx1   ; no
+         dex             ; one less to worry about
+         stx  qt_size
+         bpl  tidy_ch    ; still in middle - just copy character
+tidy_nx1:
+         cmp  #13		; carriage return
+         beq  tidy_cr
+         cmp  quot_sym
+         beq  tidy_qt
+         cmp  #32		; space?
+         beq  tidy_spj		; yes
+         cmp  #160		; shift/space
+         beq  tidy_spj
+         cmp  #$10       ; dle?
+         beq  tidy_dle
+         jsr  isital     ; alpha?
+         bcc  tidy_al    ; yes
 ;
-; COPY CHARACTER
+; copy character
 ;
-TIDY_CH: STA  (TO),Y
-         JSR  INC_TO
-TIDY_LF: JSR  INC_FROM
-         JMP  TIDY_NXT
+tidy_ch: sta  (to),y
+         jsr  inc_to
+tidy_lf: jsr  inc_from
+         jmp  tidy_nxt
 
-TIDY_SPJ: JMP  TIDY_SP
+tidy_spj: jmp  tidy_sp
 
-TIDY_QT:
-        PHA
-        EOR  EPNTR      ; FLIP FLAG
-        STA  EPNTR
-        PLA
-        BNE  TIDY_CH    ; STORE IT
+tidy_qt:
+        pha
+        eor  epntr      ; flip flag
+        sta  epntr
+        pla
+        bne  tidy_ch    ; store it
 ;
-TIDY_CR:
-        STY  EPNTR      ; CLEAR QUOTE FLAG
-        STY  QT_SIZE    ; AND ALPHA BYPASS COUNT
-        JSR  CMP_END    ; AT START OF FILE?
-        BEQ  TIDY_NSP   ; YES - OFF WE GO
+tidy_cr:
+        sty  epntr      ; clear quote flag
+        sty  qt_size    ; and alpha bypass count
+        jsr  cmp_end    ; at start of file?
+        beq  tidy_nsp   ; yes - off we go
 
 ;
-; DROP TRAILING SPACES
+; drop trailing spaces
 ;
-TIDY_OK:
-         JSR  DEC_TO
-         AND  #$7F
-         CMP  #32
-         BEQ  TIDY_CR
+tidy_ok:
+         jsr  dec_to
+         and  #$7f
+         cmp  #32
+         beq  tidy_cr
 ;
-         JSR  INC_TO     ; BACK TO LAST SPACE
-TIDY_NSP:          ; END OF FILE/SPACES
-         LDA  #$0D
-         BNE  TIDY_CH
+         jsr  inc_to     ; back to last space
+tidy_nsp:          ; end of file/spaces
+         lda  #$0d
+         bne  tidy_ch
 ;
-TIDY_END:
-         JSR  CMP_END
-         BEQ  TIDY_E2    ; AT START OF FILE
-         JSR  DEC_TO     ; C/R BEFORE END?
-         JSR  INC_TO
-         CMP  #$0D
-         BEQ  TIDY_E2    ; YES
-         LDA  #$0D       ; NO - PUT ONE THERE
-         STA  (TO),Y
-         JSR  INC_TO
-TIDY_E2:
-         TYA
-         STA  (TO),Y
-         RTS
-;
-;
-TIDY_DLE:
-         STA  (TO),Y     ; COPY 2 CHARS REGARDLESS
-         JSR  INC_TO
-         JSR  INC_FROM
-         LDA  (FROM),Y
-         TAX             ; save temporarily
-         INY
-         LDA  (FROM),Y   ; another DLE?
-         CMP  #$10
-         BEQ  TIDY_DL2   ; yes
-         AND  #$7F
-         CMP  #32		; followed by a solitary space?
-         BNE  TIDY_DL3   ; no
-         INX             ; yes - add 1 to space count
-         JSR  INC_FROM   ; and bypass the space
-TIDY_DL3: TXA             ; back to space count
-         LDY  #0
-         JMP  TIDY_CH
-;
-; here for 2 DLE's in a row
-;
-TIDY_DL2:
-         INY
-         LDA  (FROM),Y   ; second space count
-         AND  #$7F       ; strip 8 bit
-         LDY  #0
-         CLC
-         ADC  (FROM),Y   ; add to first space count
-         TAX             ; save in X
-         JSR  INC_FROM   ; now bypass 2nd. DLE and its count
-         JSR  INC_FROM
-         BNE  TIDY_DL3   ; now copy over our new count
+tidy_end:
+         jsr  cmp_end
+         beq  tidy_e2    ; at start of file
+         jsr  dec_to     ; c/r before end?
+         jsr  inc_to
+         cmp  #$0d
+         beq  tidy_e2    ; yes
+         lda  #$0d       ; no - put one there
+         sta  (to),y
+         jsr  inc_to
+tidy_e2:
+         tya
+         sta  (to),y
+         rts
 ;
 ;
-TIDY_SP:
-         LDA  EPNTR
-         BNE  TIDY_GQT   ; GOT QUOTE
-         INY
-         LDA  (FROM),Y   ; 2 SPACES IN ROW?
-         CMP  #$10       ; space followed by DLE?
-         BEQ  TIDY_BMP   ; yes - add 1 to DLE count
-         AND  #$7F
-         CMP  #32
-         BEQ  TIDY_SPC   ; YES
-         DEY             ; NO
-TIDY_GQT:
-         LDA  #32
-         JMP  TIDY_CH
+tidy_dle:
+         sta  (to),y     ; copy 2 chars regardless
+         jsr  inc_to
+         jsr  inc_from
+         lda  (from),y
+         tax             ; save temporarily
+         iny
+         lda  (from),y   ; another dle?
+         cmp  #$10
+         beq  tidy_dl2   ; yes
+         and  #$7f
+         cmp  #32		; followed by a solitary space?
+         bne  tidy_dl3   ; no
+         inx             ; yes - add 1 to space count
+         jsr  inc_from   ; and bypass the space
+tidy_dl3: txa             ; back to space count
+         ldy  #0
+         jmp  tidy_ch
 ;
-; here for a single space followed by a DLE and a space count
+; here for 2 dle's in a row
+;
+tidy_dl2:
+         iny
+         lda  (from),y   ; second space count
+         and  #$7f       ; strip 8 bit
+         ldy  #0
+         clc
+         adc  (from),y   ; add to first space count
+         tax             ; save in x
+         jsr  inc_from   ; now bypass 2nd. dle and its count
+         jsr  inc_from
+         bne  tidy_dl3   ; now copy over our new count
+;
+;
+tidy_sp:
+         lda  epntr
+         bne  tidy_gqt   ; got quote
+         iny
+         lda  (from),y   ; 2 spaces in row?
+         cmp  #$10       ; space followed by dle?
+         beq  tidy_bmp   ; yes - add 1 to dle count
+         and  #$7f
+         cmp  #32
+         beq  tidy_spc   ; yes
+         dey             ; no
+tidy_gqt:
+         lda  #32
+         jmp  tidy_ch
+;
+; here for a single space followed by a dle and a space count
 ; - just add 1 to the space count following and ignore the
 ; current space
 ;
-TIDY_BMP:
-         TYA             ; Y contains 1
-         CLC
-         INY             ; now at space count
-         ADC  (FROM),Y
-         STA  (FROM),Y
-         JMP  TIDY_LF
+tidy_bmp:
+         tya             ; y contains 1
+         clc
+         iny             ; now at space count
+         adc  (from),y
+         sta  (from),y
+         jmp  tidy_lf
 ;
 ;
-TIDY_SPC:          ; OUTPUT DLE
-         DEY
-         LDA  #$10
-         STA  (TO),Y
-         JSR  INC_TO
-         LDX  #1         ; SPACE COUNT
-TIDY_CNT:
-         JSR  INC_FROM
-         LDA  (FROM),Y
-         AND  #$7F
-         CMP  #32		; ANOTHER?
-         BNE  TIDY_DNE		; NOPE
-         INX
-         BNE  TIDY_CNT
+tidy_spc:          ; output dle
+         dey
+         lda  #$10
+         sta  (to),y
+         jsr  inc_to
+         ldx  #1         ; space count
+tidy_cnt:
+         jsr  inc_from
+         lda  (from),y
+         and  #$7f
+         cmp  #32		; another?
+         bne  tidy_dne		; nope
+         inx
+         bne  tidy_cnt
 ;
-TIDY_DNE:
-         CMP  #$0D       ; END OF LINE?
-         BEQ  TIDY_IGN   ; YES - IGNORE THEM
-         CMP  #$0A       ; SAME
-         BEQ  TIDY_IGN
-         TXA             ; SPACE COUNT
-         ORA  #$80       ; SET BIT TO STOP CONFUSION WITH C/R
-         STA  (TO),Y
-         JSR  INC_TO
-         JMP  TIDY_NXT   ; PROCESS CURRENT CHAR
+tidy_dne:
+         cmp  #$0d       ; end of line?
+         beq  tidy_ign   ; yes - ignore them
+         cmp  #$0a       ; same
+         beq  tidy_ign
+         txa             ; space count
+         ora  #$80       ; set bit to stop confusion with c/r
+         sta  (to),y
+         jsr  inc_to
+         jmp  tidy_nxt   ; process current char
 ;
-TIDY_IGN:
-         JSR  DEC_TO     ; FORGET DLE
-         JMP  TIDY_NXT   ; PROCESS CHAR
-;
-;
-INC_FROM:
-        INC  FROM
-        BNE  RTS1
-        INC  FROM+1
-RTS1:	RTS
-;
-INC_TO:
-         INC  TO
-         BNE  RTS1
-         INC  TO+1
-         RTS
-;
-DEC_TO:
-         DEC  TO
-         LDA  TO
-         CMP  #$FF
-         BNE  DEC_TO_9
-         DEC  TO+1
-DEC_TO_9:
-         LDA  (TO),Y     ; SAVE TROUBLE LATER
-         RTS
-;
-DEC_FROM:
-         DEC  FROM
-         LDA  FROM
-         CMP  #$FF
-         BNE  RTS1
-         DEC  FROM+1
-         RTS
-;
-CMP_END:
-        LDA  TO
-        CMP  REG2
-        BNE  CMP_END9
-        LDA  TO+1
-        CMP  REG2+1
-CMP_END9: RTS
+tidy_ign:
+         jsr  dec_to     ; forget dle
+         jmp  tidy_nxt   ; process char
 ;
 ;
-WRAP: 	LDA  INBUF+1
-        CMP  #'F'
-        BNE  GET7_A
-        JMP  ST_FIL     ; QF = GO TO FILES MENU
-GET7_A: ; ORDINARY QUIT
-        JMP  RESTART
+inc_from:
+        inc  from
+        bne  rts1
+        inc  from+1
+rts1:	rts
+;
+inc_to:
+         inc  to
+         bne  rts1
+         inc  to+1
+         rts
+;
+dec_to:
+         dec  to
+         lda  to
+         cmp  #$ff
+         bne  dec_to_9
+         dec  to+1
+dec_to_9:
+         lda  (to),y     ; save trouble later
+         rts
+;
+dec_from:
+         dec  from
+         lda  from
+         cmp  #$ff
+         bne  rts1
+         dec  from+1
+         rts
+;
+cmp_end:
+        lda  to
+        cmp  reg2
+        bne  cmp_end9
+        lda  to+1
+        cmp  reg2+1
+cmp_end9: rts
+;
+;
+wrap: 	lda  inbuf+1
+        cmp  #'F'
+        bne  get7_a
+        jmp  st_fil     ; qf = go to files menu
+get7_a: ; ordinary quit
+        jmp  restart
 
 ;
-GETLNZ:
-GETLN:
-GETLN1:
-        LDY  #0
-        LDX  DFLTN      ; input from keyboard (screen)?
-        BNE  GET1       ; no - bypass fancy stuff (screws up disk)
+getlnz:
+getln:
+getln1:
+        ldy  #0
+        ldx  dfltn      ; input from keyboard (screen)?
+        bne  get1       ; no - bypass fancy stuff (screws up disk)
 ;
 ; the code below ensures that we accept data from the
 ; column that the prompt ended, even if we change lines
 ;
-        JSR  CHRIN      ; trigger read of line
-        LDA  LXSP+1     ; old column
-        STA  CH         ; make new column
-        CMP  INDX       ; past logical end of line?
-        BCC  GET4       ; no - is OK
-        STY  CRSW       ; indicate line finished
-        LDA  #$0D       ; dummy up a c/r
-        BNE  GET_3
-GET4:	LDA  #1         ; make sure we keep reading line
-        STA  CRSW
-GET1:	JSR  CHRIN
-        STA  INBUF,Y    ; SAVE IN BUFFER
-        INY
-        AND  #$7F       ; c/r may have 8-bit set
-        CMP  #$0D       ; END OF LINE?
-        BNE  GET1       ; NOPE
-        DEY
-GET_3:	STA  INBUF,Y    ; proper c/r
-        INY
-        LDA  #0
-        STA  INBUF,Y    ; zero after line for Tidy processing
-        DEY
-        TYA
-        PHA
-        JSR  CROUT
-        PLA
-        TAX             ; PUT INTO X
-        RTS             ; RETURN
+        jsr  chrin      ; trigger read of line
+        lda  lxsp+1     ; old column
+        sta  ch         ; make new column
+        cmp  indx       ; past logical end of line?
+        bcc  get4       ; no - is ok
+        sty  crsw       ; indicate line finished
+        lda  #$0d       ; dummy up a c/r
+        bne  get_3
+get4:	lda  #1         ; make sure we keep reading line
+        sta  crsw
+get1:	jsr  chrin
+        sta  inbuf,y    ; save in buffer
+        iny
+        and  #$7f       ; c/r may have 8-bit set
+        cmp  #$0d       ; end of line?
+        bne  get1       ; nope
+        dey
+get_3:	sta  inbuf,y    ; proper c/r
+        iny
+        lda  #0
+        sta  inbuf,y    ; zero after line for tidy processing
+        dey
+        tya
+        pha
+        jsr  crout
+        pla
+        tax             ; put into x
+        rts             ; return
 
 ;
-         BRK
+         brk
 
 	.endscope
 
 ;***********************************************
-; PASCAL COMPILER
-; for Commodore 64
-; PART 6
-; Authors_ Nick Gammon & Sue Gobbett
-;  SYM $9000
+; pascal compiler
+; for commodore 64
+; part 6
+; authors_ nick gammon & sue gobbett
+;  sym $9000
 ;***********************************************
 
 	.scope
 
 ;***********************************************
-; PART 1 VECTORS
+; part 1 vectors
 ;***********************************************
 
-	V1	= P1
-	INIT	= V1
-	GETNEXT	= V1+3
-	COMSTL	= V1+6
-	ISITHX	= V1+9
-	ISITAL	= V1+12
-	ISITNM	= V1+15
-	CHAR	= V1+18
-	GEN2_B	= V1+21
-	DISHX	= V1+24
-	ERROR	= V1+27
-	GETCHK	= V1+30
-	CHKTKN	= V1+33
-	GENNOP	= V1+36
-	GENADR	= V1+39
-	GENNJP	= V1+42
-	GENNJM	= V1+45
-	TKNWRK	= V1+48
-	PRBYTE	= V1+51
-	GTOKEN	= V1+54
-	SPARE2	= V1+57
-	FIXAD	= V1+60
-	PSHWRK	= V1+63
-	PULWRK	= V1+66
-	PC	= V1+69
-	PT	= V1+72
-	PL	= V1+75
-	PC8	= V1+78
-	GETANS	= V1+81
-	PUTSP	= V1+84
-	DISPAD	= V1+87
-	CROUT	= V1+90
-	SHLVAL	= V1+93
-	GET_NUM	= V1+96
-	GET_HEX	= V1+99
-	FND_END	= V1+102
-	PAUSE	= V1+105
-	HOME	= V1+108
-	RDKEY	= V1+111
-	GENJMP	= V1+114
-	GENRJMP	= V1+117
+	v1	= p1
+	init	= v1
+	getnext	= v1+3
+	comstl	= v1+6
+	isithx	= v1+9
+	isital	= v1+12
+	isitnm	= v1+15
+	char	= v1+18
+	gen2_b	= v1+21
+	dishx	= v1+24
+	error	= v1+27
+	getchk	= v1+30
+	chktkn	= v1+33
+	gennop	= v1+36
+	genadr	= v1+39
+	gennjp	= v1+42
+	gennjm	= v1+45
+	tknwrk	= v1+48
+	prbyte	= v1+51
+	gtoken	= v1+54
+	spare2	= v1+57
+	fixad	= v1+60
+	pshwrk	= v1+63
+	pulwrk	= v1+66
+	pc	= v1+69
+	pt	= v1+72
+	pl	= v1+75
+	pc8	= v1+78
+	getans	= v1+81
+	putsp	= v1+84
+	dispad	= v1+87
+	crout	= v1+90
+	shlval	= v1+93
+	get_num	= v1+96
+	get_hex	= v1+99
+	fnd_end	= v1+102
+	pause	= v1+105
+	home	= v1+108
+	rdkey	= v1+111
+	genjmp	= v1+114
+	genrjmp	= v1+117
 
 	.res 6
-	;.org $BCB8 ; P6
+	;.org $bcb8 ; p6
 
-        JMP  BLOCK
-
-;***********************************************
-; PART 2 VECTORS
-;***********************************************
-
-	V2	= P2
-	STMNT	= V2
-	EXPRES	= V2+3
-	CHKLHP	= V2+6
-	CHKRHP	= V2+9
-	CHKLHB	= V2+12
-	CHKRHB	= V2+15
-	LOOKUP	= V2+18
-	CHKDUP	= V2+21
-	CONDEC	= V2+24
-	VARDEC	= V2+27
-	CONST	= V2+30
-	GETSUB	= V2+33
-	W_STRING= V2+36
-	WRKTKN	= V2+39
-	SYMWRK	= V2+42
-	WRKSYM	= V2+45
-	PSHPCODE= V2+48
-	CHK_STAK= V2+51
-	SEARCH	= V2+54
-	ADDSYM	= V2+57
-	TKNJMP	= V2+60
+        jmp  block
 
 ;***********************************************
-; PART 3 VECTORS
+; part 2 vectors
 ;***********************************************
 
-        CHK_VAL = P3+403
+	v2	= p2
+	stmnt	= v2
+	expres	= v2+3
+	chklhp	= v2+6
+	chkrhp	= v2+9
+	chklhb	= v2+12
+	chkrhb	= v2+15
+	lookup	= v2+18
+	chkdup	= v2+21
+	condec	= v2+24
+	vardec	= v2+27
+	const	= v2+30
+	getsub	= v2+33
+	w_string= v2+36
+	wrktkn	= v2+39
+	symwrk	= v2+42
+	wrksym	= v2+45
+	pshpcode= v2+48
+	chk_stak= v2+51
+	search	= v2+54
+	addsym	= v2+57
+	tknjmp	= v2+60
+
+;***********************************************
+; part 3 vectors
+;***********************************************
+
+        chk_val = p3+403
 
 ;***********************************************
 
-CHKGET:
-         JSR  CHKTKN
-         JMP  GTOKEN
+chkget:
+         jsr  chktkn
+         jmp  gtoken
 ;
-WRK_VAL:
-         PHA
-         LDA  WORK
-         STA  VALUE
-         LDA  WORK+1
-         STA  VALUE+1
-         PLA
-         RTS
+wrk_val:
+         pha
+         lda  work
+         sta  value
+         lda  work+1
+         sta  value+1
+         pla
+         rts
 ;
-VAL_WRK:
-         PHA
-         LDA  VALUE
-         STA  WORK
-         LDA  VALUE+1
-         STA  WORK+1
-         PLA
-         RTS
+val_wrk:
+         pha
+         lda  value
+         sta  work
+         lda  value+1
+         sta  work+1
+         pla
+         rts
 ;
-END_WRK:
-         PHA
-         LDA  ENDSYM
-         STA  WORK
-         LDA  ENDSYM+1
-         STA  WORK+1
-         PLA
-         RTS
+end_wrk:
+         pha
+         lda  endsym
+         sta  work
+         lda  endsym+1
+         sta  work+1
+         pla
+         rts
 ;
 ;***********************************************
 ;
 ;
-; BLOCK
+; block
 ;
-BLCKT1:	.byte $82
-        .word BLKCNS
-BLCKT2:	.byte $83
-        .word BLKVAR
-BLCKT3:	.byte $86
-        .word BLKPRC
+blckt1:	.byte $82
+        .word blkcns
+blckt2:	.byte $83
+        .word blkvar
+blckt3:	.byte $86
+        .word blkprc
         .byte $87
-        .word BLKFNC
+        .word blkfnc
         .byte $88
-        .word BLKBEG
+        .word blkbeg
         .byte 0
 
 ;
-BLOCK:	JSR  CHK_STAK
-        LDA  #0
-        STA  FRAME+1
-        LDA  #6
-        STA  FRAME
-        LDA  PRCITM
-        STA  WORK
-        LDX  PRCITM+1
-        STX  WORK+1
-         ORA  PRCITM+1
-        BEQ  BLK1
+block:	jsr  chk_stak
+        lda  #0
+        sta  frame+1
+        lda  #6
+        sta  frame
+        lda  prcitm
+        sta  work
+        ldx  prcitm+1
+        stx  work+1
+         ora  prcitm+1
+        beq  blk1
 
-; HERE CHECK FOR CONSTRUCT_
+; here check for construct_
 ;
-; PROCEDURE ABCD;
+; procedure abcd;
 ; $1234;
 ;
-; WHICH IS THE METHOD OF
-; REFERRING TO EXTERNAL
-; PROCEDURES
+; which is the method of
+; referring to external
+; procedures
 ;
-         LDA  TOKEN
-         CMP  #'N'
-         BNE  BLK1A
-         LDY  #0
-         LDA  (TKNADR),Y
-         CMP  #'$'
-         BNE  BLK1A
-         LDY  #SYMDSP
-         LDA  VALUE
-         STA  (WORK),Y
-         INY
-         LDA  VALUE+1
-         STA  (WORK),Y
-         LDA  #1         ; FLAG ABSOLUTE PROCEDURE
-         LDY  #SYMDAT
-         STA  (WORK),Y
-         LDA  #';'
-         LDX  #10
-         JMP  GETCHK
+         lda  token
+         cmp  #'N'
+         bne  blk1a
+         ldy  #0
+         lda  (tknadr),y
+         cmp  #'$'
+         bne  blk1a
+         ldy  #symdsp
+         lda  value
+         sta  (work),y
+         iny
+         lda  value+1
+         sta  (work),y
+         lda  #1         ; flag absolute procedure
+         ldy  #symdat
+         sta  (work),y
+         lda  #';'
+         ldx  #10
+         jmp  getchk
 ;
-BLK1A:	LDY  #SYMDSP
-         LDA  PCODE
-         STA  (WORK),Y
-         INY
-         LDA  PCODE+1
-         STA  (WORK),Y
-         LDA  #0
-         LDY  #SYMDAT
-         STA  (WORK),Y   ; FLAG RELATIVE PROCEDURE
-         JMP  BLK2
-BLK1:	LDA  PCODE
-         STA  WORK
-         LDA  PCODE+1
-         STA  WORK+1
-BLK2:	JSR  PSHWRK
-         JSR  GENNJP
-         LDX  #<BLCKT1
-         LDY  #>BLCKT1
-BLK4:	LDA  TOKEN
-         JSR  TKNJMP
-         LDX  #25
-         JSR  ERROR
+blk1a:	ldy  #symdsp
+         lda  pcode
+         sta  (work),y
+         iny
+         lda  pcode+1
+         sta  (work),y
+         lda  #0
+         ldy  #symdat
+         sta  (work),y   ; flag relative procedure
+         jmp  blk2
+blk1:	lda  pcode
+         sta  work
+         lda  pcode+1
+         sta  work+1
+blk2:	jsr  pshwrk
+         jsr  gennjp
+         ldx  #<blckt1
+         ldy  #>blckt1
+blk4:	lda  token
+         jsr  tknjmp
+         ldx  #25
+         jsr  error
 ;
 ;
-; CONSTANT
+; constant
 ;
-BLKCNS:	JSR  GTOKEN
-BLKCN1:	JSR  CONDEC
-         LDA  #';'
-         LDX  #10
-         JSR  CHKGET
-         LDX  #<BLCKT2
-         LDY  #>BLCKT2
-         JSR  TKNJMP
-         JMP  BLKCN1
+blkcns:	jsr  gtoken
+blkcn1:	jsr  condec
+         lda  #';'
+         ldx  #10
+         jsr  chkget
+         ldx  #<blckt2
+         ldy  #>blckt2
+         jsr  tknjmp
+         jmp  blkcn1
 ;
-; VARIABLE
+; variable
 ;
-BLKVAR:	LDA  #0
-         STA  COUNT1
-BLKVR1:	JSR  GTOKEN
-BLKVR6:	JSR  VARDEC
-         INC  COUNT1
-         BPL  BLKVR7
-         JMP  BLKV13     ; ERROR
-BLKVR7:	LDA  TOKEN
-         CMP  #','
-         BEQ  BLKVR1
-         LDA  #58
-         LDX  #5
-         JSR  CHKGET
-         CMP  #$84       ; ARRAY
-         BEQ  BLKVR2
-         CMP  #$FE       ; INTEGER
-         BEQ  BLKVR8
-         LDA  #$A1       ; CHAR
-         LDX  #36
-         JSR  CHKTKN
-         JMP  BLKVR3
-BLKVR8:	JSR  BLKVR9
-BLKV10:	LDY  #SYMPRV
-         LDA  (WORK),Y
-         TAX
-         INY
-         LDA  (WORK),Y
-         STA  WORK+1
-         TXA
-         STA  WORK       ; PREVIOUS ITEM
-         LDY  #SYMDAT
-         LDA  #0         ; INTEGER TYPE
-         STA  (WORK),Y
-         LDA  FRAME
-         LDY  #SYMDSP
-         STA  (WORK),Y
-         INY
-         LDA  FRAME+1
-         STA  (WORK),Y
-         CLC
-         LDA  FRAME
-         ADC  #3
-         STA  FRAME
-         BCC  BLKV10_A
-         INC  FRAME+1
-BLKV10_A:
-         DEC  COUNT1
-         BNE  BLKV10
-         JMP  BLKVR3
+blkvar:	lda  #0
+         sta  count1
+blkvr1:	jsr  gtoken
+blkvr6:	jsr  vardec
+         inc  count1
+         bpl  blkvr7
+         jmp  blkv13     ; error
+blkvr7:	lda  token
+         cmp  #','
+         beq  blkvr1
+         lda  #58
+         ldx  #5
+         jsr  chkget
+         cmp  #$84       ; array
+         beq  blkvr2
+         cmp  #$fe       ; integer
+         beq  blkvr8
+         lda  #$a1       ; char
+         ldx  #36
+         jsr  chktkn
+         jmp  blkvr3
+blkvr8:	jsr  blkvr9
+blkv10:	ldy  #symprv
+         lda  (work),y
+         tax
+         iny
+         lda  (work),y
+         sta  work+1
+         txa
+         sta  work       ; previous item
+         ldy  #symdat
+         lda  #0         ; integer type
+         sta  (work),y
+         lda  frame
+         ldy  #symdsp
+         sta  (work),y
+         iny
+         lda  frame+1
+         sta  (work),y
+         clc
+         lda  frame
+         adc  #3
+         sta  frame
+         bcc  blkv10_a
+         inc  frame+1
+blkv10_a:
+         dec  count1
+         bne  blkv10
+         jmp  blkvr3
 ;
-; ARRAY [ N ] OF ...
+; array [ n ] of ...
 ;
-BLKVR2:	JSR  CHKLHB
-         JSR  CONST
-         LDA  VALUE+2
-         BNE  BLKV13
-         LDA  VALUE
-         CLC
-         ADC  #1
-         STA  VALUE
-         LDA  VALUE+1
-         BMI  BLKV13
-         ADC  #0
-         BPL  BLKVR4
-BLKV13:	LDX  #15
-         JSR  ERROR
-BLKVR4:	STA  VALUE+1
-         JSR  VAL_WRK
-         JSR  GTOKEN
-         JSR  CHKRHB
-         LDA  #1
-         STA  DATTYP
-         LDA  #$85       ; OF
-         LDX  #26
-         JSR  CHKGET
-         CMP  #$FE       ; INTEGER
-         BNE  BLKV11
-         DEC  DATTYP
-         JSR  WRK_VAL
+blkvr2:	jsr  chklhb
+         jsr  const
+         lda  value+2
+         bne  blkv13
+         lda  value
+         clc
+         adc  #1
+         sta  value
+         lda  value+1
+         bmi  blkv13
+         adc  #0
+         bpl  blkvr4
+blkv13:	ldx  #15
+         jsr  error
+blkvr4:	sta  value+1
+         jsr  val_wrk
+         jsr  gtoken
+         jsr  chkrhb
+         lda  #1
+         sta  dattyp
+         lda  #$85       ; of
+         ldx  #26
+         jsr  chkget
+         cmp  #$fe       ; integer
+         bne  blkv11
+         dec  dattyp
+         jsr  wrk_val
 ;
-; MULTIPLY VALUE BY 3
+; multiply value by 3
 ;
-         LDA  VALUE
-         LDX  VALUE+1
-         ASL  VALUE
-         ROL  VALUE+1
-         BCS  BLKV13
-         ADC  VALUE
-         STA  VALUE
-         TXA
-         ADC  VALUE+1
-         BCS  BLKV13
-         STA  VALUE+1
-         JSR  VAL_WRK
-         JMP  BLKV12
-BLKV11:	LDA  #$A1       ; CHAR
-         LDX  #36
-         JSR  CHKTKN
-BLKV12:	JSR  BLKVR9
-         JMP  BLKVR5
-BLKVR9:
-         LDA  FRAME
-         SEC
-         SBC  COUNT1
-         STA  FRAME
-         LDA  FRAME+1
-         SBC  #0
-         STA  FRAME+1
-         JSR  WRK_VAL
-         LDA  ENDSYM
-         STA  WORK
-         LDA  ENDSYM+1
-         STA  WORK+1
-         RTS
-BLKVR5:	LDY  #SYMPRV
-         LDA  (WORK),Y
-         TAX
-         INY
-         LDA  (WORK),Y
-         STA  WORK+1
-         TXA
-         STA  WORK       ; PREVIOUS ITEM
-         LDY  #SYMTYP
-         LDA  #'A'
-         STA  (WORK),Y
-         LDY  #SYMDSP
-         LDA  FRAME
-         STA  (WORK),Y
-         INY
-         LDA  FRAME+1
-         STA  (WORK),Y
-         LDA  VALUE
-         CLC
-         ADC  FRAME
-         STA  FRAME
-         LDA  VALUE+1
-         ADC  FRAME+1
-         STA  FRAME+1
-         LDY  #SYMDAT
-         LDA  DATTYP
-         STA  (WORK),Y
-         LDY  #SYMSUB
-         LDA  VALUE
-         STA  (WORK),Y
-         LDA  VALUE+1
-         INY
-         STA  (WORK),Y
-         DEC  COUNT1
-         BNE  BLKVR5
-BLKVR3:	LDA  #';'
-         LDX  #10
-         JSR  GETCHK
-         JSR  GTOKEN
-         LDX  #<BLCKT3
-         LDY  #>BLCKT3
-         JSR  TKNJMP
-         LDA  #0
-         STA  COUNT1
-         JMP  BLKVR6
+         lda  value
+         ldx  value+1
+         asl  value
+         rol  value+1
+         bcs  blkv13
+         adc  value
+         sta  value
+         txa
+         adc  value+1
+         bcs  blkv13
+         sta  value+1
+         jsr  val_wrk
+         jmp  blkv12
+blkv11:	lda  #$a1       ; char
+         ldx  #36
+         jsr  chktkn
+blkv12:	jsr  blkvr9
+         jmp  blkvr5
+blkvr9:
+         lda  frame
+         sec
+         sbc  count1
+         sta  frame
+         lda  frame+1
+         sbc  #0
+         sta  frame+1
+         jsr  wrk_val
+         lda  endsym
+         sta  work
+         lda  endsym+1
+         sta  work+1
+         rts
+blkvr5:	ldy  #symprv
+         lda  (work),y
+         tax
+         iny
+         lda  (work),y
+         sta  work+1
+         txa
+         sta  work       ; previous item
+         ldy  #symtyp
+         lda  #'A'
+         sta  (work),y
+         ldy  #symdsp
+         lda  frame
+         sta  (work),y
+         iny
+         lda  frame+1
+         sta  (work),y
+         lda  value
+         clc
+         adc  frame
+         sta  frame
+         lda  value+1
+         adc  frame+1
+         sta  frame+1
+         ldy  #symdat
+         lda  dattyp
+         sta  (work),y
+         ldy  #symsub
+         lda  value
+         sta  (work),y
+         lda  value+1
+         iny
+         sta  (work),y
+         dec  count1
+         bne  blkvr5
+blkvr3:	lda  #';'
+         ldx  #10
+         jsr  getchk
+         jsr  gtoken
+         ldx  #<blckt3
+         ldy  #>blckt3
+         jsr  tknjmp
+         lda  #0
+         sta  count1
+         jmp  blkvr6
 ;
-; PROCEDURE DECLARATION
+; procedure declaration
 ;
-BLKPRC:	LDA  #'I'
-         LDX  #4
-         JSR  GETCHK
-         LDA  #0
-         STA  COUNT1
-         JSR  CHKDUP
-         LDA  #'P'
-         JSR  ADDSYM
-         INC  LEVEL
-         LDA  SYMITM
-         STA  PRCITM
-         LDA  SYMITM+1
-         STA  PRCITM+1
-         JMP  BLKPR1
+blkprc:	lda  #'I'
+         ldx  #4
+         jsr  getchk
+         lda  #0
+         sta  count1
+         jsr  chkdup
+         lda  #'P'
+         jsr  addsym
+         inc  level
+         lda  symitm
+         sta  prcitm
+         lda  symitm+1
+         sta  prcitm+1
+         jmp  blkpr1
 ;
-; FUNCTION DECLARATION
+; function declaration
 ;
-BLKFNC:	LDA  #'I'
-         LDX  #4
-         JSR  GETCHK
-         JSR  CHKDUP
-         LDA  #'F'
-         JSR  ADDSYM
-         INC  LEVEL
-         LDA  #1
-         STA  COUNT1
-         LDA  SYMITM
-         STA  PRCITM
-         LDA  SYMITM+1
-         STA  PRCITM+1
-         LDA  #'Y'
-         JSR  ADDSYM
+blkfnc:	lda  #'I'
+         ldx  #4
+         jsr  getchk
+         jsr  chkdup
+         lda  #'F'
+         jsr  addsym
+         inc  level
+         lda  #1
+         sta  count1
+         lda  symitm
+         sta  prcitm
+         lda  symitm+1
+         sta  prcitm+1
+         lda  #'Y'
+         jsr  addsym
 ;
-; PROCEDURE AND FUNCTION COMMON CODE
+; procedure and function common code
 ;
-BLKPR1:	LDA  COUNT1
-         STA  COUNT2
-         JSR  END_WRK
-         JSR  PSHWRK
-         LDA  FRAME
-         STA  WORK
-         LDA  FRAME+1
-         STA  WORK+1
-         JSR  PSHWRK
-         JSR  GTOKEN
-         CMP  #'('
-         BNE  BLKPR2
-BLKPR3:	JSR  GTOKEN
-         JSR  VARDEC
-         INC  COUNT1
-         BPL  BLKPR6
-         JMP  BLKV13
-BLKPR6:	LDA  TOKEN
-         CMP  #','
-         BEQ  BLKPR3
-         JSR  CHKRHP
-BLKPR2:	LDA  PRCITM
-         STA  WORK
-         LDA  PRCITM+1
-         STA  WORK+1
-         LDY  #SYMARG
-         LDA  COUNT1
-         SEC
-         SBC  COUNT2
-         STA  (WORK),Y
-         LDA  #';'
-         LDX  #10
-         JSR  CHKTKN
-         LDA  COUNT1
-         BEQ  BLKPR4
-         JSR  END_WRK
-         LDX  #$FD
-BLKPR5:	LDY  #SYMPRV
-         LDA  (WORK),Y
-         PHA
-         INY
-         LDA  (WORK),Y
-         STA  WORK+1
-         PLA
-         STA  WORK
-         LDY  #SYMDAT
-         LDA  #0
-         STA  (WORK),Y
-         LDY  #SYMDSP
-         TXA
-         STA  (WORK),Y
-         SEC
-         SBC  #3
-         TAX
-         LDA  #$FF
-         INY
-         STA  (WORK),Y
-         DEC  COUNT1
-         BNE  BLKPR5
-BLKPR4:	JSR  GTOKEN
-         JSR  BLOCK
-         DEC  LEVEL
-         JSR  PULWRK
-         LDA  WORK
-         STA  FRAME
-         LDA  WORK+1
-         STA  FRAME+1
-         JSR  PULWRK
-         LDA  WORK
-         STA  ENDSYM
-         LDA  WORK+1
-         STA  ENDSYM+1
-         LDA  #';'
-         LDX  #10
-         JSR  CHKGET
-         LDX  #<BLCKT3
-         LDY  #>BLCKT3
-         JMP  BLK4
+blkpr1:	lda  count1
+         sta  count2
+         jsr  end_wrk
+         jsr  pshwrk
+         lda  frame
+         sta  work
+         lda  frame+1
+         sta  work+1
+         jsr  pshwrk
+         jsr  gtoken
+         cmp  #'('
+         bne  blkpr2
+blkpr3:	jsr  gtoken
+         jsr  vardec
+         inc  count1
+         bpl  blkpr6
+         jmp  blkv13
+blkpr6:	lda  token
+         cmp  #','
+         beq  blkpr3
+         jsr  chkrhp
+blkpr2:	lda  prcitm
+         sta  work
+         lda  prcitm+1
+         sta  work+1
+         ldy  #symarg
+         lda  count1
+         sec
+         sbc  count2
+         sta  (work),y
+         lda  #';'
+         ldx  #10
+         jsr  chktkn
+         lda  count1
+         beq  blkpr4
+         jsr  end_wrk
+         ldx  #$fd
+blkpr5:	ldy  #symprv
+         lda  (work),y
+         pha
+         iny
+         lda  (work),y
+         sta  work+1
+         pla
+         sta  work
+         ldy  #symdat
+         lda  #0
+         sta  (work),y
+         ldy  #symdsp
+         txa
+         sta  (work),y
+         sec
+         sbc  #3
+         tax
+         lda  #$ff
+         iny
+         sta  (work),y
+         dec  count1
+         bne  blkpr5
+blkpr4:	jsr  gtoken
+         jsr  block
+         dec  level
+         jsr  pulwrk
+         lda  work
+         sta  frame
+         lda  work+1
+         sta  frame+1
+         jsr  pulwrk
+         lda  work
+         sta  endsym
+         lda  work+1
+         sta  endsym+1
+         lda  #';'
+         ldx  #10
+         jsr  chkget
+         ldx  #<blckt3
+         ldy  #>blckt3
+         jmp  blk4
 ;
-; BEGIN (COMPOUND STATEMENT)
+; begin (compound statement)
 ;
-BLKBEG:	JSR  GTOKEN
-         JSR  PULWRK
-         LDA  LEVEL
-         BNE  BLKB1
-BLKB3:	JSR  FIXAD
-         JMP  BLKB2
-BLKB1:	JSR  WRKSYM
-         LDY  #SYMDSP
-         LDA  (SYMITM),Y
-         STA  WORK
-         INY
-         LDA  (SYMITM),Y
-         STA  WORK+1
-         LDY  #SYMDSP
-         LDA  PCODE
-         STA  (SYMITM),Y
-         LDA  PCODE+1
-         INY
-         STA  (SYMITM),Y
-         JMP  BLKB3
-BLKB2:	LDA  FRAME
-         STA  OPND
-         LDA  FRAME+1
-         STA  OPND+1
-         LDA  #59
-         JSR  GENJMP
-BLKB5:	JSR  STMNT
-         LDA  TOKEN
-         CMP  #';'
-         BNE  BLKB4
-         JSR  GTOKEN
-         JMP  BLKB5
-BLKB4:	LDA  #$89       ; END
-         LDX  #17
-         JSR  CHKGET
-         LDA  #41
-         LDX  LEVEL
-         BNE  BLKB6
-         LDA  #17        ; STOP
-TEST1:
-BLKB6:	JMP  GENNOP
+blkbeg:	jsr  gtoken
+         jsr  pulwrk
+         lda  level
+         bne  blkb1
+blkb3:	jsr  fixad
+         jmp  blkb2
+blkb1:	jsr  wrksym
+         ldy  #symdsp
+         lda  (symitm),y
+         sta  work
+         iny
+         lda  (symitm),y
+         sta  work+1
+         ldy  #symdsp
+         lda  pcode
+         sta  (symitm),y
+         lda  pcode+1
+         iny
+         sta  (symitm),y
+         jmp  blkb3
+blkb2:	lda  frame
+         sta  opnd
+         lda  frame+1
+         sta  opnd+1
+         lda  #59
+         jsr  genjmp
+blkb5:	jsr  stmnt
+         lda  token
+         cmp  #';'
+         bne  blkb4
+         jsr  gtoken
+         jmp  blkb5
+blkb4:	lda  #$89       ; end
+         ldx  #17
+         jsr  chkget
+         lda  #41
+         ldx  level
+         bne  blkb6
+         lda  #17        ; stop
+test1:
+blkb6:	jmp  gennop
 
 ;
-        BRK
+        brk
 
         .endscope

@@ -1,104 +1,104 @@
 ; -*- asm -*-
 ;***********************************************
-; PASCAL COMPILER
-; for Commodore 64
-; PART 0 - REU functions
-; Authors: Ralph Moeritz
+; pascal compiler
+; for commodore 64
+; part 0 - reu functions
+; authors: ralph moeritz
 ;***********************************************
 
-        .org $7F00
+        .org $7f00
 
 ;***********************************************
-; G-PASCAL POINTERS & ADDRESSES
+; g-pascal pointers & addresses
 ;***********************************************
 
-        P       = $26
-        TS      = $8009
-	P1	= $8013
-	P3	= $992E
+        p       = $26
+        ts      = $8009
+	p1	= $8013
+	p3	= $992e
 
 ;***********************************************
-; G-PASCAL VECTORS
+; g-pascal vectors
 ;***********************************************
 
-        FND_END	= P1+102
-        CHK_VAL = P3+403
-        INITIO  = P3+649
+        fnd_end	= p1+102
+        chk_val = p3+403
+        initio  = p3+649
 
 ;***********************************************
-; REU CONSTANTS & ADDRESSES
+; reu constants & addresses
 ;***********************************************
 
-        WRITE_CMD    = $90
-        READ_CMD     = $91
-        REU_ARGS_LEN = 9
-        REU_ADDR     = $DF01
+        write_cmd    = $90
+        read_cmd     = $91
+        reu_args_len = 9
+        reu_addr     = $df01
 
 ;***********************************************
-; TXT2REU - Backup Pascal sources to REU
+; txt2reu - backup pascal sources to reu
 ;***********************************************
 
-TXT2REU:
-        ;; TS is the address of the Pascal source.
-        ;; Set it as the source/destination
+txt2reu:
+        ;; ts is the address of the pascal source.
+        ;; set it as the source/destination
         ;; address for the copy operation.
-        LDX TS
-        LDY TS+1
-        STX REU_ARGS+1
-        STY REU_ARGS+2
+        ldx ts
+        ldy ts+1
+        stx reu_args+1
+        sty reu_args+2
 
-        ;; Determine the end address of the sources.
-        JSR FND_END
-        ;; P contains the text end address. Subtract
-        ;; TS from P to determine the transfer length.
-        SEC
-        LDA P
-        SBC TS
-        STA REU_ARGS+6
-        LDA P+1
-        SBC TS+1
-        STA REU_ARGS+7
-        CLC
+        ;; determine the end address of the sources.
+        jsr fnd_end
+        ;; p contains the text end address. subtract
+        ;; ts from p to determine the transfer length.
+        sec
+        lda p
+        sbc ts
+        sta reu_args+6
+        lda p+1
+        sbc ts+1
+        sta reu_args+7
+        clc
 
-        LDA #WRITE_CMD
-        JMP INIT_REU
+        lda #write_cmd
+        jmp init_reu
 
 ;***********************************************
-; REU2TXT - Restore Pascal sources from REU
+; reu2txt - restore pascal sources from reu
 ;***********************************************
 
-REU2TXT:
-        LDA #READ_CMD
+reu2txt:
+        lda #read_cmd
 
-INIT_REU:
-        STA REU_ARGS            ; set command
-        LDX #REU_ARGS_LEN
+init_reu:
+        sta reu_args            ; set command
+        ldx #reu_args_len
 
-REU_LOOP:
-        ;; Store copy operation arguments in REU
+reu_loop:
+        ;; store copy operation arguments in reu
         ;; command register to initiate copy.
-        LDA REU_ARGS,X
-        STA REU_ADDR,X
-        DEX
-        BPL REU_LOOP
+        lda reu_args,x
+        sta reu_addr,x
+        dex
+        bpl reu_loop
 
-        ;; Return to G-Pascal
-        LDA REU_ARGS
-        CMP #READ_CMD
-        BCC WRITING
-READING:
-        JSR INITIO
-        JMP EXIT
-WRITING:
-        JSR CHK_VAL
-EXIT:
-        RTS
+        ;; return to g-pascal
+        lda reu_args
+        cmp #read_cmd
+        bcc writing
+reading:
+        jsr initio
+        jmp exit
+writing:
+        jsr chk_val
+exit:
+        rts
 
-REU_ARGS:
-        .byte 0                 ; REC command
-        .word 0                 ; C64 base address
-        .word 0                 ; REU base address
-        .byte 0                 ; REU bank
+reu_args:
+        .byte 0                 ; rec command
+        .word 0                 ; c64 base address
+        .word 0                 ; reu base address
+        .byte 0                 ; reu bank
         .word 0                 ; transfer length
-        .byte 0                 ; IRQ mask
+        .byte 0                 ; irq mask
         .byte 0                 ; address control register
