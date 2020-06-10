@@ -88,6 +88,8 @@
 ; copyright (c) 1986 - gambit games.
 ;***********************************************
 
+	new_edi = $0b00
+	
 	p0 = $7f00
 	p1 = $8013
 	p2 = $8dd4
@@ -3764,8 +3766,8 @@ for6:	lda  #$ff
 ; part 0 vectors
 ;***********************************************
 
-	txt2reu = p0
-	reu2txt = p0+38
+	txt2reu = p0+46
+	reu2txt = p0+84
 
 ;***********************************************
 ; part 1 vectors
@@ -4025,7 +4027,7 @@ main_tbl:
 	.byte 'S'
 	.word st_syn
 	.byte 'E'
-	.word st_edi
+	.word new_edi
 	.byte 'Q'
 	.word st_qui
 	.byte 'D'

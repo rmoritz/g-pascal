@@ -3,6 +3,7 @@ SRCDIR   := src
 OBJDIR   := build
 GP       := gpascal
 REU      := reu
+ED       := ed
 BOOT     := boot
 GP_SRC   := $(SRCDIR)/$(GP).s
 GP_OBJ   := $(OBJDIR)/$(GP).o
@@ -12,15 +13,19 @@ GP_PRG   := $(OBJDIR)/$(GP).prg
 REU_SRC  := $(SRCDIR)/$(REU).s
 REU_LBL  := $(OBJDIR)/$(REU).labels
 REU_PRG  := $(OBJDIR)/$(REU).prg
+ED_SRC  := $(SRCDIR)/$(ED).s
+ED_LBL  := $(OBJDIR)/$(ED).labels
+ED_PRG  := $(OBJDIR)/$(ED).prg
 BOOT_SRC := $(SRCDIR)/$(BOOT).bas
 BOOT_PRG := $(OBJDIR)/$(BOOT).prg
-PRG      := $(GP_PRG) $(REU_PRG) $(BOOT_PRG)
+PRG      := $(GP_PRG) $(REU_PRG) $(ED_PRG) $(BOOT_PRG)
 D64      := $(OBJDIR)/gpascal_reu.d64
 
 # Commands
 ASM_GP = ca65 -g -o $(GP_OBJ) $(GP_SRC)
 LNK_GP = ld65 -Ln $(GP_LBL) -o $(GP_BIN) -t none -S 32768 $(GP_OBJ)
 LNK_REU = cl65 -g -o $(REU_PRG) --start-addr '$$7F00' -t c64 -C c64-asm.cfg -Ln $(REU_LBL) $(REU_SRC)
+LNK_ED = cl65 -g -o $(ED_PRG) --start-addr '$$0B00' -t c64 -C c64-asm.cfg -Ln $(ED_LBL) $(ED_SRC)
 PAK_GP = dd if=$(GP_BIN) bs=1 skip=88 of=0. &&\
 printf "\000\200" >$(GP_PRG) &&\
 cat 0. >>$(GP_PRG) && rm -f 0.
@@ -52,8 +57,12 @@ $(GP_PRG): $(GP_BIN)
 $(REU_PRG): $(REU_SRC)
 	$(LNK_REU)
 
+$(ED_PRG): $(ED_SRC)
+	$(LNK_ED)
+
 $(GP_SRC): | $(OBJDIR)
 $(REU_SRC): | $(OBJDIR)
+$(ED_SRC): | $(OBJDIR)
 
 $(OBJDIR):
 	$(MKDIR) $(OBJDIR)
