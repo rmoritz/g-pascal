@@ -100,7 +100,7 @@ memcpy_loop:
 	rts	
 
 ;*************************************************
-; txt2reu - backup pascal sources to reu (bank 1),
+; txt2reu - backup pascal sources to reu (bank 0),
 ;           call chk_val, and return.
 ;*************************************************
 
@@ -118,22 +118,19 @@ txt2reu:
 	jsr fnd_end
 ;; p contains the text end address. subtract
 ;; ts from p to determine the transfer length.
-	sec
 	lda p
+	sec
 	sbc ts
 	sta reu_args+6	; set transfer length (lo)
 	lda p+1
 	sbc ts+1
-	sta reu_args+7	; set transfer length (hi)
-	clc
+	sta reu_args+7	; set transfer length (hi)		
 
-	lda #01
-	sta reu_args+5	; set reu bank
 	lda #write_cmd
 	jmp init_txtcpy
 
 ;****************************************************
-; reu2txt - restore pascal sources from reu (bank 1),
+; reu2txt - restore pascal sources from reu (bank 0),
 ;           call initio, and return.
 ;
 ; remarks:

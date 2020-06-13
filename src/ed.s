@@ -18,9 +18,10 @@
 	input = $200
 
 ; *** rom routines ***
+	cnvrtdec = $bdcd
+	cint = $ff81
 	getin = $ffe4
 	print = $ffd2
-	cnvrtdec = $bdcd
 
 ; *** zero-page ***
 ; ** variables **
@@ -47,7 +48,7 @@
 	p3 = $992e
 	p5 = $b384		
 	
-	gp_start = p3
+	gp_rest1 = p3+573
 	gp_tidy_ent = p5+1957
 
 	resetreu = p0
@@ -758,13 +759,21 @@ quit:
 
 ;; gp_to contains the end address of the tokenized source. 
 ;; subtract bufferbeg from gp_to to determine transfer length.
-	sec
 	lda gp_to
+	sec
 	sbc #<bufferbeg
 	sta memcpy_size	; set transfer length (lo)
 	lda gp_to+1
 	sbc #>bufferbeg
 	sta memcpy_size+1	; set transfer length (hi)
+	
+	lda memcpy_size
+	clc
+	adc #$01
+	sta memcpy_size
+	lda memcpy_size+1
+	adc #$00
+	sta memcpy_size+1	; add one to transfer length
 		
 	lda #<bufferbeg
 	sta memcpy_addr		
@@ -777,8 +786,9 @@ quit:
 	lda gp_ts+1
 	sta memcpy_addr+1			
 	jsr reu2mem	; copy tokenized source from reu to text store						
-	
-	jmp gp_start	; return to G-Pascal	
+							
+	jsr cint	; reset video						
+	jmp gp_rest1	; return to G-Pascal	
 
 ; command entries
 commands:
