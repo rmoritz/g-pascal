@@ -33,6 +33,9 @@
 	read_cmd = $91
 	reu_args_len = 9
 	reu_addr = $df01
+	
+	memcpy_addr = $fb
+	memcpy_size = $fd
 
 ;***********************************************
 ; resetreu - reset reu args to default values
@@ -48,40 +51,52 @@ reset_loop:
 	rts		
 
 ;**************************************************
-; zp2reu - backup page 0 ($02-$ff) to reu (bank 0)
+; mem2reu - backup memory to reu (bank 0)
+;
+; parameters:
+; - $fb: start address of memory to copy (lo)
+; - $fc: start address of memory to copy (hi)
+; - $fd: size of memory to copy (lo)
+; - $fe: size of memory to copy (hi)
 ;**************************************************
 
-zp2reu:
-	jsr resetreu
-	lda #$02	
-	sta reu_args+1	; set c64 base address (lo)	
-	lda #$fd
-	sta reu_args+6	; set transfer length
-	lda #write_cmd
-	jmp init_zpcpy
+mem2reu:	
+	ldy #write_cmd
+	jmp init_memcpy
 
 ;*****************************************************
-; reu2zp - restore page 0 ($02-$ff) from reu (bank 0)
+; reu2mem - restore memory from reu (bank 0)
 ;
-; remarks:
-; - must be called after zp2reu
-; - no other reu routines must be called between
-;   calling zp2reu and reu2zp!
+; parameters:
+; - $fb: start address of memory to restore (lo)
+; - $fc: start address of memory to restore (hi)
+; - $fd: size of memory to restore (lo)
+; - $fe: size of memory to restore (hi)
 ;*****************************************************
 
-reu2zp:
-	lda #read_cmd	
+reu2mem:
+	ldy #read_cmd	
 	
-init_zpcpy:
-	sta reu_args	; set rec command		
+init_memcpy:
+	sty reu_args	; set rec command
+	
+	lda memcpy_addr	
+	sta reu_args+1	; set c64 base address (lo)
+	lda memcpy_addr+1	
+	sta reu_args+2	; set c64 base address (hi)	
+	lda memcpy_size
+	sta reu_args+6	; set transfer length (lo)
+	lda memcpy_size+1
+	sta reu_args+7	; set transfer length (hi)
+	
 	ldx #reu_args_len
-zpcpy_loop:
+memcpy_loop:
 ;; store copy operation arguments in reu
 ;; command register to initiate copy.
 	lda reu_args,x
 	sta reu_addr,x
 	dex
-	bpl zpcpy_loop	
+	bpl memcpy_loop	
 	rts	
 
 ;*************************************************

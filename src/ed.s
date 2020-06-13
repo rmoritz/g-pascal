@@ -43,29 +43,42 @@
 
 ; *** g-pascal ***
 ; ** addresses **
-	p0 = $7f00	
+	p0 = $7f00		
 	p3 = $992e
 	p5 = $b384		
-			
-; ** pointers **		
-	ts = $8009		
-			
-; ** vectors ***
-	resetreu = p0
-	zp2reu = p0+11
-	reu2zp = p0+29
 	
 	gp_start = p3
 	gp_tidy_ent = p5+1957
 
+	resetreu = p0
+	mem2reu = p0+11
+	reu2mem = p0+16
+			
+; ** pointers **	
+	gp_to = $45	
+	gp_ts = $8009		
+
+	memcpy_addr = $fb
+	memcpy_size = $fd	
+			
 ; *** beginning of code ***
 	.org $0b00
 	
 start:	
-	jsr zp2reu	; backup zero-page memory
-	inc $01	; enable basic
+	jsr resetreu	
+		
+	lda #$02	
+	sta memcpy_addr		
+	lda #$f8
+	sta memcpy_size
+	lda #$00
+	sta memcpy_addr+1
+	sta memcpy_size+1
+	jsr mem2reu	; backup zero-page memory
 	
-	;; TODO Read source from ts & de-tokenize into input buffer
+	;; TODO Read source from ts & de-tokenize into input buffer	
+	
+	inc $01	; enable basic
 
 	lda #$80	; all keys repeat
 	sta rptkey
@@ -728,14 +741,42 @@ f34:
 	pha 
 	rts
 quit:	
-	dec $01	; disable basic																					
-	jsr reu2zp	; restore zero-page memory 					
+	dec $01	; disable basic					
+																																																																																																																																
+	lda #$02	
+	sta memcpy_addr		
+	lda #$f8
+	sta memcpy_size
+	lda #$00
+	sta memcpy_addr+1
+	sta memcpy_size+1																																																																	
+	jsr reu2mem	; restore zero-page memory 	
 
 	lda #<bufferbeg					
 	ldx #>bufferbeg					
 	jsr gp_tidy_ent	; tokenize source
-	
-	;; TODO Copy tokenized source from input buffer to ts
+
+;; gp_to contains the end address of the tokenized source. 
+;; subtract bufferbeg from gp_to to determine transfer length.
+	sec
+	lda gp_to
+	sbc #<bufferbeg
+	sta memcpy_size	; set transfer length (lo)
+	lda gp_to+1
+	sbc #>bufferbeg
+	sta memcpy_size+1	; set transfer length (hi)
+		
+	lda #<bufferbeg
+	sta memcpy_addr		
+	lda #>bufferbeg
+	sta memcpy_addr+1				
+	jsr mem2reu	; copy tokenized source from input buffer to reu						
+		
+	lda gp_ts
+	sta memcpy_addr		
+	lda gp_ts+1
+	sta memcpy_addr+1			
+	jsr reu2mem	; copy tokenized source from reu to text store						
 	
 	jmp gp_start	; return to G-Pascal	
 
